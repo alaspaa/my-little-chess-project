@@ -1,0 +1,95 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.gameboard {
+    border: black 1px solid;
+    
+}
+
+.gameboardrow {
+  padding: 0;
+  margin: 0;
+  width: 800px;
+  height: 100px;
+}
+
+.gamesquare {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  margin: 0;
+  
+}
+
+ .black {
+    background-color: rgb(35, 34, 34);
+ }
+
+ .white {
+    background-color: rgb(185, 185, 185);
+ }
+
+ .chesspiece {
+    padding-top: 20px;
+    height: 60px;
+    width: 60px;
+    text-shadow: 0px 0px 5px #000000;
+ }
+
+ .whitepiece path {
+  stroke: black;
+  stroke-width: 10;
+}
+
+.blackpiece path {
+  stroke: white;
+  stroke-width: 10;
+}
+
+ .blackpiece {
+    color: black;
+ }
+
+ .whitepiece {
+    color: white;
+ }
