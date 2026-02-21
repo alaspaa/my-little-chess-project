@@ -1,12 +1,12 @@
 import GamePiece from './GamePiece'
-import { type Square } from './types/ChessObjects'
+import { type Square } from '../types/ChessObjects'
 
 interface opts {
     row: Square[],
     rowIndex: number,
 }
 
-function BoardRow(props: opts) {
+function GameBoardRow(props: opts) {
     const {row, rowIndex} = props
 
    return (
@@ -42,4 +42,4 @@ function getColorClassName(index: number, rowIndex: number): string {
     return isBlack(index, rowIndex) ? 'black' : 'white'
 }
 
-export default BoardRow
+export default GameBoardRow
