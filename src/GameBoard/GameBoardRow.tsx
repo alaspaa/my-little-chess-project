@@ -1,45 +1,58 @@
 import GamePiece from './GamePiece'
 import { type Square } from '../types/ChessObjects'
+import { useEffect, useRef } from 'react'
+import GameSquare from './GameSquare'
 
 interface opts {
     row: Square[],
     rowIndex: number,
+    setPieceClicked: (bool: boolean) => void
+    isPieceClicked: boolean
 }
 
 function GameBoardRow(props: opts) {
-    const {row, rowIndex} = props
+    const {row, rowIndex, setPieceClicked, isPieceClicked} = props
+
+    const hoveredSquare = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if(!hoveredSquare.current) return
+
+        const square = hoveredSquare.current
+
+        const onHover = (e: MouseEvent) => {
+            const id = e.target instanceof HTMLElement ? e.target.id : "No id"
+            console.log(id)
+            //console.log("Mouse entered square " + getSquareNumber(rowIndex, rowIndex))
+        }
+
+        square.addEventListener('mouseover', onHover)
+  
+        const cleanup = () => {
+            square.removeEventListener('mouseover', onHover)
+        }
+
+        return cleanup
+
+    }, [])
 
    return (
     <>
         { 
             row.map((gameSquare, index) =>
                 <>
-                    <div key={getSquareNumber(index, rowIndex).toString()} id={getSquareNumber(index, rowIndex).toString()} className={'gamesquare black ' + getColorClassName(index, rowIndex) }>
-                        {gameSquare.piece &&
-                            <GamePiece piece={gameSquare.piece} />
-                        }
-                    </div>      
+                    <GameSquare 
+                        gameSquare={gameSquare} 
+                        columnIndex={index} 
+                        rowIndex={rowIndex}
+                        setPieceClicked={setPieceClicked}
+                        isPieceClicked={isPieceClicked}
+                    />    
                 </>
             )
         }
     </>
    )
   }
-
-function getSquareNumber(index: number, rowIndex: number): number {
-        return (index+1) + (rowIndex * 8)
-    }
-
-function isBlack(index: number, rowIndex: number): boolean {
-    if((rowIndex + 1) % 2 == 0) {
-        return (index + 1) % 2 != 0
-    } else {
-        return (index + 1) % 2 == 0
-    }
-}
-
-function getColorClassName(index: number, rowIndex: number): string {
-    return isBlack(index, rowIndex) ? 'black' : 'white'
-}
 
 export default GameBoardRow

@@ -5,30 +5,37 @@ import { useEffect, useRef } from "react"
 
 interface opts {
     piece: chessPiece,
+    isPieceClicked: boolean
+    setPieceClicked: (bool: boolean) => void
 }
 
 function GamePiece(props: opts) {
-    const {piece} = props
+    const {piece, isPieceClicked, setPieceClicked} = props
 
     const pieceRef = useRef<SVGSVGElement>(null)
-    const isClicked = useRef(false)
+    useRef(isPieceClicked)
 
     useEffect(() => {
         if(!pieceRef.current) return 
 
         const piece = pieceRef.current
 
-        const onMouseDown = (e: MouseEvent) => {
-            isClicked.current = true
+        const onMouseDown = (e: MouseEvent) => { 
+            setPieceClicked(true)
+            console.log("Piece clicked")
+            piece.style.top = `${e.clientY}px`
+            piece.style.left = `${e.clientX}px`
         }
 
         const onMouseUp = (e: MouseEvent) => {
-            isClicked.current = false
+            setPieceClicked(false)
+            console.log("Piece released")
         }
 
         piece.addEventListener('mousedown', onMouseDown)
 
         piece.addEventListener('mouseup', onMouseUp)
+        
 
         const cleanup = () => {
             piece.removeEventListener('mousedown', onMouseDown)
