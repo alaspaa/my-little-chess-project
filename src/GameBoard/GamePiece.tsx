@@ -1,4 +1,4 @@
-import { type BoardCoordinates, type ChessPiece, CHESS_PIECE_COLOR, CHESS_PIECE_TYPE, type Square } from "../types/ChessObjects"
+import { type BoardCoordinates, type ChessPiece, CHESS_PIECE_TYPE, type Square } from "../types/ChessObjects"
 import { faChessBishop, faChessKing, faChessKnight, faChessPawn, faChessQueen, faChessRook } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"

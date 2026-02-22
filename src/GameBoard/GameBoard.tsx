@@ -1,12 +1,9 @@
-
 import { useEffect, useRef} from 'react'
 import GameBoardRow from './GameBoardRow'
 import { useAtom, useAtomValue } from 'jotai'
 import { boardCoordinatesAtom, gameBoardAtom, pieceClickedAtom } from '../state'
 
-interface opts {}
-
-function GameBoard(props: opts) {
+function GameBoard() {
     const gameBoard = useAtomValue(gameBoardAtom)
     const pieceClicked = useAtomValue(pieceClickedAtom)
     const [pieceCoords, setPieceCoords] = useAtom(boardCoordinatesAtom)

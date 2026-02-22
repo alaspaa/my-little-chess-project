@@ -1,9 +1,6 @@
-import GamePiece from './GamePiece'
-import { type BoardCoordinates, type Square } from '../types/ChessObjects'
-import { useEffect, useRef } from 'react'
+import { type Square } from '../types/ChessObjects'
 import GameSquare from './GameSquare'
-import { useAtomValue } from 'jotai'
-import { pieceClickedAtom } from '../state'
+
 
 interface opts {
     row: Square[],
