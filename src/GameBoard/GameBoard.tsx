@@ -1,27 +1,35 @@
 
-import { useEffect, useRef, useState } from 'react'
-import { type Square } from '../types/ChessObjects'
-import { createEmptyBoard, populateBoardWithPieces } from '../types/GameBoard'
+import { useEffect, useRef} from 'react'
 import GameBoardRow from './GameBoardRow'
+import { useAtom, useAtomValue } from 'jotai'
+import { boardCoordinatesAtom, gameBoardAtom, pieceClickedAtom } from '../state'
 
 interface opts {}
 
 function GameBoard(props: opts) {
-    const [gameBoard, setGameBoard] = useState<Square[][]>(createEmptyBoard())
-    const [pieceClicked, setPieceClicked] = useState(false)
-    
+    const gameBoard = useAtomValue(gameBoardAtom)
+    const pieceClicked = useAtomValue(pieceClickedAtom)
+    const [pieceCoords, setPieceCoords] = useAtom(boardCoordinatesAtom)
+
     const boardRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        setGameBoard([...populateBoardWithPieces(gameBoard)])
-
         if(!boardRef.current) return 
-
         const board = boardRef.current
 
         const onMouseMove = (e: MouseEvent) => {
-             if(!pieceClicked) return
-             console.log(e.clientX, e.clientY)
+          if(!pieceClicked) return
+            const piece = document.getElementById(pieceClicked)?.childNodes[0] as SVGSVGElement
+
+            if(piece) {
+                piece.style.position = "absolute"
+                const x = e.clientX - 30
+                const y = e.clientY - 40
+
+                setPieceCoords({x: e.clientX, y: e.clientY})
+                piece.style.top = `${y}px`
+                piece.style.left = `${x}px`
+            }
         }
 
         board.addEventListener('mousemove', onMouseMove)  
@@ -31,7 +39,7 @@ function GameBoard(props: opts) {
         }
 
         return cleanup
-    }, [])
+    }, [pieceClicked, pieceCoords])
 
     return (
         <div className='gameboard' ref={boardRef}>
@@ -41,8 +49,6 @@ function GameBoard(props: opts) {
                 <GameBoardRow 
                   row={row} 
                   rowIndex={index}  
-                  isPieceClicked={pieceClicked} 
-                  setPieceClicked={setPieceClicked}
                 />               
             </div>
           )

@@ -1,5 +1,5 @@
 
-import { type Square, chessPieceColor, chessPieceType, type chessPiece } from "./ChessObjects"
+import { type Square, CHESS_PIECE_COLOR, CHESS_PIECE_TYPE, type ChessPiece } from "./ChessObjects"
 
 function createEmptyBoard(): Square[][] {
   return [
@@ -32,34 +32,34 @@ function createEmptySquare(): Square {
 }
 
 function populateBoardWithPieces(board: Square[][]): Square[][] {
-    board[1] = createFrontrow(chessPieceColor.WHITE, board[1])
-    board[6] = createFrontrow(chessPieceColor.BLACK, board[6])
+    board[1] = createFrontrow(CHESS_PIECE_COLOR.WHITE, board[1])
+    board[6] = createFrontrow(CHESS_PIECE_COLOR.BLACK, board[6])
     //add white pawns
     
-    board[0] = createBackrow(chessPieceColor.WHITE, board[0])
-    board[7] = createBackrow(chessPieceColor.BLACK, board[7])
+    board[0] = createBackrow(CHESS_PIECE_COLOR.WHITE, board[0])
+    board[7] = createBackrow(CHESS_PIECE_COLOR.BLACK, board[7])
     
     return board
 }
 
-function createFrontrow(color: chessPieceColor, row: Square[]): Square[] {
-    return row.map(square => {
-        square.piece = createPawn(color)
+function createFrontrow(color: CHESS_PIECE_COLOR, row: Square[]): Square[] {
+    return row.map((square, index) => {
+        square.piece = createPawn(color, index)
         return square
     })
 }  
 
-function createBackrow(color: chessPieceColor, row: Square[]): Square[] {
-    row[0].piece = createRook(color)
-    row[7].piece = createRook(color)
+function createBackrow(color: CHESS_PIECE_COLOR, row: Square[]): Square[] {
+    row[0].piece = createRook(color, 0)
+    row[7].piece = createRook(color, 1)
     
     //add white knights
-    row[1].piece = createKnight(color)
-    row[6].piece = createKnight(color)
+    row[1].piece = createKnight(color, 0)
+    row[6].piece = createKnight(color, 1)
 
     //add white bishop
-    row[2].piece = createBishop(color)
-    row[5].piece = createBishop(color)
+    row[2].piece = createBishop(color, 0)
+    row[5].piece = createBishop(color, 1)
     
     //add white queen
     row[3].piece = createQueen(color)
@@ -70,45 +70,51 @@ function createBackrow(color: chessPieceColor, row: Square[]): Square[] {
     return row
 }
 
-function createPawn(color: chessPieceColor): chessPiece {
+function createPawn(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
+        id: `${color}pawn${index}`,
         color: color, 
-        type: chessPieceType.PAWN
+        type: CHESS_PIECE_TYPE.PAWN
     }
 } 
 
-function createRook(color: chessPieceColor): chessPiece {
+function createRook(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
+        id: `${color}rook${index}`,
         color: color, 
-        type: chessPieceType.ROOK
+        type: CHESS_PIECE_TYPE.ROOK
     }
 } 
 
-function createKnight(color: chessPieceColor): chessPiece {
+function createKnight(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
+        id: `${color}knight${index}`,
         color: color, 
-        type: chessPieceType.KNIGHT
+        type: CHESS_PIECE_TYPE.KNIGHT
     }
 } 
 
-function createBishop(color: chessPieceColor): chessPiece {
+function createBishop(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
+        id: `${color}bishop${index}`,
         color: color, 
-        type: chessPieceType.BISHOP
+        type: CHESS_PIECE_TYPE.BISHOP
     }
 } 
 
-function createQueen(color: chessPieceColor): chessPiece {
+function createQueen(color: CHESS_PIECE_COLOR): ChessPiece {
     return {
+        id: `${color}queen`,
         color: color, 
-        type: chessPieceType.QUEEN
+        type: CHESS_PIECE_TYPE.QUEEN
     }
 } 
 
-function createKing(color: chessPieceColor): chessPiece {
+function createKing(color: CHESS_PIECE_COLOR): ChessPiece {
     return {
+        id: `${color}king`,
         color: color, 
-        type: chessPieceType.KING
+        type: CHESS_PIECE_TYPE.KING
     }
 } 
 

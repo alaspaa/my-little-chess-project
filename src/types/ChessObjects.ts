@@ -1,18 +1,24 @@
 export type Square = {
-  piece: chessPiece | null
+  piece: ChessPiece | null
 }
 
-export type chessPiece = {
-  color: chessPieceColor,
-  type: chessPieceType,
+export type ChessPiece = {
+  id: string,
+  color: CHESS_PIECE_COLOR,
+  type: CHESS_PIECE_TYPE,
 }
 
-export enum chessPieceColor {
+export type BoardCoordinates = {
+  x: number,
+  y: number
+} 
+
+export enum CHESS_PIECE_COLOR {
   BLACK = "black",
   WHITE = "white",
 }
 
-export enum chessPieceType {
+export enum CHESS_PIECE_TYPE {
   PAWN = "PAWN",
   ROOK = "ROOK",
   KNIGHT = "KNIGHT",
