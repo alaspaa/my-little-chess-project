@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react"
 import { gameBoardAtom, pieceClickedAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
+import validateMove from "../types/GameLogicValidator"
 
 interface opts {
     piece: ChessPiece,
@@ -116,11 +117,15 @@ function getGameBoardCoordinatesFromGameSquare(gameSquare: Element | undefined):
 
 function updateGameBoardWithMovedPiece(gameBoard: Square[][], pieceId: string, newCoordinates: BoardCoordinates): Square[][] {
     let piece: ChessPiece | null = null
+    let originalCoordinates: BoardCoordinates | null = null
 
-    let newBoard = gameBoard.map(row => 
-        row.map(square => {
+    let newBoard = gameBoard.map((row, index) => {
+        const rowIndex = index
+
+        return row.map((square, index) => {
             if(square.piece && square.piece.id === pieceId) {
                 piece = square.piece
+                originalCoordinates = {x: index, y: rowIndex}
                 return {
                     ...square,
                     piece: null
@@ -130,10 +135,13 @@ function updateGameBoardWithMovedPiece(gameBoard: Square[][], pieceId: string, n
             }
         }
         )
+    }
+        
     )
 
-    if (!piece) return gameBoard
-    // TODO: validate move
+    if (!piece || !originalCoordinates) return gameBoard
+
+    if(!validateMove(gameBoard, originalCoordinates, newCoordinates, piece)) return gameBoard
 
     newBoard[newCoordinates.y][newCoordinates.x] = {
         ...newBoard[newCoordinates.y][newCoordinates.x],
