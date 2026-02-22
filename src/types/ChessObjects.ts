@@ -13,16 +13,15 @@ export type BoardCoordinates = {
   y: number
 } 
 
-export enum CHESS_PIECE_COLOR {
-  BLACK = "black",
-  WHITE = "white",
-}
+export type CHESS_PIECE_COLOR =
+  "black" |
+  "white"
 
-export enum CHESS_PIECE_TYPE {
-  PAWN = "PAWN",
-  ROOK = "ROOK",
-  KNIGHT = "KNIGHT",
-  BISHOP = "BISHOP",
-  QUEEN = "QUEEN",
-  KING = "KING",
-}
+
+export type CHESS_PIECE_TYPE =
+  "PAWN" |
+  "ROOK" |
+  "KNIGHT" |
+  "BISHOP" |
+  "QUEEN" |
+  "KING"

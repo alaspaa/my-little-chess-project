@@ -1,4 +1,4 @@
-import { type BoardCoordinates, type ChessPiece, CHESS_PIECE_TYPE, type Square } from "../types/ChessObjects"
+import { type BoardCoordinates, type ChessPiece, type Square } from "../types/ChessObjects"
 import { faChessBishop, faChessKing, faChessKnight, faChessPawn, faChessQueen, faChessRook } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
@@ -73,22 +73,22 @@ function GamePiece(props: opts) {
 
     const getGamePieceIcon = (gamePiece: ChessPiece) => {
         switch(gamePiece.type) {
-        case CHESS_PIECE_TYPE.PAWN:
+        case "PAWN":
             return (<FontAwesomeIcon icon={faChessPawn} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />);
             
-        case CHESS_PIECE_TYPE.ROOK:
+        case "ROOK":
             return(<FontAwesomeIcon icon={faChessRook} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />)
             
-        case CHESS_PIECE_TYPE.KNIGHT:
+        case "KNIGHT":
             return(<FontAwesomeIcon icon={faChessKnight} id={gamePiece.id}   className={`chesspiece ${gamePiece.color}piece` } />)
         
-        case CHESS_PIECE_TYPE.BISHOP:
+        case "BISHOP":
             return(<FontAwesomeIcon icon={faChessBishop} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />)
             
-        case CHESS_PIECE_TYPE.KING:
+        case "KING":
             return(<FontAwesomeIcon icon={faChessKing} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />)
             
-        case CHESS_PIECE_TYPE.QUEEN:
+        case "QUEEN":
             return(<FontAwesomeIcon icon={faChessQueen} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />)
     }
     }

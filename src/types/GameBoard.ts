@@ -1,5 +1,5 @@
 
-import { type Square, CHESS_PIECE_COLOR, CHESS_PIECE_TYPE, type ChessPiece } from "./ChessObjects"
+import { type Square, type CHESS_PIECE_COLOR, type ChessPiece } from "./ChessObjects"
 
 function createEmptyBoard(): Square[][] {
   return [
@@ -32,12 +32,12 @@ function createEmptySquare(): Square {
 }
 
 function populateBoardWithPieces(board: Square[][]): Square[][] {
-    board[1] = createFrontrow(CHESS_PIECE_COLOR.WHITE, board[1])
-    board[6] = createFrontrow(CHESS_PIECE_COLOR.BLACK, board[6])
+    board[1] = createFrontrow("white", board[1])
+    board[6] = createFrontrow("black", board[6])
     //add white pawns
     
-    board[0] = createBackrow(CHESS_PIECE_COLOR.WHITE, board[0])
-    board[7] = createBackrow(CHESS_PIECE_COLOR.BLACK, board[7])
+    board[0] = createBackrow("white", board[0])
+    board[7] = createBackrow("black", board[7])
     
     return board
 }
@@ -74,7 +74,7 @@ function createPawn(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
         id: `${color}pawn${index}`,
         color: color, 
-        type: CHESS_PIECE_TYPE.PAWN
+        type: "PAWN"
     }
 } 
 
@@ -82,7 +82,7 @@ function createRook(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
         id: `${color}rook${index}`,
         color: color, 
-        type: CHESS_PIECE_TYPE.ROOK
+        type: "ROOK"
     }
 } 
 
@@ -90,7 +90,7 @@ function createKnight(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
         id: `${color}knight${index}`,
         color: color, 
-        type: CHESS_PIECE_TYPE.KNIGHT
+        type: "KNIGHT"
     }
 } 
 
@@ -98,7 +98,7 @@ function createBishop(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
         id: `${color}bishop${index}`,
         color: color, 
-        type: CHESS_PIECE_TYPE.BISHOP
+        type: "BISHOP"
     }
 } 
 
@@ -106,7 +106,7 @@ function createQueen(color: CHESS_PIECE_COLOR): ChessPiece {
     return {
         id: `${color}queen`,
         color: color, 
-        type: CHESS_PIECE_TYPE.QUEEN
+        type: "QUEEN"
     }
 } 
 
@@ -114,7 +114,7 @@ function createKing(color: CHESS_PIECE_COLOR): ChessPiece {
     return {
         id: `${color}king`,
         color: color, 
-        type: CHESS_PIECE_TYPE.KING
+        type: "KING"
     }
 } 
 
