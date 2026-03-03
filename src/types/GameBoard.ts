@@ -74,7 +74,8 @@ function createPawn(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
         id: `${color}pawn${index}`,
         color: color, 
-        type: "PAWN"
+        type: "PAWN",
+        hasMoved: false
     }
 } 
 
@@ -82,7 +83,8 @@ function createRook(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
         id: `${color}rook${index}`,
         color: color, 
-        type: "ROOK"
+        type: "ROOK",
+        hasMoved: false
     }
 } 
 
@@ -90,7 +92,8 @@ function createKnight(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
         id: `${color}knight${index}`,
         color: color, 
-        type: "KNIGHT"
+        type: "KNIGHT",
+        hasMoved: false
     }
 } 
 
@@ -98,7 +101,8 @@ function createBishop(color: CHESS_PIECE_COLOR, index: number): ChessPiece {
     return {
         id: `${color}bishop${index}`,
         color: color, 
-        type: "BISHOP"
+        type: "BISHOP",
+        hasMoved: false
     }
 } 
 
@@ -106,7 +110,8 @@ function createQueen(color: CHESS_PIECE_COLOR): ChessPiece {
     return {
         id: `${color}queen`,
         color: color, 
-        type: "QUEEN"
+        type: "QUEEN",
+        hasMoved: false
     }
 } 
 
@@ -114,7 +119,8 @@ function createKing(color: CHESS_PIECE_COLOR): ChessPiece {
     return {
         id: `${color}king`,
         color: color, 
-        type: "KING"
+        type: "KING",
+        hasMoved: false
     }
 } 
 

@@ -4,6 +4,7 @@ export type Square = {
 
 export type ChessPiece = {
   id: string,
+  hasMoved: boolean,
   color: CHESS_PIECE_COLOR,
   type: CHESS_PIECE_TYPE,
 }

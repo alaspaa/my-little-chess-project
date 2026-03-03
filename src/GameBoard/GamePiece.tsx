@@ -136,19 +136,28 @@ function updateGameBoardWithMovedPiece(gameBoard: Square[][], pieceId: string, n
         }
         )
     }
-        
     )
 
     if (!piece || !originalCoordinates) return gameBoard
 
-    if(!validateMove(gameBoard, originalCoordinates, newCoordinates, piece)) return gameBoard
-
-    newBoard[newCoordinates.y][newCoordinates.x] = {
-        ...newBoard[newCoordinates.y][newCoordinates.x],
-        piece: piece
-    }
-
-    return newBoard
+    return validateAndUpdateGameBoardWithMovedPiece(gameBoard, newBoard, originalCoordinates, newCoordinates, piece)
 }
 
+function validateAndUpdateGameBoardWithMovedPiece(
+    currentGameBoard: Square[][], 
+    newGameBoard: Square[][], 
+    originalCoordinates: BoardCoordinates, 
+    newCoordinates: BoardCoordinates,
+    chessPiece: ChessPiece,
+): Square[][] {
+ if(!validateMove(currentGameBoard, originalCoordinates, newCoordinates, chessPiece)) return currentGameBoard
+    
+
+    newGameBoard[newCoordinates.y][newCoordinates.x] = {
+        ...newGameBoard[newCoordinates.y][newCoordinates.x],
+        piece: {...chessPiece, hasMoved: true}
+    }
+
+    return newGameBoard
+}
 export default GamePiece
