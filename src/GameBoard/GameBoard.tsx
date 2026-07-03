@@ -1,7 +1,8 @@
 import { useEffect, useRef} from 'react'
 import GameBoardRow from './GameBoardRow'
 import { useAtom, useAtomValue } from 'jotai'
-import { blackPlayerAtom, boardCoordinatesAtom, currentTurnAtom, gameBoardAtom, pieceClickedAtom, whitePlayerAtom } from '../state'
+import { blackPlayerAtom, boardCoordinatesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, pieceClickedAtom, whitePlayerAtom } from '../state'
+import type { Player } from '../types/ChessObjects'
 
 function GameBoard() {
     const gameBoard = useAtomValue(gameBoardAtom)
@@ -10,6 +11,7 @@ function GameBoard() {
     const whitePlayer = useAtomValue(whitePlayerAtom)
     const blackPlayer = useAtomValue(blackPlayerAtom)
     const currentTurn = useAtomValue(currentTurnAtom)
+    const gameStatus = useAtomValue(gameStatusAtom)
 
     const boardRef = useRef<HTMLDivElement>(null)
 
@@ -43,6 +45,13 @@ function GameBoard() {
 
     return (
         <>
+        {gameStatus.state !== 'playing' &&
+            <div className={`gameboard-status ${gameStatus.state}`}>
+                {gameStatus.state === 'checkmate'
+                    ? `Checkmate! ${getPlayerName(gameStatus.color === 'white' ? 'black' : 'white', whitePlayer, blackPlayer)} wins`
+                    : `${getPlayerName(gameStatus.color, whitePlayer, blackPlayer)} is in check`}
+            </div>
+        }
         <div className={'gameboard-player black' + (currentTurn === 'white' ? ' active' : '')}>White: {whitePlayer?.name}</div>
         <div className='gameboard' ref={boardRef}>
         {
@@ -59,6 +68,12 @@ function GameBoard() {
       <div className={'gameboard-player black' + (currentTurn === 'black' ? ' active' : '')}>Black: {blackPlayer?.name}</div>
       </>
     )
+}
+
+function getPlayerName(color: 'white' | 'black' | null, whitePlayer: Player | null, blackPlayer: Player | null): string {
+    if(color === 'white') return whitePlayer?.name ?? 'White'
+    if(color === 'black') return blackPlayer?.name ?? 'Black'
+    return ''
 }
 
 export default GameBoard

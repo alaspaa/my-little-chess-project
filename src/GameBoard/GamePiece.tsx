@@ -2,11 +2,10 @@ import { type BoardCoordinates, type ChessPiece, type Square } from "../types/Ch
 import { faChessBishop, faChessKing, faChessKnight, faChessPawn, faChessQueen, faChessRook } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { currentTurnAtom, gameBoardAtom, pieceClickedAtom, validMovesAtom } from "../state"
+import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pieceClickedAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
-import validateMove from "../types/GameLogicValidator"
-import getValidMoves from "../types/MoveValidator"
+import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../types/GameLogicValidator"
 
 interface opts {
     piece: ChessPiece,
@@ -21,6 +20,7 @@ function GamePiece(props: opts) {
     const [gameBoard, setGameBoard] = useAtom(gameBoardAtom)
     const [, setValidMoves] = useAtom(validMovesAtom)
     const [currentTurn, setCurrentTurn] = useAtom(currentTurnAtom)
+    const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
 
 
     useEffect(() => {
@@ -29,6 +29,8 @@ function GamePiece(props: opts) {
         const piece = pieceRef.current
 
         const onMouseDown = (e: MouseEvent) => {
+            if(gameStatus.state === "checkmate") return
+
             const id: string | null = (e.target as SVGPathElement).parentElement?.parentElement?.id || null
             if(!id) return
 
@@ -38,7 +40,7 @@ function GamePiece(props: opts) {
             if(clickedPiece.color !== currentTurn) return
 
             setPieceClicked(id)
-            setValidMoves(getValidMoves(gameBoard, currentCoordinates, clickedPiece))
+            setValidMoves(getLegalMoves(gameBoard, currentCoordinates, clickedPiece))
         }
 
         const onMouseUp = () => {
@@ -56,7 +58,17 @@ function GamePiece(props: opts) {
                 const newBoard = updateGameBoardWithMovedPiece(gameBoard, pieceClicked!, gameBoardCoordinates!)
                 if(newBoard !== gameBoard) {
                     setGameBoard(newBoard)
-                    setCurrentTurn(currentTurn === "white" ? "black" : "white")
+
+                    const nextTurn = currentTurn === "white" ? "black" : "white"
+                    setCurrentTurn(nextTurn)
+
+                    if(isCheckmate(newBoard, nextTurn)) {
+                        setGameStatus({state: "checkmate", color: nextTurn})
+                    } else if(isKingInCheck(newBoard, nextTurn)) {
+                        setGameStatus({state: "check", color: nextTurn})
+                    } else {
+                        setGameStatus({state: "playing", color: null})
+                    }
                 }
             }
 
@@ -82,7 +94,7 @@ function GamePiece(props: opts) {
         }
 
         return cleanup
-    }, [pieceClicked, boardCoordinates, currentTurn])
+    }, [pieceClicked, boardCoordinates, currentTurn, gameStatus])
 
     const getGamePieceIcon = (gamePiece: ChessPiece) => {
         switch(gamePiece.type) {

@@ -94,6 +94,25 @@
     margin: 0;
 }
 
+.gameboard-status {
+    max-width: 800px;
+    margin: 0 auto 0.5rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.gameboard-status.check {
+    background-color: rgb(200, 160, 40);
+    color: black;
+}
+
+.gameboard-status.checkmate {
+    background-color: rgb(200, 60, 60);
+    color: white;
+}
+
 .gameboard-player {
     max-width: 800px;
     margin: 0 auto;
