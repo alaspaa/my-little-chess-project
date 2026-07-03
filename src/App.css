@@ -94,36 +94,20 @@
     margin: 0;
 }
 
-.gameboard-status {
-    max-width: 800px;
-    margin: 0 auto 0.5rem;
-    font-weight: bold;
-    text-align: center;
-    padding: 0.5rem;
-    border-radius: 4px;
-}
-
-.gameboard-status.check {
-    background-color: rgb(200, 160, 40);
-    color: black;
-}
-
-.gameboard-status.checkmate {
-    background-color: rgb(200, 60, 60);
-    color: white;
-}
-
 .game-footer {
     max-width: 800px;
     margin: 0.5rem auto 0;
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 1.5rem;
     border: black 1px solid;
     border-radius: 4px;
     padding: 0.5rem 1rem;
 }
 
 .gameboard-player {
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     font-weight: bold;
@@ -144,6 +128,49 @@
 
 .gameboard-player-name {
     font-size: 1.1rem;
+}
+
+.game-footer-status-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    border-radius: 4px;
+}
+
+.game-footer-status-wrapper.check {
+    background-color: rgba(200, 160, 40, 0.2);
+}
+
+.game-footer-status-wrapper.checkmate {
+    background-color: rgba(220, 80, 80, 0.2);
+}
+
+.game-footer-status {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+    padding: 0 0.5rem;
+}
+
+.game-footer-status.check {
+    color: rgb(200, 160, 40);
+}
+
+.game-footer-status.checkmate {
+    color: rgb(220, 80, 80);
+}
+
+.turn-arrow {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    color: rgb(80, 200, 120);
+    visibility: hidden;
+}
+
+.turn-arrow.active {
+    visibility: visible;
 }
 
  .chesspiece {

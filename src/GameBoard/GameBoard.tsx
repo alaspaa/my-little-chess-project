@@ -1,14 +1,10 @@
 import { useEffect, useRef} from 'react'
-import { useTranslation } from 'react-i18next'
 import GameBoardRow from './GameBoardRow'
 import GameFooter from './GameFooter'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { blackPlayerAtom, boardCoordinatesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, pieceClickedAtom, whitePlayerAtom } from '../state'
-import type { TFunction } from 'i18next'
-import type { Player } from '../types/ChessObjects'
 
 function GameBoard() {
-    const { t } = useTranslation()
     const gameBoard = useAtomValue(gameBoardAtom)
     const pieceClicked = useAtomValue(pieceClickedAtom)
     const setPieceCoords = useSetAtom(boardCoordinatesAtom)
@@ -58,13 +54,6 @@ function GameBoard() {
 
     return (
         <>
-        {gameStatus.state !== 'playing' &&
-            <div className={`gameboard-status ${gameStatus.state}`}>
-                {gameStatus.state === 'checkmate'
-                    ? t('gameStatus.checkmate', {winner: getPlayerName(gameStatus.color === 'white' ? 'black' : 'white', whitePlayer, blackPlayer, t)})
-                    : t('gameStatus.check', {player: getPlayerName(gameStatus.color, whitePlayer, blackPlayer, t)})}
-            </div>
-        }
         <div className='gameboard' ref={boardRef}>
         {
           gameBoard.map( (row, index) =>
@@ -77,15 +66,14 @@ function GameBoard() {
           )
         }
       </div>
-      <GameFooter whitePlayer={whitePlayer} blackPlayer={blackPlayer} currentTurn={currentTurn} />
+      <GameFooter
+        whitePlayer={whitePlayer}
+        blackPlayer={blackPlayer}
+        currentTurn={currentTurn}
+        gameStatus={gameStatus}
+      />
       </>
     )
-}
-
-function getPlayerName(color: 'white' | 'black' | null, whitePlayer: Player | null, blackPlayer: Player | null, t: TFunction): string {
-    if(color === 'white') return whitePlayer?.name ?? t('common.white')
-    if(color === 'black') return blackPlayer?.name ?? t('common.black')
-    return ''
 }
 
 export default GameBoard

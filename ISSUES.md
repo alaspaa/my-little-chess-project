@@ -34,25 +34,6 @@ active-player highlight's meaning.
 
 ---
 
-## Check/checkmate banner shifts the board when it appears or disappears
-
-**Complexity:** Small — CSS plus a one-line JSX change, already fully
-scoped below.
-
-**Area:** UI (`src/GameBoard/GameBoard.tsx`, `src/App.css`)
-
-The `.gameboard-status` banner is only rendered in the DOM when
-`gameStatus.state !== 'playing'` (see the conditional in `GameBoard.tsx`'s
-render). Its height isn't reserved when absent, so the board visibly jumps
-down by the banner's height the moment a check/checkmate happens (and jumps
-back up if the state clears). Fix should keep the board's position stable
-regardless of whether a message is showing — e.g. always render the
-`.gameboard-status` div and reserve its height via CSS
-(`visibility: hidden` when there's no message, rather than removing it from
-the DOM), instead of conditionally rendering the element itself.
-
----
-
 ## Add a resign button
 
 **Complexity:** Small — one new `gameStatusAtom` value, one button, and
@@ -87,30 +68,6 @@ and the captured piece is simply lost — plus new state (e.g.
 `capturedPiecesAtom`, probably split per color) and a small rendering
 component (icons via the existing FontAwesome piece icons, grouped by
 color) placed near each player's username label.
-
----
-
-## Extend the footer to also hold the check/checkmate banner
-
-**Complexity:** Small-medium — `GameFooter.tsx` and the stable-footer
-layout already exist; this is about moving one more thing into it.
-
-**Area:** UI (`src/GameBoard/GameBoard.tsx`, `src/GameBoard/GameFooter.tsx`,
-`src/App.css`)
-
-Partially done: `GameFooter.tsx` now exists below `.gameboard` and holds
-the player names/turn indicator, confirmed stable (growing/changing
-footer content doesn't move the board, since the footer is a sibling
-*after* the board in document flow). What's still outstanding is the
-check/checkmate status banner (`.gameboard-status` in `GameBoard.tsx`),
-which is still rendered *above* the board and still conditionally
-mounted/unmounted — so it still causes the exact shift described in the
-"Check/checkmate banner shifts the board" issue below. Moving that
-banner into `GameFooter.tsx` (or a sibling area within the same stable
-footer) would fix that shift for good and finish this issue's original
-scope, along with giving captured pieces/resign/draw buttons (see the
-other issues here) a single consistent home instead of being added
-piecemeal.
 
 ---
 
