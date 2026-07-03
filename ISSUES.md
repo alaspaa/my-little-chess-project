@@ -132,64 +132,47 @@ of the pawn.
 
 ---
 
-## Extract visible text into language strings
-
-**Complexity:** Medium — no new logic, but touches every component with
-user-facing text, so it's breadth-heavy rather than deep. Prerequisite
-for the two i18n issues below.
-
-**Area:** all UI components (`src/StartPage/StartPage.tsx`,
-`src/GameBoard/GameBoard.tsx`, `src/GameBoard/GameFooter.tsx`)
-
-All visible text is currently hardcoded inline — e.g. `"Chess"` and the
-validation error in `StartPage.tsx`, `"Checkmate! ... wins"` /
-`"... is in check"` in `GameBoard.tsx`'s `getPlayerName`/render, and the
-`"White"`/`"Black"` labels in `GameFooter.tsx`. Needs a central place for
-every user-facing string (e.g. a `src/strings.ts` or similar lookup keyed
-by string id) with components reading from it instead of literal text, so
-a translation can later swap the whole set without touching component
-code. This issue is just the extraction/centralization — it doesn't add
-any other language, just a single (English) string table as the
-foundation.
-
----
-
 ## Add translations for additional languages
 
-**Complexity:** Medium-large — needs actual translation content plus a
-way to select and interpolate the active language, and depends entirely
-on the extraction issue above existing first.
+**Complexity:** Medium — content + wiring, not architecture: the
+extraction/centralization this used to depend on is done.
 
-**Area:** new (e.g. `src/strings/` per-language files), state
-(`src/state.ts`)
+**Area:** `src/locales/` (new per-language JSON files), `src/i18n.ts`
 
-Once visible text is centralized (see the extraction issue above), add
-one or more additional language string tables and a way to pick which one
-is active (e.g. a `languageAtom`). Needs to handle interpolated strings
-correctly, not just static labels — e.g. "Checkmate! {name} wins" and
-"{name} is in check" both splice a player's name into the middle of a
-sentence, which some languages will need to reorder rather than just
-substitute in place.
+Visible text is now centralized via `react-i18next`: `src/i18n.ts` sets
+up the `i18next` instance and `src/locales/en.json` holds every
+user-facing string (including the interpolated `gameStatus.checkmate` /
+`gameStatus.check` keys used for "Checkmate! {{winner}} wins" and
+"{{player}} is in check" — i18next's `{{}}` interpolation already lets a
+translation reorder around the placeholder, so no extra work is needed
+there beyond writing the translated string). What's still missing: any
+language other than English (add `src/locales/<lang>.json` and register
+it in the `resources` object in `src/i18n.ts`), and a way to actually
+switch `i18n.language` at runtime instead of the current hardcoded
+`lng: "en"`.
 
 ---
 
 ## Add a language selection screen
 
 **Complexity:** Medium — a small new UI + one new piece of state, but
-only meaningful once translations exist to choose between (depends on
-both issues above).
+only meaningful once a second language exists to choose (depends on the
+translations issue above).
 
 **Area:** UI (new component, likely alongside `src/StartPage/StartPage.tsx`),
 state (`src/state.ts`)
 
-With translations in place, add a screen (or a control on the existing
-setup page) letting a player pick a language before or while playing,
-writing the choice to the `languageAtom` from the translations issue
-above. Consider whether the choice should persist across a page reload
-(there's no persistence layer in this project at all yet — see how
-`whitePlayerAtom`/`blackPlayerAtom` are already lost on refresh — so this
-may need to stay in-memory-only too, unless persistence is added as part
-of this work).
+Once more than one language exists (see the translations issue above),
+add a screen (or a control on the existing setup page) letting a player
+pick a language before or while playing, calling `i18n.changeLanguage(...)`
+(from the `i18n` instance exported by `src/i18n.ts`) — probably still
+worth mirroring the choice into a Jotai atom too, so React components can
+reactively re-render on change rather than relying on `i18next`'s own
+subscription mechanism directly. Consider whether the choice should
+persist across a page reload (there's no persistence layer in this
+project at all yet — see how `whitePlayerAtom`/`blackPlayerAtom` are
+already lost on refresh — so this may need to stay in-memory-only too,
+unless persistence is added as part of this work).
 
 ---
 

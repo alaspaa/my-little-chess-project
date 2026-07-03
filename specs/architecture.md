@@ -74,6 +74,21 @@ add it as a new atom/field rather than inferring it from the board alone.
    success: commit the new board, flip `currentTurnAtom`, then recompute
    `gameStatusAtom` for the side about to move next.
 
+## User-facing text (`src/i18n.ts`, `src/locales/`)
+
+Every piece of visible text goes through `react-i18next`'s `useTranslation`
+hook (`const { t } = useTranslation()`), never a literal string in JSX.
+`src/i18n.ts` initializes the `i18next` instance with a single locale for
+now (`src/locales/en.json`), keyed by section (`common`, `startPage`,
+`gameStatus`). Strings that splice in a value (e.g. the check/checkmate
+messages) use `i18next`'s `{{placeholder}}` interpolation
+(`t('gameStatus.checkmate', {winner: name})`) rather than JS template
+literals, so a translation can reorder the sentence around the
+placeholder. `getPlayerName` in `GameBoard.tsx` takes `t` as a parameter
+rather than calling the hook itself, since it's a plain module-level
+function, not a component — keeps it testable the same way the rest of
+the logic layer is (see `specs/code-style.md`).
+
 ## Board coordinate system
 
 `Square[][]` is indexed `[y][x]`. `gameBoard[0]` is White's back rank

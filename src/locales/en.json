@@ -1,0 +1,17 @@
+{
+  "common": {
+    "white": "White",
+    "black": "Black"
+  },
+  "startPage": {
+    "title": "Chess",
+    "whiteUsernameLabel": "White username",
+    "blackUsernameLabel": "Black username",
+    "startButton": "Start",
+    "usernameRequiredError": "Both players need a username to start the game"
+  },
+  "gameStatus": {
+    "checkmate": "Checkmate! {{winner}} wins",
+    "check": "{{player}} is in check"
+  }
+}
