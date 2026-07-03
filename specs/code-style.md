@@ -34,6 +34,10 @@ undocumented.
   defaults (`js.configs.recommended`, `typescript-eslint` recommended,
   `react-hooks` recommended, `react-refresh`). No stylistic (Prettier-style)
   rules are enforced by lint — formatting consistency is by convention only.
+- `npm run lint` runs automatically on every commit via a Husky
+  `pre-commit` hook (`.husky/pre-commit`) — a commit is blocked if lint
+  reports an error (warnings don't block). Run `npm install` once after
+  cloning so the hook is registered (handled by the `prepare` script).
 
 ## Naming
 
