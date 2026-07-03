@@ -146,6 +146,24 @@ would need to be prevented — plus a new `gameStatusAtom` end state (e.g.
 
 ---
 
+## Fifty-move rule draw is not implemented
+
+**Complexity:** Medium — just a counter (moves since the last pawn move
+or capture), reset on the right conditions and checked each turn.
+
+**Area:** game state (`src/state.ts`, `src/types/GameLogicValidator.ts`)
+
+A game should be drawn if 50 full moves pass with no pawn move and no
+capture. Needs: a new counter in state (e.g. `halfmoveClockAtom`),
+incremented after every move and reset to 0 whenever the moved piece is a
+`"PAWN"` or the destination square was occupied (a capture) — both already
+knowable at the point `GamePiece.tsx` commits a move — plus a new
+`gameStatusAtom` end state (e.g. `"draw"`) once the counter reaches 100
+half-moves. Doesn't need full position history, unlike threefold
+repetition below — just the running count.
+
+---
+
 ## Offer a rematch/restart prompt when the game ends
 
 **Complexity:** Medium-large — needs a "reset the game to its initial
@@ -204,17 +222,23 @@ support (it only relocates one piece per move).
 
 ---
 
-## Fifty-move rule and threefold repetition draws are not implemented
+## Threefold repetition draw is not implemented
 
-**Complexity:** Largest — needs a full move/position history log (not
-just "the last move" like en passant), spanning the whole game.
+**Complexity:** Largest — needs a full position history log (not just a
+running counter like the fifty-move rule, or "the last move" like en
+passant), plus a way to compare positions for equality.
 
 **Area:** game state (`src/state.ts`, `src/types/GameLogicValidator.ts`)
 
-Two draw conditions aren't detected: 50 moves with no pawn move or capture,
-and the same position occurring three times. Both need history that
-doesn't exist yet — a move/position log — plus a new `gameStatusAtom`
-state value (currently only `"playing" | "check" | "checkmate"`) for
-`"draw"`, and a reason to display. Lower priority than the special-case
-moves above since draws are rare in casual play, but worth tracking since
-`gameStatusAtom`'s shape will need to change either way.
+A game should be drawn if the same position (piece placement, side to
+move, and — once implemented — castling/en passant rights) occurs three
+times. Needs: a log of every position reached so far (e.g. a serialized
+board snapshot per move, since there's no existing notion of "position
+equality" — `Square[][]` objects are always structurally distinct even
+when the arrangement is identical), a way to detect when a new snapshot
+matches two earlier ones, and a new `gameStatusAtom` end state (e.g.
+`"draw"`). Depends on castling/en passant rights being tracked first if
+those are implemented, since two positions with different castling/en
+passant availability aren't actually the same position for repetition
+purposes — otherwise it can ship considering board+turn only, which is a
+reasonable simplification for now.

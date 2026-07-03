@@ -19,7 +19,7 @@ function GameSquare(props: opts) {
         <div
             key={getSquareNumber(columnIndex, rowIndex).toString()}
             id={getSquareNumber(columnIndex, rowIndex).toString()}
-            className={'gamesquare black ' + getColorClassName(columnIndex, rowIndex) + (isValidMove ? ' validmove' : '')}
+            className={'gamesquare ' + getColorClassName(columnIndex, rowIndex) + (isValidMove ? ' validmove' : '')}
         >
             {gameSquare.piece &&
                 <GamePiece 
@@ -43,7 +43,7 @@ function isBlack(index: number, rowIndex: number): boolean {
 }
 
 function getColorClassName(index: number, rowIndex: number): string {
-    return isBlack(index, rowIndex) ? 'black' : 'white'
+    return isBlack(index, rowIndex) ? 'square-black' : 'square-white'
 }
 
 

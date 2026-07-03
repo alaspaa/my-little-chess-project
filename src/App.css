@@ -62,11 +62,11 @@
   
 }
 
- .black {
+ .square-black {
     background-color: rgb(35, 34, 34);
  }
 
- .white {
+ .square-white {
     background-color: rgb(185, 185, 185);
  }
 
@@ -113,25 +113,37 @@
     color: white;
 }
 
-.gameboard-player {
+.game-footer {
     max-width: 800px;
-    margin: 0 auto;
+    margin: 0.5rem auto 0;
+    display: flex;
+    justify-content: space-between;
+    border: black 1px solid;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+}
+
+.gameboard-player {
+    display: flex;
+    flex-direction: column;
     font-weight: bold;
     text-align: left;
-    opacity: 0.5;
+    color: rgb(140, 140, 140);
 }
 
 .gameboard-player.active {
-    opacity: 1;
     color: rgb(80, 200, 120);
 }
 
-.gameboard-player.white {
-    margin-bottom: 0.5rem;
+.gameboard-player-color {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.75;
 }
 
-.gameboard-player.black {
-    margin-top: 0.5rem;
+.gameboard-player-name {
+    font-size: 1.1rem;
 }
 
  .chesspiece {

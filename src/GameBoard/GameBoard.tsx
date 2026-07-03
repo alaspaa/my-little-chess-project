@@ -1,5 +1,6 @@
 import { useEffect, useRef} from 'react'
 import GameBoardRow from './GameBoardRow'
+import GameFooter from './GameFooter'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { blackPlayerAtom, boardCoordinatesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, pieceClickedAtom, whitePlayerAtom } from '../state'
 import type { Player } from '../types/ChessObjects'
@@ -61,7 +62,6 @@ function GameBoard() {
                     : `${getPlayerName(gameStatus.color, whitePlayer, blackPlayer)} is in check`}
             </div>
         }
-        <div className={'gameboard-player black' + (currentTurn === 'white' ? ' active' : '')}>White: {whitePlayer?.name}</div>
         <div className='gameboard' ref={boardRef}>
         {
           gameBoard.map( (row, index) =>
@@ -74,7 +74,7 @@ function GameBoard() {
           )
         }
       </div>
-      <div className={'gameboard-player black' + (currentTurn === 'black' ? ' active' : '')}>Black: {blackPlayer?.name}</div>
+      <GameFooter whitePlayer={whitePlayer} blackPlayer={blackPlayer} currentTurn={currentTurn} />
       </>
     )
 }
