@@ -2,10 +2,11 @@ import { type BoardCoordinates, type ChessPiece, type Square } from "../types/Ch
 import { faChessBishop, faChessKing, faChessKnight, faChessPawn, faChessQueen, faChessRook } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { gameBoardAtom, pieceClickedAtom } from "../state"
+import { gameBoardAtom, pieceClickedAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove from "../types/GameLogicValidator"
+import getValidMoves from "../types/MoveValidator"
 
 interface opts {
     piece: ChessPiece,
@@ -18,18 +19,25 @@ function GamePiece(props: opts) {
     const [pieceClicked, setPieceClicked] = useAtom(pieceClickedAtom)
     const [boardCoordinates, setBoardCoordinates] = useAtom(boardCoordinatesAtom)
     const [gameBoard, setGameBoard] = useAtom(gameBoardAtom)
-  
+    const [, setValidMoves] = useAtom(validMovesAtom)
+
 
     useEffect(() => {
-        if(!pieceRef.current ) return 
+        if(!pieceRef.current ) return
 
         const piece = pieceRef.current
 
-        const onMouseDown = (e: MouseEvent) => { 
+        const onMouseDown = (e: MouseEvent) => {
             const id: string | null = (e.target as SVGPathElement).parentElement?.parentElement?.id || null
             if(!id) return
 
-            setPieceClicked(id)         
+            setPieceClicked(id)
+
+            const currentCoordinates = findPieceCoordinates(gameBoard, id)
+            const clickedPiece = currentCoordinates && gameBoard[currentCoordinates.y][currentCoordinates.x].piece
+            if(currentCoordinates && clickedPiece) {
+                setValidMoves(getValidMoves(gameBoard, currentCoordinates, clickedPiece))
+            }
         }
 
         const onMouseUp = () => {
@@ -38,7 +46,7 @@ function GamePiece(props: opts) {
             const gameSquare = document.elementsFromPoint(boardCoordinates.x, boardCoordinates.y)
             .find(el => {
                 return el instanceof HTMLElement && el.classList.contains('gamesquare')
-            }) 
+            })
 
             const gameBoardCoordinates = getGameBoardCoordinatesFromGameSquare(gameSquare)
             if(gameBoardCoordinates) {
@@ -57,6 +65,7 @@ function GamePiece(props: opts) {
 
             setBoardCoordinates(null)
             setPieceClicked(null)
+            setValidMoves([])
         }
 
         piece.addEventListener('mousedown', onMouseDown)
@@ -115,30 +124,26 @@ function getGameBoardCoordinatesFromGameSquare(gameSquare: Element | undefined):
     return getBoardCoordinates(parseInt(id))
 }
 
-function updateGameBoardWithMovedPiece(gameBoard: Square[][], pieceId: string, newCoordinates: BoardCoordinates): Square[][] {
-    let piece: ChessPiece | null = null
-    let originalCoordinates: BoardCoordinates | null = null
-
-    let newBoard = gameBoard.map((row, index) => {
-        const rowIndex = index
-
-        return row.map((square, index) => {
-            if(square.piece && square.piece.id === pieceId) {
-                piece = square.piece
-                originalCoordinates = {x: index, y: rowIndex}
-                return {
-                    ...square,
-                    piece: null
-                }
-            } else {
-                return square
+function findPieceCoordinates(gameBoard: Square[][], pieceId: string): BoardCoordinates | null {
+    for(let y = 0; y < gameBoard.length; y++) {
+        for(let x = 0; x < gameBoard[y].length; x++) {
+            if(gameBoard[y][x].piece?.id === pieceId) {
+                return {x, y}
             }
         }
-        )
     }
-    )
+    return null
+}
 
-    if (!piece || !originalCoordinates) return gameBoard
+function updateGameBoardWithMovedPiece(gameBoard: Square[][], pieceId: string, newCoordinates: BoardCoordinates): Square[][] {
+    const originalCoordinates = findPieceCoordinates(gameBoard, pieceId)
+    const piece = originalCoordinates && gameBoard[originalCoordinates.y][originalCoordinates.x].piece
+
+    if(!piece || !originalCoordinates) return gameBoard
+
+    const newBoard = gameBoard.map(row => row.map(square =>
+        square.piece?.id === pieceId ? {...square, piece: null} : square
+    ))
 
     return validateAndUpdateGameBoardWithMovedPiece(gameBoard, newBoard, originalCoordinates, newCoordinates, piece)
 }

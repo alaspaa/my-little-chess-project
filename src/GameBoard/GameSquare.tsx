@@ -1,5 +1,7 @@
+import { useAtomValue } from 'jotai'
 import GamePiece from './GamePiece'
 import { type Square } from '../types/ChessObjects'
+import { validMovesAtom } from '../state'
 
 interface opts {
     gameSquare: Square,
@@ -9,12 +11,15 @@ interface opts {
 
 function GameSquare(props: opts) {
     const {gameSquare, rowIndex, columnIndex } = props
-    
+    const validMoves = useAtomValue(validMovesAtom)
+
+    const isValidMove = validMoves.some(move => move.x === columnIndex && move.y === rowIndex)
+
     return (
-        <div 
-            key={getSquareNumber(columnIndex, rowIndex).toString()} 
-            id={getSquareNumber(columnIndex, rowIndex).toString()} 
-            className={'gamesquare black ' + getColorClassName(columnIndex, rowIndex) }
+        <div
+            key={getSquareNumber(columnIndex, rowIndex).toString()}
+            id={getSquareNumber(columnIndex, rowIndex).toString()}
+            className={'gamesquare black ' + getColorClassName(columnIndex, rowIndex) + (isValidMove ? ' validmove' : '')}
         >
             {gameSquare.piece &&
                 <GamePiece 
