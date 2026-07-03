@@ -1,12 +1,14 @@
 import { useEffect, useRef} from 'react'
 import GameBoardRow from './GameBoardRow'
 import { useAtom, useAtomValue } from 'jotai'
-import { boardCoordinatesAtom, gameBoardAtom, pieceClickedAtom } from '../state'
+import { blackPlayerAtom, boardCoordinatesAtom, gameBoardAtom, pieceClickedAtom, whitePlayerAtom } from '../state'
 
 function GameBoard() {
     const gameBoard = useAtomValue(gameBoardAtom)
     const pieceClicked = useAtomValue(pieceClickedAtom)
     const [pieceCoords, setPieceCoords] = useAtom(boardCoordinatesAtom)
+    const whitePlayer = useAtomValue(whitePlayerAtom)
+    const blackPlayer = useAtomValue(blackPlayerAtom)
 
     const boardRef = useRef<HTMLDivElement>(null)
 
@@ -39,18 +41,22 @@ function GameBoard() {
     }, [pieceClicked, pieceCoords])
 
     return (
+        <>
+        <div className='gameboard-player white'>White: {whitePlayer?.name}</div>
         <div className='gameboard' ref={boardRef}>
         {
           gameBoard.map( (row, index) =>
             <div key={`row${index}`} className="gameboardrow">
-                <GameBoardRow 
-                  row={row} 
-                  rowIndex={index}  
-                />               
+                <GameBoardRow
+                  row={row}
+                  rowIndex={index}
+                />
             </div>
           )
         }
       </div>
+      <div className='gameboard-player black'>Black: {blackPlayer?.name}</div>
+      </>
     )
 }
 

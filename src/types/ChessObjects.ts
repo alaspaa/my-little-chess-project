@@ -2,6 +2,11 @@ export type Square = {
   piece: ChessPiece | null
 }
 
+export type Player = {
+  id: string,
+  name: string,
+}
+
 export type ChessPiece = {
   id: string,
   hasMoved: boolean,
