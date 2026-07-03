@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { type BoardCoordinates, type Player } from "./types/ChessObjects";
+import { type BoardCoordinates, type CHESS_PIECE_COLOR, type Player } from "./types/ChessObjects";
 import { createEmptyBoard, populateBoardWithPieces } from "./types/GameBoard";
 
 export type Page = "setup" | "game"
@@ -15,3 +15,4 @@ export const gameBoardAtom = atom(
 export const currentPageAtom = atom<Page>("setup")
 export const whitePlayerAtom = atom<Player | null>(null)
 export const blackPlayerAtom = atom<Player | null>(null)
+export const currentTurnAtom = atom<CHESS_PIECE_COLOR>("white")

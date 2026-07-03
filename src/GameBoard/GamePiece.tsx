@@ -2,7 +2,7 @@ import { type BoardCoordinates, type ChessPiece, type Square } from "../types/Ch
 import { faChessBishop, faChessKing, faChessKnight, faChessPawn, faChessQueen, faChessRook } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { gameBoardAtom, pieceClickedAtom, validMovesAtom } from "../state"
+import { currentTurnAtom, gameBoardAtom, pieceClickedAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove from "../types/GameLogicValidator"
@@ -20,6 +20,7 @@ function GamePiece(props: opts) {
     const [boardCoordinates, setBoardCoordinates] = useAtom(boardCoordinatesAtom)
     const [gameBoard, setGameBoard] = useAtom(gameBoardAtom)
     const [, setValidMoves] = useAtom(validMovesAtom)
+    const [currentTurn, setCurrentTurn] = useAtom(currentTurnAtom)
 
 
     useEffect(() => {
@@ -31,13 +32,13 @@ function GamePiece(props: opts) {
             const id: string | null = (e.target as SVGPathElement).parentElement?.parentElement?.id || null
             if(!id) return
 
-            setPieceClicked(id)
-
             const currentCoordinates = findPieceCoordinates(gameBoard, id)
             const clickedPiece = currentCoordinates && gameBoard[currentCoordinates.y][currentCoordinates.x].piece
-            if(currentCoordinates && clickedPiece) {
-                setValidMoves(getValidMoves(gameBoard, currentCoordinates, clickedPiece))
-            }
+            if(!currentCoordinates || !clickedPiece) return
+            if(clickedPiece.color !== currentTurn) return
+
+            setPieceClicked(id)
+            setValidMoves(getValidMoves(gameBoard, currentCoordinates, clickedPiece))
         }
 
         const onMouseUp = () => {
@@ -53,7 +54,10 @@ function GamePiece(props: opts) {
                 //console.log(`${gameBoardCoordinates?.x}, ${gameBoardCoordinates?.y}, ${pieceClicked}`)
 
                 const newBoard = updateGameBoardWithMovedPiece(gameBoard, pieceClicked!, gameBoardCoordinates!)
-                setGameBoard(newBoard)
+                if(newBoard !== gameBoard) {
+                    setGameBoard(newBoard)
+                    setCurrentTurn(currentTurn === "white" ? "black" : "white")
+                }
             }
 
             const piece = (document.getElementById(pieceClicked!) as HTMLElement).firstChild as HTMLElement
@@ -76,9 +80,9 @@ function GamePiece(props: opts) {
             piece.removeEventListener('mousedown', onMouseDown)
             piece.removeEventListener('mouseup', onMouseUp)
         }
-        
+
         return cleanup
-    }, [pieceClicked, boardCoordinates])
+    }, [pieceClicked, boardCoordinates, currentTurn])
 
     const getGamePieceIcon = (gamePiece: ChessPiece) => {
         switch(gamePiece.type) {

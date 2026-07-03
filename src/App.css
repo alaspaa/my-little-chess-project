@@ -99,6 +99,12 @@
     margin: 0 auto;
     font-weight: bold;
     text-align: left;
+    opacity: 0.5;
+}
+
+.gameboard-player.active {
+    opacity: 1;
+    color: rgb(80, 200, 120);
 }
 
 .gameboard-player.white {
