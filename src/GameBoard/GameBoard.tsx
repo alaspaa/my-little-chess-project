@@ -1,13 +1,13 @@
 import { useEffect, useRef} from 'react'
 import GameBoardRow from './GameBoardRow'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { blackPlayerAtom, boardCoordinatesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, pieceClickedAtom, whitePlayerAtom } from '../state'
 import type { Player } from '../types/ChessObjects'
 
 function GameBoard() {
     const gameBoard = useAtomValue(gameBoardAtom)
     const pieceClicked = useAtomValue(pieceClickedAtom)
-    const [pieceCoords, setPieceCoords] = useAtom(boardCoordinatesAtom)
+    const setPieceCoords = useSetAtom(boardCoordinatesAtom)
     const whitePlayer = useAtomValue(whitePlayerAtom)
     const blackPlayer = useAtomValue(blackPlayerAtom)
     const currentTurn = useAtomValue(currentTurnAtom)
@@ -15,13 +15,22 @@ function GameBoard() {
 
     const boardRef = useRef<HTMLDivElement>(null)
 
+    // Read via a ref inside the listener instead of depending on pieceClicked
+    // in the effect, so the listener is attached once and always sees the
+    // latest value without being torn down and re-added on every drag.
+    const pieceClickedRef = useRef(pieceClicked)
     useEffect(() => {
-        if(!boardRef.current) return 
+        pieceClickedRef.current = pieceClicked
+    })
+
+    useEffect(() => {
+        if(!boardRef.current) return
         const board = boardRef.current
 
         const onMouseMove = (e: MouseEvent) => {
-          if(!pieceClicked) return
-            const piece = document.getElementById(pieceClicked)?.childNodes[0] as SVGSVGElement
+            const clickedId = pieceClickedRef.current
+            if(!clickedId) return
+            const piece = document.getElementById(clickedId)?.childNodes[0] as SVGSVGElement
 
             if(piece) {
                 piece.style.position = "absolute"
@@ -34,14 +43,14 @@ function GameBoard() {
             }
         }
 
-        board.addEventListener('mousemove', onMouseMove)  
+        board.addEventListener('mousemove', onMouseMove)
 
         const cleanup = () => {
             board.removeEventListener('mousemove', onMouseMove)
         }
 
         return cleanup
-    }, [pieceClicked, pieceCoords])
+    }, [setPieceCoords])
 
     return (
         <>

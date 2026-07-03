@@ -22,6 +22,21 @@ function GamePiece(props: opts) {
     const [currentTurn, setCurrentTurn] = useAtom(currentTurnAtom)
     const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
 
+    // Read via refs inside the event listeners below instead of depending on
+    // these atoms in the effect, so the listeners are attached once and
+    // always see the latest values without being torn down and re-added.
+    const pieceClickedRef = useRef(pieceClicked)
+    const boardCoordinatesRef = useRef(boardCoordinates)
+    const gameBoardRef = useRef(gameBoard)
+    const currentTurnRef = useRef(currentTurn)
+    const gameStatusRef = useRef(gameStatus)
+    useEffect(() => {
+        pieceClickedRef.current = pieceClicked
+        boardCoordinatesRef.current = boardCoordinates
+        gameBoardRef.current = gameBoard
+        currentTurnRef.current = currentTurn
+        gameStatusRef.current = gameStatus
+    })
 
     useEffect(() => {
         if(!pieceRef.current ) return
@@ -29,21 +44,23 @@ function GamePiece(props: opts) {
         const piece = pieceRef.current
 
         const onMouseDown = (e: MouseEvent) => {
-            if(gameStatus.state === "checkmate") return
+            if(gameStatusRef.current.state === "checkmate") return
 
             const id: string | null = (e.target as SVGPathElement).parentElement?.parentElement?.id || null
             if(!id) return
 
-            const currentCoordinates = findPieceCoordinates(gameBoard, id)
-            const clickedPiece = currentCoordinates && gameBoard[currentCoordinates.y][currentCoordinates.x].piece
+            const currentGameBoard = gameBoardRef.current
+            const currentCoordinates = findPieceCoordinates(currentGameBoard, id)
+            const clickedPiece = currentCoordinates && currentGameBoard[currentCoordinates.y][currentCoordinates.x].piece
             if(!currentCoordinates || !clickedPiece) return
-            if(clickedPiece.color !== currentTurn) return
+            if(clickedPiece.color !== currentTurnRef.current) return
 
             setPieceClicked(id)
-            setValidMoves(getLegalMoves(gameBoard, currentCoordinates, clickedPiece))
+            setValidMoves(getLegalMoves(currentGameBoard, currentCoordinates, clickedPiece))
         }
 
         const onMouseUp = () => {
+            const boardCoordinates = boardCoordinatesRef.current
             if(!boardCoordinates) return
 
             const gameSquare = document.elementsFromPoint(boardCoordinates.x, boardCoordinates.y)
@@ -51,15 +68,18 @@ function GamePiece(props: opts) {
                 return el instanceof HTMLElement && el.classList.contains('gamesquare')
             })
 
+            const pieceClicked = pieceClickedRef.current
+            const currentGameBoard = gameBoardRef.current
+
             const gameBoardCoordinates = getGameBoardCoordinatesFromGameSquare(gameSquare)
             if(gameBoardCoordinates) {
                 //console.log(`${gameBoardCoordinates?.x}, ${gameBoardCoordinates?.y}, ${pieceClicked}`)
 
-                const newBoard = updateGameBoardWithMovedPiece(gameBoard, pieceClicked!, gameBoardCoordinates!)
-                if(newBoard !== gameBoard) {
+                const newBoard = updateGameBoardWithMovedPiece(currentGameBoard, pieceClicked!, gameBoardCoordinates!)
+                if(newBoard !== currentGameBoard) {
                     setGameBoard(newBoard)
 
-                    const nextTurn = currentTurn === "white" ? "black" : "white"
+                    const nextTurn = currentTurnRef.current === "white" ? "black" : "white"
                     setCurrentTurn(nextTurn)
 
                     if(isCheckmate(newBoard, nextTurn)) {
@@ -94,7 +114,7 @@ function GamePiece(props: opts) {
         }
 
         return cleanup
-    }, [pieceClicked, boardCoordinates, currentTurn, gameStatus])
+    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates])
 
     const getGamePieceIcon = (gamePiece: ChessPiece) => {
         switch(gamePiece.type) {
