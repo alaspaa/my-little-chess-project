@@ -15,3 +15,6 @@ Before making changes, read the specs in [specs/](specs/):
 
 These are living documents — when a change makes one of them inaccurate,
 update it in the same commit.
+
+Known gaps and bugs waiting to be picked up are tracked in
+[ISSUES.md](ISSUES.md), not in these specs.
