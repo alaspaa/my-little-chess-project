@@ -80,8 +80,22 @@ undocumented.
 
 ## Testability
 
-There are no tests in the project yet, but code should be written as if
-tests were coming, so adding them later doesn't require a rewrite:
+Tests run on [Vitest](https://vitest.dev) (`npm test`). Test files sit
+next to the code they cover as `*.test.ts` (e.g.
+`src/types/MoveValidator.test.ts`), not in a separate `__tests__` tree.
+Import `describe`/`it`/`expect` explicitly from `"vitest"` rather than
+relying on injected globals, so files type-check without extra config.
+Shared test-only helpers (e.g. `buildBoard`/`piece` for constructing a
+board with specific pieces on it) live in `src/testUtils.ts`.
+
+Only the logic layer (`src/types/*.ts`) is covered so far — components
+(`GamePiece`, `GameBoard`, `StartPage`) aren't tested yet, since they drive
+everything through raw DOM mouse events and imperative style mutation
+rather than props/return values; testing them meaningfully would need
+that interaction extracted into something callable without a real drag.
+
+What makes the logic layer testable, and should be preserved as more of
+it is written:
 
 - Keep game-rule logic (`src/types/*.ts`) as plain functions of
   `(gameBoard, coordinates, piece, ...)` that return a value — no DOM
