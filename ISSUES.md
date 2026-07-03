@@ -58,7 +58,7 @@ the DOM), instead of conditionally rendering the element itself.
 **Complexity:** Small — one new `gameStatusAtom` value, one button, and
 the move-blocking check already exists for checkmate.
 
-**Area:** UI (`src/GameBoard/GameBoard.tsx`), state (`src/state.ts`)
+**Area:** UI (`src/GameBoard/GameFooter.tsx`), state (`src/state.ts`)
 
 No way for a player to concede the game early. Needs a button (likely one
 per player, or one that resigns "whoever's turn it is") that sets
@@ -75,7 +75,7 @@ blocks further moves the same way checkmate currently does in
 **Complexity:** Medium — touches the move-commit path (currently discards
 captures) plus new state and a small rendering component.
 
-**Area:** UI (`src/GameBoard/GameBoard.tsx`), state (`src/state.ts`)
+**Area:** UI (`src/GameBoard/GameFooter.tsx`), state (`src/state.ts`)
 
 There's no visual record of which pieces have been taken, which would help
 a player track how the game has progressed at a glance (material count,
@@ -90,26 +90,27 @@ color) placed near each player's username label.
 
 ---
 
-## Introduce a footer area for game info/banners
+## Extend the footer to also hold the check/checkmate banner
 
-**Complexity:** Medium — a layout restructuring rather than new game
-logic, but touches several existing pieces of UI at once.
+**Complexity:** Small-medium — `GameFooter.tsx` and the stable-footer
+layout already exist; this is about moving one more thing into it.
 
-**Area:** UI (`src/GameBoard/GameBoard.tsx`, `src/App.css`)
+**Area:** UI (`src/GameBoard/GameBoard.tsx`, `src/GameBoard/GameFooter.tsx`,
+`src/App.css`)
 
-Right now check/checkmate status, player labels, and any future additions
-(captured pieces, resign/draw buttons, a rematch prompt — see the other
-issues here) are placed directly above/below `.gameboard` in the normal
-document flow, so anything that changes size pushes the board itself up
-or down (this is the direct cause of the "Check/checkmate banner shifts
-the board" issue above, though that issue can be fixed on its own with a
-narrower CSS-only reserved-height fix). A dedicated footer region below
-the board — sized/positioned so it can grow or change content without
-affecting the board's position (e.g. taken out of flow, or the board given
-a fixed position relative to the page rather than relative to its
-siblings) — would give a single, consistent place for all of this
-game-progress information, rather than solving the shifting problem
-piecemeal for each new banner/button as it's added.
+Partially done: `GameFooter.tsx` now exists below `.gameboard` and holds
+the player names/turn indicator, confirmed stable (growing/changing
+footer content doesn't move the board, since the footer is a sibling
+*after* the board in document flow). What's still outstanding is the
+check/checkmate status banner (`.gameboard-status` in `GameBoard.tsx`),
+which is still rendered *above* the board and still conditionally
+mounted/unmounted — so it still causes the exact shift described in the
+"Check/checkmate banner shifts the board" issue below. Moving that
+banner into `GameFooter.tsx` (or a sibling area within the same stable
+footer) would fix that shift for good and finish this issue's original
+scope, along with giving captured pieces/resign/draw buttons (see the
+other issues here) a single consistent home instead of being added
+piecemeal.
 
 ---
 
@@ -131,12 +132,73 @@ of the pawn.
 
 ---
 
+## Extract visible text into language strings
+
+**Complexity:** Medium — no new logic, but touches every component with
+user-facing text, so it's breadth-heavy rather than deep. Prerequisite
+for the two i18n issues below.
+
+**Area:** all UI components (`src/StartPage/StartPage.tsx`,
+`src/GameBoard/GameBoard.tsx`, `src/GameBoard/GameFooter.tsx`)
+
+All visible text is currently hardcoded inline — e.g. `"Chess"` and the
+validation error in `StartPage.tsx`, `"Checkmate! ... wins"` /
+`"... is in check"` in `GameBoard.tsx`'s `getPlayerName`/render, and the
+`"White"`/`"Black"` labels in `GameFooter.tsx`. Needs a central place for
+every user-facing string (e.g. a `src/strings.ts` or similar lookup keyed
+by string id) with components reading from it instead of literal text, so
+a translation can later swap the whole set without touching component
+code. This issue is just the extraction/centralization — it doesn't add
+any other language, just a single (English) string table as the
+foundation.
+
+---
+
+## Add translations for additional languages
+
+**Complexity:** Medium-large — needs actual translation content plus a
+way to select and interpolate the active language, and depends entirely
+on the extraction issue above existing first.
+
+**Area:** new (e.g. `src/strings/` per-language files), state
+(`src/state.ts`)
+
+Once visible text is centralized (see the extraction issue above), add
+one or more additional language string tables and a way to pick which one
+is active (e.g. a `languageAtom`). Needs to handle interpolated strings
+correctly, not just static labels — e.g. "Checkmate! {name} wins" and
+"{name} is in check" both splice a player's name into the middle of a
+sentence, which some languages will need to reorder rather than just
+substitute in place.
+
+---
+
+## Add a language selection screen
+
+**Complexity:** Medium — a small new UI + one new piece of state, but
+only meaningful once translations exist to choose between (depends on
+both issues above).
+
+**Area:** UI (new component, likely alongside `src/StartPage/StartPage.tsx`),
+state (`src/state.ts`)
+
+With translations in place, add a screen (or a control on the existing
+setup page) letting a player pick a language before or while playing,
+writing the choice to the `languageAtom` from the translations issue
+above. Consider whether the choice should persist across a page reload
+(there's no persistence layer in this project at all yet — see how
+`whitePlayerAtom`/`blackPlayerAtom` are already lost on refresh — so this
+may need to stay in-memory-only too, unless persistence is added as part
+of this work).
+
+---
+
 ## Add a button to offer/accept a draw
 
 **Complexity:** Medium — needs a two-sided offer/accept interaction, not
 just a single button, to prevent a player accepting their own offer.
 
-**Area:** UI (`src/GameBoard/GameBoard.tsx`), state (`src/state.ts`)
+**Area:** UI (`src/GameBoard/GameFooter.tsx`), state (`src/state.ts`)
 
 No way to end the game as a mutually agreed draw. Needs a two-step
 interaction (one player offers, the other accepts/declines) — a single
