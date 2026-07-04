@@ -5,8 +5,12 @@ import { createEmptyBoard, populateBoardWithPieces } from "./types/GameBoard";
 export type Page = "setup" | "game"
 
 export type GameStatus = {
-    state: "playing" | "check" | "checkmate",
+    state: "playing" | "check" | "checkmate" | "resigned",
     color: CHESS_PIECE_COLOR | null,
+}
+
+export function isGameOver(state: GameStatus["state"]): boolean {
+    return state === "checkmate" || state === "resigned"
 }
 
 export const pieceClickedAtom = atom<string | null>(null)

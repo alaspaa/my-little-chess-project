@@ -98,12 +98,25 @@
     max-width: 800px;
     margin: 0.5rem auto 0;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
     border: black 1px solid;
     border-radius: 4px;
     padding: 0.5rem 1rem;
+}
+
+.game-footer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.game-footer-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgb(60, 60, 60);
 }
 
 .gameboard-player {
@@ -130,6 +143,15 @@
     font-size: 1.1rem;
 }
 
+.resign-button {
+    padding: 0.15rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: normal;
+    background-color: transparent;
+    color: inherit;
+    border-color: rgb(140, 140, 140);
+}
+
 .game-footer-status-wrapper {
     flex: 1;
     display: flex;
@@ -147,6 +169,10 @@
     background-color: rgba(220, 80, 80, 0.2);
 }
 
+.game-footer-status-wrapper.resigned {
+    background-color: rgba(120, 130, 200, 0.2);
+}
+
 .game-footer-status {
     flex: 1;
     text-align: center;
@@ -160,6 +186,10 @@
 
 .game-footer-status.checkmate {
     color: rgb(220, 80, 80);
+}
+
+.game-footer-status.resigned {
+    color: rgb(120, 130, 200);
 }
 
 .turn-arrow {

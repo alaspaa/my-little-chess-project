@@ -12,6 +12,10 @@
   },
   "gameStatus": {
     "checkmate": "Checkmate! {{winner}} wins",
-    "check": "{{player}} is in check"
+    "check": "{{player}} is in check",
+    "resigned": "{{winner}} wins by resignation"
+  },
+  "gameFooter": {
+    "resignButton": "Resign"
   }
 }

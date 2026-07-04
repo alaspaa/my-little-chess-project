@@ -34,23 +34,6 @@ active-player highlight's meaning.
 
 ---
 
-## Add a resign button
-
-**Complexity:** Small — one new `gameStatusAtom` value, one button, and
-the move-blocking check already exists for checkmate.
-
-**Area:** UI (`src/GameBoard/GameFooter.tsx`), state (`src/state.ts`)
-
-No way for a player to concede the game early. Needs a button (likely one
-per player, or one that resigns "whoever's turn it is") that sets
-`gameStatusAtom` to an end state declaring the other color the winner, and
-blocks further moves the same way checkmate currently does in
-`GamePiece.tsx`'s `onMouseDown`. `gameStatusAtom`'s `state` union
-(`"playing" | "check" | "checkmate"`) will need a new value (e.g.
-`"resigned"`) since a resignation isn't a checkmate.
-
----
-
 ## Display captured pieces
 
 **Complexity:** Medium — touches the move-commit path (currently discards
@@ -68,6 +51,27 @@ and the captured piece is simply lost — plus new state (e.g.
 `capturedPiecesAtom`, probably split per color) and a small rendering
 component (icons via the existing FontAwesome piece icons, grouped by
 color) placed near each player's username label.
+
+---
+
+## Add a reusable confirmation modal
+
+**Complexity:** Medium — a self-contained new component plus wiring one
+existing call site; no domain logic.
+
+**Area:** new UI component (e.g. `src/ConfirmModal/ConfirmModal.tsx`)
+
+There's no modal/dialog primitive anywhere in the codebase yet — the
+closest thing is `StartPage.tsx`, which is a full page, not an overlay.
+Add a generic reusable confirmation modal (message + confirm/cancel
+actions, blocking interaction with the rest of the page until answered)
+and use it for the resign button in `GameFooter.tsx`, which currently
+resigns immediately on click with no "are you sure?" step — an easy
+misclick currently just ends the game. This can be done as a standalone
+piece of work (add the component, wire up resign) separately from the
+pawn promotion issue below, even though promotion will also want a
+similar blocking-prompt pattern for choosing a piece and could
+potentially reuse this component's overlay/blocking mechanics.
 
 ---
 
@@ -144,7 +148,12 @@ No way to end the game as a mutually agreed draw. Needs a two-step
 interaction (one player offers, the other accepts/declines) — a single
 button isn't quite enough, since one player accepting their own offer
 would need to be prevented — plus a new `gameStatusAtom` end state (e.g.
-`"draw"`) and blocking further moves the same way checkmate does.
+`"draw"`). Follow the pattern the resign button already established:
+add `"draw"` to `GameStatus["state"]` in `src/state.ts`, extend the
+`isGameOver` helper there to include it, and add a `gameStatus.draw`
+translation key in `src/locales/en.json` (see `gameStatus.resigned` for
+the shape) rendered the same way in `GameFooter.tsx`'s
+`getGameStatusMessage`.
 
 ---
 

@@ -2,7 +2,7 @@ import { type BoardCoordinates, type ChessPiece, type Square } from "../types/Ch
 import { faChessBishop, faChessKing, faChessKnight, faChessPawn, faChessQueen, faChessRook } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pieceClickedAtom, validMovesAtom } from "../state"
+import { currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pieceClickedAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../types/GameLogicValidator"
@@ -44,7 +44,7 @@ function GamePiece(props: opts) {
         const piece = pieceRef.current
 
         const onMouseDown = (e: MouseEvent) => {
-            if(gameStatusRef.current.state === "checkmate") return
+            if(isGameOver(gameStatusRef.current.state)) return
 
             const id: string | null = (e.target as SVGPathElement).parentElement?.parentElement?.id || null
             if(!id) return
