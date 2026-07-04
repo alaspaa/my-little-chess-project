@@ -12,9 +12,14 @@ Commit messages follow [Conventional Commits](https://www.conventionalcommits.or
   `style` (formatting only, no logic change), `perf`.
 - Summary line: imperative mood ("add", "fix", "move", not "added"/
   "adds"), no trailing period, ideally under ~70 characters.
-- Keep the summary concise — it should describe *what* changed. Save
-  *why* for the body, and only include a body when the reasoning isn't
-  already obvious from the diff itself.
+- Default to a summary line only, no body. Most commits in this project
+  don't need one — git history + the diff itself are the detailed
+  record; the commit message doesn't need to re-derive or restate it.
+- Only add a body when the summary line genuinely isn't enough to know
+  why the commit exists (a non-obvious bug fix, a reason a reviewer
+  couldn't guess from the diff). When you do, keep it to one short,
+  loose sentence — not a itemized rundown of every file/mechanism
+  touched.
 - One logical change per commit. If a change touches both a feature and
   an unrelated cleanup, split it into two commits.
 
@@ -27,6 +32,6 @@ feat: add check and checkmate detection
 ```
 fix: correct pawn double-step target square for white
 
-The two-square advance was writing to y-2 instead of y+2, a copy-paste
-leftover from the black branch.
+Was writing to the wrong row for white, a copy-paste leftover from the
+black branch.
 ```
