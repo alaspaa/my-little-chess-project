@@ -19,13 +19,13 @@ pickup order.
 
 **Area:** new UI component (e.g. `src/Header/Header.tsx`)
 
-Neither `GameBoard.tsx` nor `StartPage.tsx` share a common header —
+Neither `GamePage.tsx` nor `StartPage.tsx` share a common header —
 `StartPage.tsx` has its own `<h1>{t('startPage.title')}</h1>` and
-`GameBoard.tsx` has nothing above the board at all, so branding is
+`GamePage.tsx` has nothing above the board at all, so branding is
 inconsistent between the two screens. Add a shared `Header` component
 (game title, and a natural home for future controls — a settings
 toggle like the one below, a language selector once that exists, etc.)
-rendered above both `StartPage` and `GameBoard` from `App.tsx`.
+rendered above both `StartPage` and `GamePage` from `App.tsx`.
 
 ---
 
@@ -43,34 +43,6 @@ square highlighting. Add a boolean atom (e.g.
 when it's off. Needs a toggle control somewhere for the player to flip
 it — the header (once it exists, see above) is a natural home, but this
 can ship with a temporary control anywhere in the meantime.
-
----
-
-## Extract a game page container so GameBoard is just the board grid
-
-**Complexity:** Medium — mostly mechanical reorganization of existing
-code and props; no behavior change.
-
-**Area:** `src/GameBoard/GameBoard.tsx`, `src/App.tsx`, new component
-(e.g. `src/GamePage/GamePage.tsx`)
-
-`GameBoard.tsx` currently plays two roles at once: it's both "the page
-you see once a game starts" and "the 8x8 grid of squares." It owns the
-drag-follow `mousemove` effect (arguably page/session behavior, not
-grid-drawing), reads `whitePlayerAtom`/`blackPlayerAtom`/
-`currentTurnAtom`/`gameStatusAtom` only to hand them down to
-`GameFooter` as props, and renders both the board and the footer
-itself. `App.tsx` reflects this by choosing between `<StartPage />` and
-`<GameBoard />` — `GameBoard` is standing in as the whole page.
-
-Pull the page-level concerns (the atom reads that exist only to
-distribute to children, the footer, and the drag-follow effect if it
-makes more sense to own at the page level) into a new container
-component and have `App.tsx` render that instead, leaving `GameBoard`
-itself closer in spirit to `GameBoardRow`/`GameSquare` — just the grid,
-reading only `gameBoardAtom` and drawing squares. Should be a pure
-restructuring with no functional change, so the existing test suite and
-manual play-through are the way to confirm nothing broke.
 
 ---
 
@@ -203,7 +175,7 @@ repetition below — just the running count.
 state" mechanism that doesn't exist anywhere yet, in addition to the modal
 itself.
 
-**Area:** UI (`src/GameBoard/GameBoard.tsx` or a new component), state
+**Area:** UI (`src/GamePage/GamePage.tsx` or a new component), state
 (`src/state.ts`)
 
 When the game reaches an end state (checkmate today; resignation/draw once

@@ -9,9 +9,19 @@ duration of one browser tab.
 ## Page switching
 
 There's no routing library. `currentPageAtom` (`"setup" | "game"`) in
-`src/state.ts` picks which top-level component `App.tsx` renders. Adding a
-new page means adding a new value to `Page` and a new branch in `App.tsx`,
-not a new route.
+`src/state.ts` picks which top-level component `App.tsx` renders:
+`StartPage` or `GamePage`. Adding a new page means adding a new value to
+`Page` and a new branch in `App.tsx`, not a new route.
+
+`GamePage.tsx` is the page-level container for an in-progress game — it
+reads the atoms that only exist to hand down to children
+(`whitePlayerAtom`/`blackPlayerAtom`/`currentTurnAtom`/`gameStatusAtom`)
+and renders `GameBoard` plus `GameFooter`. `GameBoard.tsx` itself is just
+the 8x8 grid (reads only `gameBoardAtom`, plus the drag-follow
+`pieceClicked`/`boardCoordinates` state described below) — it doesn't
+know about players, turns, or game status. When something is page-level
+concern rather than board-drawing concern, it belongs in `GamePage`, not
+`GameBoard`.
 
 ## State (`src/state.ts`)
 
@@ -84,7 +94,7 @@ now (`src/locales/en.json`), keyed by section (`common`, `startPage`,
 messages) use `i18next`'s `{{placeholder}}` interpolation
 (`t('gameStatus.checkmate', {winner: name})`) rather than JS template
 literals, so a translation can reorder the sentence around the
-placeholder. `getPlayerName` in `GameBoard.tsx` takes `t` as a parameter
+placeholder. `getPlayerName` in `GameFooter.tsx` takes `t` as a parameter
 rather than calling the hook itself, since it's a plain module-level
 function, not a component — keeps it testable the same way the rest of
 the logic layer is (see `specs/code-style.md`).

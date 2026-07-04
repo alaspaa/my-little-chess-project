@@ -1,5 +1,5 @@
 import { useAtomValue } from "jotai"
-import GameBoard from "./GameBoard/GameBoard"
+import GamePage from "./GamePage/GamePage"
 import StartPage from "./StartPage/StartPage"
 import { currentPageAtom } from "./state"
 import './App.css'
@@ -8,7 +8,7 @@ function App() {
   const currentPage = useAtomValue(currentPageAtom)
 
   return (
-    currentPage === "setup" ? <StartPage /> : <GameBoard />
+    currentPage === "setup" ? <StartPage /> : <GamePage />
   )
 }
 
