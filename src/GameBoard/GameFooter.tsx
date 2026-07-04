@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -5,6 +6,7 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import type { TFunction } from 'i18next'
 import { gameStatusAtom, isGameOver, type GameStatus } from '../state'
 import type { CHESS_PIECE_COLOR, Player } from '../types/ChessObjects'
+import ConfirmModal from '../ConfirmModal/ConfirmModal'
 
 interface opts {
     whitePlayer: Player | null,
@@ -17,9 +19,11 @@ function GameFooter(props: opts) {
     const { whitePlayer, blackPlayer, currentTurn, gameStatus } = props
     const { t } = useTranslation()
     const setGameStatus = useSetAtom(gameStatusAtom)
+    const [showResignConfirm, setShowResignConfirm] = useState(false)
 
     const resign = () => {
         setGameStatus({state: 'resigned', color: currentTurn})
+        setShowResignConfirm(false)
     }
 
     return (
@@ -52,11 +56,19 @@ function GameFooter(props: opts) {
                     <button
                         type="button"
                         className="resign-button"
-                        onClick={resign}
+                        onClick={() => setShowResignConfirm(true)}
                     >
                         {t('gameFooter.resignButton')}
                     </button>
                 </div>
+            }
+            {showResignConfirm &&
+                <ConfirmModal
+                    title={t('gameFooter.resignConfirmTitle', {player: getPlayerName(currentTurn, whitePlayer, blackPlayer, t)})}
+                    description={t('gameFooter.resignConfirmDescription')}
+                    onAccept={resign}
+                    onDecline={() => setShowResignConfirm(false)}
+                />
             }
         </footer>
     )

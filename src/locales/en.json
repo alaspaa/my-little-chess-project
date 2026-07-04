@@ -1,7 +1,9 @@
 {
   "common": {
     "white": "White",
-    "black": "Black"
+    "black": "Black",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "startPage": {
     "title": "Chess",
@@ -16,6 +18,8 @@
     "resigned": "{{winner}} wins by resignation"
   },
   "gameFooter": {
-    "resignButton": "Resign"
+    "resignButton": "Resign",
+    "resignConfirmTitle": "{{player}}, resign?",
+    "resignConfirmDescription": "Are you sure you want to resign? This will end the game."
   }
 }

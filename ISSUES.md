@@ -54,27 +54,6 @@ color) placed near each player's username label.
 
 ---
 
-## Add a reusable confirmation modal
-
-**Complexity:** Medium — a self-contained new component plus wiring one
-existing call site; no domain logic.
-
-**Area:** new UI component (e.g. `src/ConfirmModal/ConfirmModal.tsx`)
-
-There's no modal/dialog primitive anywhere in the codebase yet — the
-closest thing is `StartPage.tsx`, which is a full page, not an overlay.
-Add a generic reusable confirmation modal (message + confirm/cancel
-actions, blocking interaction with the rest of the page until answered)
-and use it for the resign button in `GameFooter.tsx`, which currently
-resigns immediately on click with no "are you sure?" step — an easy
-misclick currently just ends the game. This can be done as a standalone
-piece of work (add the component, wire up resign) separately from the
-pawn promotion issue below, even though promotion will also want a
-similar blocking-prompt pattern for choosing a piece and could
-potentially reuse this component's overlay/blocking mechanics.
-
----
-
 ## Pawn promotion is not implemented
 
 **Complexity:** Medium — a new blocking modal UI plus board-mutation
@@ -86,10 +65,13 @@ logic, but no new persistent state/history needed.
 A pawn reaching the opposite back rank (y=7 for white, y=0 for black) must
 be replaced by a queen, rook, bishop, or knight of the player's choice —
 not automatically a queen. Needs: detecting the promotion condition when a
-pawn move lands on the back rank, a UI prompt to choose the piece (a new
-small component, likely modal-like, blocking further interaction until a
-choice is made), and updating the board with the chosen piece type instead
-of the pawn.
+pawn move lands on the back rank, a UI prompt to choose the piece, and
+updating the board with the chosen piece type instead of the pawn.
+`src/ConfirmModal/ConfirmModal.tsx` (used for the resign confirmation)
+has the overlay/backdrop-click mechanics already, but its two-button
+accept/decline shape doesn't fit a 4-way piece choice — would need a
+new component, possibly factoring out `ConfirmModal`'s overlay wrapper
+for reuse rather than reusing `ConfirmModal` itself.
 
 ---
 
