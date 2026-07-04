@@ -13,24 +13,36 @@ pickup order.
 
 ---
 
-## Valid-move square highlighting doesn't fit the color scheme
+## Add a page header
 
-**Complexity:** Trivial — CSS-only, no logic or state changes.
+**Complexity:** Small-medium — new static component, no complex state.
 
-**Area:** UI (`src/App.css`)
+**Area:** new UI component (e.g. `src/Header/Header.tsx`)
 
-`.validmove` currently draws a solid green inset border
-(`box-shadow: inset 0 0 0 4px rgba(80, 200, 120, 0.8)`) around legal
-destination squares. Against the board's grayscale square colors
-(`rgb(35, 34, 34)` / `rgb(185, 185, 185)`) and the existing green used for
-"whose turn is active" (`.gameboard-player.active`, also
-`rgb(80, 200, 120)`), the same green for two unrelated meanings (active
-player vs. legal move) plus a hard 4px border reads as visually busy
-rather than a natural affordance. Worth revisiting with something more in
-line with the board's existing palette — e.g. a soft dot/overlay in the
-center of the square (closer to how most chess UIs mark legal moves)
-instead of a full border, and/or a color that doesn't double up with the
-active-player highlight's meaning.
+Neither `GameBoard.tsx` nor `StartPage.tsx` share a common header —
+`StartPage.tsx` has its own `<h1>{t('startPage.title')}</h1>` and
+`GameBoard.tsx` has nothing above the board at all, so branding is
+inconsistent between the two screens. Add a shared `Header` component
+(game title, and a natural home for future controls — a settings
+toggle like the one below, a language selector once that exists, etc.)
+rendered above both `StartPage` and `GameBoard` from `App.tsx`.
+
+---
+
+## Add a setting to turn off square highlighting
+
+**Complexity:** Small — one new boolean atom, a read in
+`GameSquare.tsx`, and a toggle control somewhere in the UI.
+
+**Area:** state (`src/state.ts`), UI (`src/GameBoard/GameSquare.tsx`)
+
+There's currently no way to turn off the `validmove`/`validcapture`
+square highlighting. Add a boolean atom (e.g.
+`highlightMovesEnabledAtom`, defaulting to `true`) and have
+`GameSquare.tsx` skip applying the `validmove`/`validcapture` classes
+when it's off. Needs a toggle control somewhere for the player to flip
+it — the header (once it exists, see above) is a natural home, but this
+can ship with a temporary control anywhere in the meantime.
 
 ---
 

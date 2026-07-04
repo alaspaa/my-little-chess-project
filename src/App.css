@@ -71,7 +71,11 @@
  }
 
  .validmove {
-    box-shadow: inset 0 0 0 4px rgba(80, 200, 120, 0.8);
+    box-shadow: inset 0 0 0 999px rgba(80, 140, 220, 0.35);
+ }
+
+ .validcapture {
+    box-shadow: inset 0 0 0 999px rgba(220, 90, 60, 0.4);
  }
 
 .startpage {

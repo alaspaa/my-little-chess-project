@@ -14,12 +14,13 @@ function GameSquare(props: opts) {
     const validMoves = useAtomValue(validMovesAtom)
 
     const isValidMove = validMoves.some(move => move.x === columnIndex && move.y === rowIndex)
+    const isValidCapture = isValidMove && !!gameSquare.piece
 
     return (
         <div
             key={getSquareNumber(columnIndex, rowIndex).toString()}
             id={getSquareNumber(columnIndex, rowIndex).toString()}
-            className={'gamesquare ' + getColorClassName(columnIndex, rowIndex) + (isValidMove ? ' validmove' : '')}
+            className={'gamesquare ' + getColorClassName(columnIndex, rowIndex) + (isValidCapture ? ' validcapture' : isValidMove ? ' validmove' : '')}
         >
             {gameSquare.piece &&
                 <GamePiece 
