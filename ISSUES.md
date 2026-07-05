@@ -17,27 +17,6 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
-## Add translations for additional languages
-
-**Complexity:** Medium — content + wiring, not architecture: the
-extraction/centralization this used to depend on is done.
-
-**Area:** `src/locales/` (new per-language JSON files), `src/i18n.ts`
-
-Visible text is now centralized via `react-i18next`: `src/i18n.ts` sets
-up the `i18next` instance and `src/locales/en.json` holds every
-user-facing string (including the interpolated `gameStatus.checkmate` /
-`gameStatus.check` keys used for "Checkmate! {{winner}} wins" and
-"{{player}} is in check" — i18next's `{{}}` interpolation already lets a
-translation reorder around the placeholder, so no extra work is needed
-there beyond writing the translated string). What's still missing: any
-language other than English (add `src/locales/<lang>.json` and register
-it in the `resources` object in `src/i18n.ts`), and a way to actually
-switch `i18n.language` at runtime instead of the current hardcoded
-`lng: "en"`.
-
----
-
 ## Add a language selection screen
 
 **Complexity:** Medium — a small new UI + one new piece of state, but

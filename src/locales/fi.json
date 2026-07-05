@@ -1,0 +1,38 @@
+{
+  "common": {
+    "white": "Valkoinen",
+    "black": "Musta",
+    "confirm": "Vahvista",
+    "cancel": "Peruuta",
+    "close": "Sulje"
+  },
+  "header": {
+    "title": "Shakki",
+    "settingsButtonLabel": "Asetukset",
+    "highlightMovesLabel": "Korosta sallitut siirrot"
+  },
+  "startPage": {
+    "whiteUsernameLabel": "Valkoisen käyttäjänimi",
+    "blackUsernameLabel": "Mustan käyttäjänimi",
+    "startButton": "Aloita",
+    "usernameRequiredError": "Molemmilla pelaajilla täytyy olla käyttäjänimi pelin aloittamiseksi"
+  },
+  "gameStatus": {
+    "checkmate": "Shakkimatti! {{winner}} voittaa",
+    "check": "{{player}} on shakissa",
+    "resigned": "{{winner}} voittaa luovutuksella"
+  },
+  "gameFooter": {
+    "resignButton": "Luovuta",
+    "resignConfirmTitle": "{{player}}, luovutatko?",
+    "resignConfirmDescription": "Oletko varma, että haluat luovuttaa? Tämä päättää pelin."
+  },
+  "pawnPromotion": {
+    "title": "Onnittelut ylennyksestä!",
+    "description": "Valitse uusi arvo",
+    "queen": "Kuningatar",
+    "rook": "Torni",
+    "bishop": "Lähetti",
+    "knight": "Ratsu"
+  }
+}
