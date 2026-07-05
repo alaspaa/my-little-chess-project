@@ -45,6 +45,14 @@ All cross-component state is a Jotai atom in this one file:
   the black pieces white has taken), rendered in `GameFooter`.
 - `pendingPromotionAtom` — `{ color, coordinates } | null`, set when a
   pawn move lands on the back rank; see "Pawn promotion" below.
+- `languageAtom` — mirrors `i18n.language`, initialized from it directly
+  (`src/i18n.ts`'s `i18n` instance is imported into `state.ts` for this).
+  `SettingsMenu.tsx`'s language dropdown (`src/Header/languages.ts` holds
+  the `{code, label, flag}` list) sets both this atom and calls
+  `i18n.changeLanguage(code)` together — the atom exists purely so React
+  re-renders on a language change via Jotai's subscription instead of
+  hooking into `i18next`'s own event emitter. Not persisted across a
+  reload, same as `whitePlayerAtom`/`blackPlayerAtom`.
 
 ## Validation pipeline (`src/types/`)
 

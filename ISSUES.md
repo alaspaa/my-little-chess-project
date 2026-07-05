@@ -17,28 +17,6 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
-## Add a language selection screen
-
-**Complexity:** Medium — a small new UI + one new piece of state, but
-only meaningful once a second language exists to choose (depends on the
-translations issue above).
-
-**Area:** UI (`src/Header/SettingsMenu.tsx`), state (`src/state.ts`)
-
-Once more than one language exists (see the translations issue above),
-add a control letting a player pick a language before or while playing,
-calling `i18n.changeLanguage(...)`
-(from the `i18n` instance exported by `src/i18n.ts`) — probably still
-worth mirroring the choice into a Jotai atom too, so React components can
-reactively re-render on change rather than relying on `i18next`'s own
-subscription mechanism directly. Consider whether the choice should
-persist across a page reload (there's no persistence layer in this
-project at all yet — see how `whitePlayerAtom`/`blackPlayerAtom` are
-already lost on refresh — so this may need to stay in-memory-only too,
-unless persistence is added as part of this work).
-
----
-
 ## Add a button to offer/accept a draw
 
 **Complexity:** Medium — needs a two-sided offer/accept interaction, not

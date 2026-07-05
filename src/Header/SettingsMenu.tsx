@@ -3,13 +3,21 @@ import { useTranslation } from "react-i18next"
 import { useAtom } from "jotai"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faGear } from "@fortawesome/free-solid-svg-icons"
-import { highlightMovesEnabledAtom } from "../state"
+import { highlightMovesEnabledAtom, languageAtom } from "../state"
 import Modal from "../Modal/Modal"
+import i18n from "../i18n"
+import { LANGUAGES } from "./languages"
 
 function SettingsMenu() {
     const { t } = useTranslation()
     const [highlightMovesEnabled, setHighlightMovesEnabled] = useAtom(highlightMovesEnabledAtom)
+    const [language, setLanguage] = useAtom(languageAtom)
     const [isOpen, setIsOpen] = useState(false)
+
+    const changeLanguage = (code: string) => {
+        i18n.changeLanguage(code)
+        setLanguage(code)
+    }
 
     return (
         <>
@@ -31,6 +39,20 @@ function SettingsMenu() {
                             onChange={e => setHighlightMovesEnabled(e.target.checked)}
                         />
                         {t("header.highlightMovesLabel")}
+                    </label>
+                    <label className="settings-menu-option">
+                        {t("header.languageLabel")}
+                        <select
+                            className="settings-menu-language-select"
+                            value={language}
+                            onChange={e => changeLanguage(e.target.value)}
+                        >
+                            {LANGUAGES.map(lang =>
+                                <option key={lang.code} value={lang.code}>
+                                    {lang.flag} {lang.label}
+                                </option>
+                            )}
+                        </select>
                     </label>
                     <button
                         type="button"

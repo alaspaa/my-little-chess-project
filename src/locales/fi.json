@@ -9,7 +9,8 @@
   "header": {
     "title": "Shakki",
     "settingsButtonLabel": "Asetukset",
-    "highlightMovesLabel": "Korosta sallitut siirrot"
+    "highlightMovesLabel": "Korosta sallitut siirrot",
+    "languageLabel": "Kieli"
   },
   "startPage": {
     "whiteUsernameLabel": "Valkoisen käyttäjänimi",
