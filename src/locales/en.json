@@ -6,7 +6,8 @@
     "cancel": "Cancel"
   },
   "header": {
-    "title": "Chess"
+    "title": "Chess",
+    "highlightMovesLabel": "Highlight legal moves"
   },
   "startPage": {
     "whiteUsernameLabel": "White username",

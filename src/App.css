@@ -13,6 +13,16 @@
   margin: 0;
 }
 
+.app-header-setting {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: rgb(180, 180, 180);
+  cursor: pointer;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
