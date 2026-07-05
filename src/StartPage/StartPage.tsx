@@ -30,7 +30,6 @@ function StartPage() {
 
     return (
         <div className="startpage">
-            <h1>{t("startPage.title")}</h1>
             <div className="startpage-field">
                 <label htmlFor="white-username">{t("startPage.whiteUsernameLabel")}</label>
                 <input

@@ -5,8 +5,10 @@
     "confirm": "Confirm",
     "cancel": "Cancel"
   },
+  "header": {
+    "title": "Chess"
+  },
   "startPage": {
-    "title": "Chess",
     "whiteUsernameLabel": "White username",
     "blackUsernameLabel": "Black username",
     "startButton": "Start",

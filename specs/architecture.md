@@ -11,7 +11,11 @@ duration of one browser tab.
 There's no routing library. `currentPageAtom` (`"setup" | "game"`) in
 `src/state.ts` picks which top-level component `App.tsx` renders:
 `StartPage` or `GamePage`. Adding a new page means adding a new value to
-`Page` and a new branch in `App.tsx`, not a new route.
+`Page` and a new branch in `App.tsx`, not a new route. `App.tsx` also
+always renders `Header` above whichever page is active — it's the one
+piece of UI shared by every page (the game title today; a natural home
+for future global controls like a settings toggle or language
+selector).
 
 `GamePage.tsx` is the page-level container for an in-progress game — it
 reads the atoms that only exist to hand down to children

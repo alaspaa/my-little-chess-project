@@ -13,36 +13,21 @@ pickup order.
 
 ---
 
-## Add a page header
-
-**Complexity:** Small-medium — new static component, no complex state.
-
-**Area:** new UI component (e.g. `src/Header/Header.tsx`)
-
-Neither `GamePage.tsx` nor `StartPage.tsx` share a common header —
-`StartPage.tsx` has its own `<h1>{t('startPage.title')}</h1>` and
-`GamePage.tsx` has nothing above the board at all, so branding is
-inconsistent between the two screens. Add a shared `Header` component
-(game title, and a natural home for future controls — a settings
-toggle like the one below, a language selector once that exists, etc.)
-rendered above both `StartPage` and `GamePage` from `App.tsx`.
-
----
-
 ## Add a setting to turn off square highlighting
 
 **Complexity:** Small — one new boolean atom, a read in
 `GameSquare.tsx`, and a toggle control somewhere in the UI.
 
-**Area:** state (`src/state.ts`), UI (`src/GameBoard/GameSquare.tsx`)
+**Area:** state (`src/state.ts`), UI (`src/GameBoard/GameSquare.tsx`,
+`src/Header/Header.tsx`)
 
 There's currently no way to turn off the `validmove`/`validcapture`
 square highlighting. Add a boolean atom (e.g.
 `highlightMovesEnabledAtom`, defaulting to `true`) and have
 `GameSquare.tsx` skip applying the `validmove`/`validcapture` classes
 when it's off. Needs a toggle control somewhere for the player to flip
-it — the header (once it exists, see above) is a natural home, but this
-can ship with a temporary control anywhere in the meantime.
+it — `Header.tsx` (see `src/Header/Header.tsx`) is a natural home for
+this now that it exists.
 
 ---
 
