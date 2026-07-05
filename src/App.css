@@ -6,6 +6,7 @@
 }
 
 .app-header {
+  position: relative;
   margin-bottom: 3rem;
 }
 
@@ -13,11 +14,37 @@
   margin: 0;
 }
 
-.app-header-setting {
-  display: inline-flex;
+.settings-menu {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.settings-menu-toggle {
+  background-color: transparent;
+  border: 1px solid rgb(140, 140, 140);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  color: inherit;
+}
+
+.settings-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 200px;
+  background-color: #242424;
+  border: 1px solid rgb(140, 140, 140);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  z-index: 50;
+}
+
+.settings-menu-option {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 0.75rem;
   font-size: 0.9rem;
   color: rgb(180, 180, 180);
   cursor: pointer;
