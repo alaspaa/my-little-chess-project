@@ -77,6 +77,55 @@ since further game changes should build on that fresh board.
 
 ---
 
+## Track wins/losses/draws across games
+
+**Complexity:** Medium — new counters plus a UI spot to render them, but
+depends on being able to play more than one game per session.
+
+**Area:** state (`src/state.ts`), UI (`src/GameBoard/GameFooter.tsx` or
+`src/Header/Header.tsx`)
+
+There's no running tally of results across games — a game's outcome
+(`gameStatusAtom`) is only ever shown once, and the page has to be
+reloaded to play again today. Needs a score atom (e.g. `scoreAtom:
+{white: number, black: number, draws: number}`, or keyed by player name
+instead of color if a rematch can swap sides), incremented once when
+`gameStatusAtom` reaches an end state (checkmate/resignation/draw once
+that exists), and reset only on a full page reload — not by "Offer a
+rematch/restart prompt" above, since the whole point is to keep counting
+across rematches. Depends on that rematch/restart issue existing first,
+since without a way to start a new game in the same session this would
+never go above one result.
+
+---
+
+## Add a chess clock
+
+**Complexity:** Large — new atoms, a per-turn ticking mechanism that has
+to interact with the existing pause state during a pawn promotion, and a
+new game-over reason.
+
+**Area:** state (`src/state.ts`), `src/GameBoard/GamePiece.tsx`, UI
+(`src/GameBoard/GameFooter.tsx`)
+
+No time control exists — games can go on indefinitely. Needs deciding
+between two designs before implementation: a **per-game clock** (each
+player gets a fixed total budget, e.g. 10 minutes, counting down only on
+their turn — the traditional physical chess-clock model), or a
+**per-move clock** (each player gets a fixed amount of time to make each
+individual move, resetting every turn instead of accumulating a budget).
+Either needs: a remaining-time atom per color, a ticking mechanism (e.g.
+`setInterval` started/stopped on `currentTurnAtom` changes), a new
+`gameStatusAtom` end state (e.g. `"timeout"`) set when a color's time
+expires, and a `gameStatus.timeout` translation key rendered the same way
+`GameFooter.tsx`'s `getGameStatusMessage` already handles the other end
+states. Also needs to not tick while `pendingPromotionAtom` is set, since
+the game is already effectively paused then (see "Pawn promotion" in
+`specs/architecture.md`) — the same pause condition `GamePiece.tsx`'s
+`onMouseDown` already checks before starting a drag.
+
+---
+
 ## En passant move-generation logic
 
 **Complexity:** Large — needs move-history state that doesn't exist yet,
