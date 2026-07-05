@@ -64,11 +64,11 @@ be replaced by a queen, rook, bishop, or knight of the player's choice —
 not automatically a queen. Needs: detecting the promotion condition when a
 pawn move lands on the back rank, a UI prompt to choose the piece, and
 updating the board with the chosen piece type instead of the pawn.
-`src/ConfirmModal/ConfirmModal.tsx` (used for the resign confirmation)
-has the overlay/backdrop-click mechanics already, but its two-button
-accept/decline shape doesn't fit a 4-way piece choice — would need a
-new component, possibly factoring out `ConfirmModal`'s overlay wrapper
-for reuse rather than reusing `ConfirmModal` itself.
+`src/Modal/Modal.tsx` is a generic overlay frame (just `onDismiss` +
+`children`, no title/button opinions) factored out of `ConfirmModal`
+for exactly this kind of reuse — build the 4-way piece-choice content
+and pass it as `Modal`'s children instead of reaching for
+`ConfirmModal`, whose accept/decline shape doesn't fit.
 
 ---
 

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import Modal from '../Modal/Modal'
 
 interface opts {
     title: string,
@@ -14,20 +15,18 @@ function ConfirmModal(props: opts) {
     const { t } = useTranslation()
 
     return (
-        <div className="modal-overlay" onClick={onDecline}>
-            <div className="modal" onClick={e => e.stopPropagation()}>
-                <h2 className="modal-title">{title}</h2>
-                {description && <p className="modal-description">{description}</p>}
-                <div className="modal-actions">
-                    <button type="button" className="modal-accept-button" onClick={onAccept}>
-                        {acceptLabel ?? t('common.confirm')}
-                    </button>
-                    <button type="button" className="modal-decline-button" onClick={onDecline}>
-                        {declineLabel ?? t('common.cancel')}
-                    </button>
-                </div>
+        <Modal onDismiss={onDecline}>
+            <h2 className="modal-title">{title}</h2>
+            {description && <p className="modal-description">{description}</p>}
+            <div className="modal-actions">
+                <button type="button" className="modal-accept-button" onClick={onAccept}>
+                    {acceptLabel ?? t('common.confirm')}
+                </button>
+                <button type="button" className="modal-decline-button" onClick={onDecline}>
+                    {declineLabel ?? t('common.cancel')}
+                </button>
             </div>
-        </div>
+        </Modal>
     )
 }
 
