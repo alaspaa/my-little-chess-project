@@ -11,23 +11,9 @@ missing/wrong, and enough context to start without re-deriving it from
 scratch. Ordered simplest to most complex, so it doubles as a suggested
 pickup order.
 
----
-
-## Add a setting to turn off square highlighting
-
-**Complexity:** Small — one new boolean atom, a read in
-`GameSquare.tsx`, and a toggle control somewhere in the UI.
-
-**Area:** state (`src/state.ts`), UI (`src/GameBoard/GameSquare.tsx`,
-`src/Header/Header.tsx`)
-
-There's currently no way to turn off the `validmove`/`validcapture`
-square highlighting. Add a boolean atom (e.g.
-`highlightMovesEnabledAtom`, defaulting to `true`) and have
-`GameSquare.tsx` skip applying the `validmove`/`validcapture` classes
-when it's off. Needs a toggle control somewhere for the player to flip
-it — `Header.tsx` (see `src/Header/Header.tsx`) is a natural home for
-this now that it exists.
+Trying out migrating entries to [GitHub Issues](https://github.com/alaspaa/my-little-chess-project/issues)
+one at a time instead — when an entry moves there, it's deleted from
+here rather than duplicated, same as when it's resolved.
 
 ---
 
