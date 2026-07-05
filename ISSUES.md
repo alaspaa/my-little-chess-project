@@ -17,30 +17,6 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
-## Handle the pawn promotion trigger and reassign the piece
-
-**Complexity:** Medium — a new blocking modal UI plus board-mutation
-logic, but no new persistent state/history needed.
-
-**Area:** UI (`src/GameBoard/GamePiece.tsx`, new component)
-
-Once a pawn move is detected as a promotion, the player must choose a
-queen, rook, bishop, or knight to replace it with (not automatically a
-queen). `isPawnPromotion(piece, destination)` in `src/types/MoveValidator.ts`
-already detects the condition (covered by tests in
-`MoveValidator.test.ts`) but nothing calls it yet. Needs: calling it
-right after a pawn's move commits in `GamePiece.tsx`, a UI prompt to
-choose the piece, and updating the board with the chosen piece type
-instead of the pawn (mirroring how `hasMoved` is already patched onto
-the piece in `validateAndUpdateGameBoardWithMovedPiece`).
-`src/Modal/Modal.tsx` is a generic overlay frame (just `onDismiss` +
-`children`, no title/button opinions) factored out of `ConfirmModal`
-for exactly this kind of reuse — build the 4-way piece-choice content
-and pass it as `Modal`'s children instead of reaching for
-`ConfirmModal`, whose accept/decline shape doesn't fit.
-
----
-
 ## Add translations for additional languages
 
 **Complexity:** Medium — content + wiring, not architecture: the

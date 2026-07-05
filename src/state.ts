@@ -32,3 +32,9 @@ export const highlightMovesEnabledAtom = atom(true)
 // is the black pieces white has taken), so each side's footer area can
 // render its own trophies directly.
 export const capturedPiecesAtom = atom<Record<CHESS_PIECE_COLOR, ChessPiece[]>>({white: [], black: []})
+
+export type PendingPromotion = {
+    color: CHESS_PIECE_COLOR,
+    coordinates: BoardCoordinates,
+}
+export const pendingPromotionAtom = atom<PendingPromotion | null>(null)

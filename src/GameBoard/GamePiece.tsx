@@ -1,10 +1,11 @@
 import { type BoardCoordinates, type ChessPiece, type Square } from "../types/ChessObjects"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pieceClickedAtom, validMovesAtom } from "../state"
+import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../types/GameLogicValidator"
+import { isPawnPromotion } from "../types/MoveValidator"
 import getPieceIcon from "./pieceIcons"
 
 interface opts {
@@ -22,6 +23,7 @@ function GamePiece(props: opts) {
     const [currentTurn, setCurrentTurn] = useAtom(currentTurnAtom)
     const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
     const [, setCapturedPieces] = useAtom(capturedPiecesAtom)
+    const [pendingPromotion, setPendingPromotion] = useAtom(pendingPromotionAtom)
 
     // Read via refs inside the event listeners below instead of depending on
     // these atoms in the effect, so the listeners are attached once and
@@ -31,12 +33,14 @@ function GamePiece(props: opts) {
     const gameBoardRef = useRef(gameBoard)
     const currentTurnRef = useRef(currentTurn)
     const gameStatusRef = useRef(gameStatus)
+    const pendingPromotionRef = useRef(pendingPromotion)
     useEffect(() => {
         pieceClickedRef.current = pieceClicked
         boardCoordinatesRef.current = boardCoordinates
         gameBoardRef.current = gameBoard
         currentTurnRef.current = currentTurn
         gameStatusRef.current = gameStatus
+        pendingPromotionRef.current = pendingPromotion
     })
 
     useEffect(() => {
@@ -46,6 +50,7 @@ function GamePiece(props: opts) {
 
         const onMouseDown = (e: MouseEvent) => {
             if(isGameOver(gameStatusRef.current.state)) return
+            if(pendingPromotionRef.current) return
 
             const id: string | null = (e.target as SVGPathElement).parentElement?.parentElement?.id || null
             if(!id) return
@@ -89,15 +94,23 @@ function GamePiece(props: opts) {
                         }))
                     }
 
-                    const nextTurn = capturingColor === "white" ? "black" : "white"
-                    setCurrentTurn(nextTurn)
-
-                    if(isCheckmate(newBoard, nextTurn)) {
-                        setGameStatus({state: "checkmate", color: nextTurn})
-                    } else if(isKingInCheck(newBoard, nextTurn)) {
-                        setGameStatus({state: "check", color: nextTurn})
+                    const movedPiece = newBoard[gameBoardCoordinates.y][gameBoardCoordinates.x].piece
+                    if(movedPiece && isPawnPromotion(movedPiece, gameBoardCoordinates)) {
+                        // Hold off on flipping the turn/status until the
+                        // player picks a piece - PromotionPrompt finishes
+                        // the move once that happens.
+                        setPendingPromotion({color: capturingColor, coordinates: gameBoardCoordinates})
                     } else {
-                        setGameStatus({state: "playing", color: null})
+                        const nextTurn = capturingColor === "white" ? "black" : "white"
+                        setCurrentTurn(nextTurn)
+
+                        if(isCheckmate(newBoard, nextTurn)) {
+                            setGameStatus({state: "checkmate", color: nextTurn})
+                        } else if(isKingInCheck(newBoard, nextTurn)) {
+                            setGameStatus({state: "check", color: nextTurn})
+                        } else {
+                            setGameStatus({state: "playing", color: null})
+                        }
                     }
                 }
             }
@@ -124,7 +137,7 @@ function GamePiece(props: opts) {
         }
 
         return cleanup
-    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces])
+    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces, setPendingPromotion])
 
     return(
         <div className="gamepiece" id={piece.id} ref={pieceRef}>

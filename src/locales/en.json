@@ -26,5 +26,13 @@
     "resignButton": "Resign",
     "resignConfirmTitle": "{{player}}, resign?",
     "resignConfirmDescription": "Are you sure you want to resign? This will end the game."
+  },
+  "pawnPromotion": {
+    "title": "Congratulations on your promotion!",
+    "description": "Choose your new rank",
+    "queen": "Queen",
+    "rook": "Rook",
+    "bishop": "Bishop",
+    "knight": "Knight"
   }
 }

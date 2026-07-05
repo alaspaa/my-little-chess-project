@@ -321,6 +321,25 @@
     gap: 1.5rem;
 }
 
+.modal:has(.promotion-choices) {
+    max-width: 480px;
+}
+
+.promotion-choices {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.promotion-choice-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    background-color: rgb(70, 70, 70);
+}
+
  .chesspiece {
     height: 60px;
     width: 60px;

@@ -38,9 +38,13 @@ All cross-component state is a Jotai atom in this one file:
 - `validMovesAtom` — the legal destination squares for whatever piece is
   currently picked up; consumed by `GameSquare` to render the highlight.
 - `currentTurnAtom` — whose color may move next.
-- `gameStatusAtom` — `{ state: "playing" | "check" | "checkmate", color }`.
+- `gameStatusAtom` — `{ state: "playing" | "check" | "checkmate" | "resigned", color }`.
 - `whitePlayerAtom` / `blackPlayerAtom` — the `Player` entered on the setup
   page for each color.
+- `capturedPiecesAtom` — keyed by the *capturing* color (e.g. `.white` is
+  the black pieces white has taken), rendered in `GameFooter`.
+- `pendingPromotionAtom` — `{ color, coordinates } | null`, set when a
+  pawn move lands on the back rank; see "Pawn promotion" below.
 
 ## Validation pipeline (`src/types/`)
 
@@ -55,9 +59,8 @@ Move legality is split into two layers, each in its own file:
    `isPawnPromotion(piece, destination)`, a standalone predicate for
    detecting when a pawn move lands on the opposite back rank — a rule,
    not a move (it doesn't change what squares are legal), so it isn't
-   folded into `getValidMoves`. Nothing calls it yet; wiring it into
-   `GamePiece.tsx`'s move-commit step to actually prompt for and apply a
-   promotion is separate, tracked work.
+   folded into `getValidMoves`. `GamePiece.tsx` calls it right after a
+   move commits; see "Pawn promotion" below for what happens next.
 2. **`GameLogicValidator.ts`** — the game-rules layer built on top of
    `MoveValidator`:
    - `getLegalMoves` filters `getValidMoves`' output down to moves that
@@ -79,9 +82,10 @@ add it as a new atom/field rather than inferring it from the board alone.
 
 1. `mousedown` on a piece: look up its board coordinates
    (`findPieceCoordinates`), refuse to start a drag if it's not that
-   piece's color's turn (`currentTurnAtom`) or if the game already ended
-   (`gameStatusAtom.state === "checkmate"`), otherwise populate
-   `validMovesAtom` via `getLegalMoves`.
+   piece's color's turn (`currentTurnAtom`), the game already ended
+   (`isGameOver(gameStatusAtom.state)`), or a promotion choice is pending
+   (`pendingPromotionAtom`) — otherwise populate `validMovesAtom` via
+   `getLegalMoves`.
 2. `mousemove` (in `GameBoard.tsx`, not `GamePiece.tsx`): follows the cursor
    by directly setting the dragged piece's inline `style.top`/`left` —
    this is imperative DOM manipulation, not React state, for drag
@@ -91,8 +95,38 @@ add it as a new atom/field rather than inferring it from the board alone.
    Success is detected by **reference equality** — the update functions
    return the original `gameBoard` object unchanged when a move is
    rejected, so `newBoard !== gameBoard` means the move was applied. On
-   success: commit the new board, flip `currentTurnAtom`, then recompute
-   `gameStatusAtom` for the side about to move next.
+   success: commit the new board and captured-piece bookkeeping, then
+   either set `pendingPromotionAtom` (if `isPawnPromotion` is true for the
+   piece that just landed) or flip `currentTurnAtom` and recompute
+   `gameStatusAtom` immediately — not both. See "Pawn promotion" below for
+   how the deferred case gets finished.
+
+## Pawn promotion (`src/PawnPromotion/PromotionPrompt.tsx`)
+
+When `GamePiece.tsx` detects a promotion, it does **not** flip the turn or
+recompute check/checkmate status right away — it sets `pendingPromotionAtom`
+to `{ color, coordinates }` and leaves the pawn sitting on the back rank.
+While that atom is non-null, `GamePiece.tsx`'s `mousedown` handler refuses
+to start any drag (for either color), so the game is effectively paused.
+
+`PromotionPrompt` (rendered from `GamePage.tsx`, a sibling of `GameBoard`/
+`GameFooter`) watches `pendingPromotionAtom` and renders `Modal` with a
+2x2 grid of piece choices when it's set. Choosing a piece:
+
+1. Replaces the pawn at `pendingPromotion.coordinates` with `{...pawn,
+   type: chosenType}` (same `id`, so nothing else needs to know a
+   replacement happened — ids aren't parsed for piece type anywhere).
+2. Flips `currentTurnAtom` and recomputes `gameStatusAtom` — the same
+   two steps `GamePiece.tsx` would have done immediately, just deferred
+   until now, since checkmate/check must be evaluated against the
+   *promoted* piece, not the pawn.
+3. Clears `pendingPromotionAtom`, un-pausing the game.
+
+This duplicates a small (~6 line) turn-flip/status snippet between
+`GamePiece.tsx` and `PromotionPrompt.tsx` rather than sharing a helper —
+deliberate, since the two files don't have a natural common parent to
+own that logic, and the snippet is small enough that the duplication is
+cheaper than the plumbing to share it.
 
 ## User-facing text (`src/i18n.ts`, `src/locales/`)
 

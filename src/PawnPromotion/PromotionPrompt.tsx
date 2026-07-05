@@ -1,0 +1,70 @@
+import { useAtom, useSetAtom } from "jotai"
+import { useTranslation } from "react-i18next"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import Modal from "../Modal/Modal"
+import getPieceIcon from "../GameBoard/pieceIcons"
+import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pendingPromotionAtom } from "../state"
+import { isCheckmate, isKingInCheck } from "../types/GameLogicValidator"
+import type { CHESS_PIECE_TYPE } from "../types/ChessObjects"
+
+const PROMOTION_CHOICES: CHESS_PIECE_TYPE[] = ["QUEEN", "ROOK", "BISHOP", "KNIGHT"]
+
+function PromotionPrompt() {
+    const { t } = useTranslation()
+    const [pendingPromotion, setPendingPromotion] = useAtom(pendingPromotionAtom)
+    const [gameBoard, setGameBoard] = useAtom(gameBoardAtom)
+    const setCurrentTurn = useSetAtom(currentTurnAtom)
+    const setGameStatus = useSetAtom(gameStatusAtom)
+
+    if(!pendingPromotion) return null
+
+    const choosePiece = (type: CHESS_PIECE_TYPE) => {
+        const { coordinates, color } = pendingPromotion
+        const pawn = gameBoard[coordinates.y][coordinates.x].piece
+        if(!pawn) return
+
+        const newBoard = gameBoard.map((row, y) =>
+            row.map((square, x) =>
+                x === coordinates.x && y === coordinates.y
+                    ? {...square, piece: {...pawn, type}}
+                    : square
+            )
+        )
+        setGameBoard(newBoard)
+
+        const nextTurn = color === "white" ? "black" : "white"
+        setCurrentTurn(nextTurn)
+
+        if(isCheckmate(newBoard, nextTurn)) {
+            setGameStatus({state: "checkmate", color: nextTurn})
+        } else if(isKingInCheck(newBoard, nextTurn)) {
+            setGameStatus({state: "check", color: nextTurn})
+        } else {
+            setGameStatus({state: "playing", color: null})
+        }
+
+        setPendingPromotion(null)
+    }
+
+    return (
+        <Modal>
+            <h2 className="modal-title">{t("pawnPromotion.title")}</h2>
+            <p className="modal-description">{t("pawnPromotion.description")}</p>
+            <div className="promotion-choices">
+                {PROMOTION_CHOICES.map(type =>
+                    <button
+                        key={type}
+                        type="button"
+                        className="promotion-choice-button"
+                        aria-label={t(`pawnPromotion.${type.toLowerCase()}`)}
+                        onClick={() => choosePiece(type)}
+                    >
+                        <FontAwesomeIcon icon={getPieceIcon(type)} className={`chesspiece ${pendingPromotion.color}piece`} />
+                    </button>
+                )}
+            </div>
+        </Modal>
+    )
+}
+
+export default PromotionPrompt
