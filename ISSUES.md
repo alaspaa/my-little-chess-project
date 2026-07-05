@@ -17,6 +17,25 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
+## Add a config/options menu to the header
+
+**Complexity:** Small-medium — mostly a new UI container; the one
+setting that exists today just moves into it.
+
+**Area:** UI (`src/Header/Header.tsx`, new component e.g.
+`src/Header/SettingsMenu.tsx`)
+
+`Header.tsx` currently renders the "Highlight legal moves" checkbox
+directly, inline next to the title — fine for one setting, but won't
+scale once the language selector (see the translations/language-selector
+issues) needs a home too. Add a proper config/options menu (e.g. a
+gear icon that opens a dropdown/panel) in the header, move the
+`highlightMovesEnabledAtom` checkbox into it, and leave a clear spot
+for the language selector to land there once it exists instead of
+bolting more controls onto the header bar directly.
+
+---
+
 ## Display captured pieces
 
 **Complexity:** Medium — touches the move-commit path (currently discards
@@ -85,12 +104,12 @@ switch `i18n.language` at runtime instead of the current hardcoded
 only meaningful once a second language exists to choose (depends on the
 translations issue above).
 
-**Area:** UI (new component, likely alongside `src/StartPage/StartPage.tsx`),
-state (`src/state.ts`)
+**Area:** UI (the header config/options menu, see the issue above, once
+it exists), state (`src/state.ts`)
 
 Once more than one language exists (see the translations issue above),
-add a screen (or a control on the existing setup page) letting a player
-pick a language before or while playing, calling `i18n.changeLanguage(...)`
+add a control letting a player pick a language before or while playing,
+calling `i18n.changeLanguage(...)`
 (from the `i18n` instance exported by `src/i18n.ts`) — probably still
 worth mirroring the choice into a Jotai atom too, so React components can
 reactively re-render on change rather than relying on `i18next`'s own
