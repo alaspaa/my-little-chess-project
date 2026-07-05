@@ -11,9 +11,10 @@ missing/wrong, and enough context to start without re-deriving it from
 scratch. Ordered simplest to most complex, so it doubles as a suggested
 pickup order.
 
-Trying out migrating entries to [GitHub Issues](https://github.com/alaspaa/my-little-chess-project/issues)
-one at a time instead — when an entry moves there, it's deleted from
-here rather than duplicated, same as when it's resolved.
+We tried migrating one entry to [GitHub Issues](https://github.com/alaspaa/my-little-chess-project/issues)
+(issue #1, currently in progress on the `highlight-toggle-setting`
+branch) but are sticking with this file as the source of truth for now
+rather than maintaining two backlogs.
 
 ---
 
