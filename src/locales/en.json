@@ -3,10 +3,12 @@
     "white": "White",
     "black": "Black",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "header": {
     "title": "Chess",
+    "settingsButtonLabel": "Settings",
     "highlightMovesLabel": "Highlight legal moves"
   },
   "startPage": {
