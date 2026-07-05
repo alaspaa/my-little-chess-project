@@ -12,9 +12,8 @@ scratch. Ordered simplest to most complex, so it doubles as a suggested
 pickup order.
 
 We tried migrating one entry to [GitHub Issues](https://github.com/alaspaa/my-little-chess-project/issues)
-(issue #1, currently in progress on the `highlight-toggle-setting`
-branch) but are sticking with this file as the source of truth for now
-rather than maintaining two backlogs.
+(issue #1, resolved via #2) but are sticking with this file as the
+source of truth for now rather than maintaining two backlogs.
 
 ---
 
