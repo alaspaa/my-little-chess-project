@@ -17,6 +17,26 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
+## Add board coordinate labels (ranks/files)
+
+**Complexity:** Small — a wrapper around the existing board rendering, no
+new state.
+
+**Area:** UI (`src/GameBoard/GameBoard.tsx`, `src/App.css`)
+
+There's no way to see file/rank labels (a-h, 1-8) around the board today
+— `GameBoard.tsx` just renders 8 `GameBoardRow`s of 8 `GameSquare`s, with
+nothing surrounding them. Needs a wrapper element around the existing
+`.gameboard` output that renders column letters (a-h) along one edge and
+row numbers (1-8) along another, styled to line up with the 100px
+`.gamesquare` grid. Since the board's orientation is fixed — there's no
+"play as black, flip the board" feature, and `gameBoard[0]` is always
+White's back rank rendered at top (see "Board coordinate system" in
+`specs/architecture.md`) — the labels are static text in a fixed
+position, not derived from player color or recomputed per game.
+
+---
+
 ## Add a button to offer/accept a draw
 
 **Complexity:** Medium — needs a two-sided offer/accept interaction, not
