@@ -179,8 +179,9 @@
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
+    align-items: center;
     font-weight: bold;
-    text-align: left;
+    text-align: center;
     color: rgb(140, 140, 140);
 }
 
@@ -197,6 +198,31 @@
 
 .gameboard-player-name {
     font-size: 1.1rem;
+}
+
+.captured-pieces {
+    display: grid;
+    grid-template-columns: repeat(8, 1.1rem);
+    grid-template-rows: repeat(2, 1.1rem);
+    gap: 0.15rem;
+    margin: 0.35rem 0;
+    padding: 0.15rem;
+    background-color: rgb(70, 70, 70);
+    border: 1px solid rgb(60, 60, 60);
+    border-radius: 4px;
+}
+
+.captured-piece-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    background-color: rgb(70, 70, 70);
+}
+
+.captured-piece-icon {
+    width: 0.7rem;
+    height: 0.7rem;
 }
 
 .resign-button {

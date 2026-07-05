@@ -5,18 +5,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import type { TFunction } from 'i18next'
 import { gameStatusAtom, isGameOver, type GameStatus } from '../state'
-import type { CHESS_PIECE_COLOR, Player } from '../types/ChessObjects'
+import type { CHESS_PIECE_COLOR, ChessPiece, Player } from '../types/ChessObjects'
 import ConfirmModal from '../ConfirmModal/ConfirmModal'
+import getPieceIcon from './pieceIcons'
 
 interface opts {
     whitePlayer: Player | null,
     blackPlayer: Player | null,
     currentTurn: CHESS_PIECE_COLOR,
     gameStatus: GameStatus,
+    capturedPieces: Record<CHESS_PIECE_COLOR, ChessPiece[]>,
 }
 
 function GameFooter(props: opts) {
-    const { whitePlayer, blackPlayer, currentTurn, gameStatus } = props
+    const { whitePlayer, blackPlayer, currentTurn, gameStatus, capturedPieces } = props
     const { t } = useTranslation()
     const setGameStatus = useSetAtom(gameStatusAtom)
     const [showResignConfirm, setShowResignConfirm] = useState(false)
@@ -32,6 +34,7 @@ function GameFooter(props: opts) {
                 <div className={'gameboard-player player-white' + (currentTurn === 'white' ? ' active' : '')}>
                     <div className="gameboard-player-color">{t('common.white')}</div>
                     <div className="gameboard-player-name">{whitePlayer?.name}</div>
+                    <CapturedPieces pieces={capturedPieces.white} />
                 </div>
                 <div className={`game-footer-status-wrapper ${gameStatus.state}`}>
                     <FontAwesomeIcon
@@ -49,6 +52,7 @@ function GameFooter(props: opts) {
                 <div className={'gameboard-player player-black' + (currentTurn === 'black' ? ' active' : '')}>
                     <div className="gameboard-player-color">{t('common.black')}</div>
                     <div className="gameboard-player-name">{blackPlayer?.name}</div>
+                    <CapturedPieces pieces={capturedPieces.black} />
                 </div>
             </div>
             {!isGameOver(gameStatus.state) &&
@@ -71,6 +75,23 @@ function GameFooter(props: opts) {
                 />
             }
         </footer>
+    )
+}
+
+function CapturedPieces(props: {pieces: ChessPiece[]}) {
+    const { pieces } = props
+
+    return (
+        <div className="captured-pieces">
+            {pieces.map(piece =>
+                <span key={piece.id} className="captured-piece-chip">
+                    <FontAwesomeIcon
+                        icon={getPieceIcon(piece.type)}
+                        className={`captured-piece-icon ${piece.color}piece`}
+                    />
+                </span>
+            )}
+        </div>
     )
 }
 

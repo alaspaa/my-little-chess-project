@@ -1,11 +1,11 @@
 import { type BoardCoordinates, type ChessPiece, type Square } from "../types/ChessObjects"
-import { faChessBishop, faChessKing, faChessKnight, faChessPawn, faChessQueen, faChessRook } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pieceClickedAtom, validMovesAtom } from "../state"
+import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pieceClickedAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../types/GameLogicValidator"
+import getPieceIcon from "./pieceIcons"
 
 interface opts {
     piece: ChessPiece,
@@ -21,6 +21,7 @@ function GamePiece(props: opts) {
     const [, setValidMoves] = useAtom(validMovesAtom)
     const [currentTurn, setCurrentTurn] = useAtom(currentTurnAtom)
     const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
+    const [, setCapturedPieces] = useAtom(capturedPiecesAtom)
 
     // Read via refs inside the event listeners below instead of depending on
     // these atoms in the effect, so the listeners are attached once and
@@ -75,11 +76,20 @@ function GamePiece(props: opts) {
             if(gameBoardCoordinates) {
                 //console.log(`${gameBoardCoordinates?.x}, ${gameBoardCoordinates?.y}, ${pieceClicked}`)
 
+                const capturedPiece = currentGameBoard[gameBoardCoordinates.y][gameBoardCoordinates.x].piece
                 const newBoard = updateGameBoardWithMovedPiece(currentGameBoard, pieceClicked!, gameBoardCoordinates!)
                 if(newBoard !== currentGameBoard) {
                     setGameBoard(newBoard)
 
-                    const nextTurn = currentTurnRef.current === "white" ? "black" : "white"
+                    const capturingColor = currentTurnRef.current
+                    if(capturedPiece) {
+                        setCapturedPieces(previous => ({
+                            ...previous,
+                            [capturingColor]: [...previous[capturingColor], capturedPiece],
+                        }))
+                    }
+
+                    const nextTurn = capturingColor === "white" ? "black" : "white"
                     setCurrentTurn(nextTurn)
 
                     if(isCheckmate(newBoard, nextTurn)) {
@@ -114,36 +124,14 @@ function GamePiece(props: opts) {
         }
 
         return cleanup
-    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates])
-
-    const getGamePieceIcon = (gamePiece: ChessPiece) => {
-        switch(gamePiece.type) {
-        case "PAWN":
-            return (<FontAwesomeIcon icon={faChessPawn} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />);
-            
-        case "ROOK":
-            return(<FontAwesomeIcon icon={faChessRook} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />)
-            
-        case "KNIGHT":
-            return(<FontAwesomeIcon icon={faChessKnight} id={gamePiece.id}   className={`chesspiece ${gamePiece.color}piece` } />)
-        
-        case "BISHOP":
-            return(<FontAwesomeIcon icon={faChessBishop} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />)
-            
-        case "KING":
-            return(<FontAwesomeIcon icon={faChessKing} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />)
-            
-        case "QUEEN":
-            return(<FontAwesomeIcon icon={faChessQueen} id={gamePiece.id} className={`chesspiece ${gamePiece.color}piece` } />)
-    }
-    }
+    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces])
 
     return(
         <div className="gamepiece" id={piece.id} ref={pieceRef}>
-            {getGamePieceIcon(piece)}
+            <FontAwesomeIcon icon={getPieceIcon(piece.type)} id={piece.id} className={`chesspiece ${piece.color}piece`} />
         </div>
     )
-    
+
 }
 
 function getBoardCoordinates(squareNumber: number): BoardCoordinates {

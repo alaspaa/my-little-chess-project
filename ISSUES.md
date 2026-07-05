@@ -17,26 +17,6 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
-## Display captured pieces
-
-**Complexity:** Medium — touches the move-commit path (currently discards
-captures) plus new state and a small rendering component.
-
-**Area:** UI (`src/GameBoard/GameFooter.tsx`), state (`src/state.ts`)
-
-There's no visual record of which pieces have been taken, which would help
-a player track how the game has progressed at a glance (material count,
-what's left on the board). Needs: capturing the taken `ChessPiece` (not
-just discarding it) at the point a move replaces an occupied square —
-currently `updateGameBoardWithMovedPiece`/`validateAndUpdateGameBoardWithMovedPiece`
-in `GamePiece.tsx` overwrite the captured square's piece with the mover
-and the captured piece is simply lost — plus new state (e.g.
-`capturedPiecesAtom`, probably split per color) and a small rendering
-component (icons via the existing FontAwesome piece icons, grouped by
-color) placed near each player's username label.
-
----
-
 ## Pawn promotion is not implemented
 
 **Complexity:** Medium — a new blocking modal UI plus board-mutation
