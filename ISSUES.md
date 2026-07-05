@@ -17,37 +17,18 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
-## Detect pawn promotion as a rule
-
-**Complexity:** Small — a pure predicate, no UI or board mutation.
-
-**Area:** move rules (`src/types/MoveValidator.ts` or
-`src/types/GameLogicValidator.ts`)
-
-A pawn reaching the opposite back rank (y=7 for white, y=0 for black)
-must promote — there's currently no code anywhere that recognizes this.
-Add a pure function (e.g. `isPromotion(piece: ChessPiece, destination:
-BoardCoordinates): boolean`, checking `piece.type === "PAWN"` and
-`destination.y === 7` for white / `=== 0` for black) that the piece
-"reassignment" issue below can call after a move lands, without needing
-to know anything about UI or how the replacement happens. Keep it a
-plain function like the rest of the validation layer, so it stays
-unit-testable the same way `MoveValidator.test.ts` already covers other
-piece rules.
-
----
-
 ## Handle the pawn promotion trigger and reassign the piece
 
 **Complexity:** Medium — a new blocking modal UI plus board-mutation
 logic, but no new persistent state/history needed.
 
-**Area:** UI (`src/GameBoard/GamePiece.tsx`, new component), depends on
-the "Detect pawn promotion as a rule" issue above
+**Area:** UI (`src/GameBoard/GamePiece.tsx`, new component)
 
 Once a pawn move is detected as a promotion, the player must choose a
 queen, rook, bishop, or knight to replace it with (not automatically a
-queen). Needs: calling the promotion predicate from the issue above
+queen). `isPawnPromotion(piece, destination)` in `src/types/MoveValidator.ts`
+already detects the condition (covered by tests in
+`MoveValidator.test.ts`) but nothing calls it yet. Needs: calling it
 right after a pawn's move commits in `GamePiece.tsx`, a UI prompt to
 choose the piece, and updating the board with the chosen piece type
 instead of the pawn (mirroring how `hasMoved` is already patched onto

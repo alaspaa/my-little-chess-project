@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import getValidMoves from "./MoveValidator"
+import getValidMoves, { isPawnPromotion } from "./MoveValidator"
 import { buildBoard, expectMoves, piece } from "../testUtils"
 
 describe("pawn moves", () => {
@@ -226,5 +226,32 @@ describe("king moves", () => {
         expectMoves(getValidMoves(board, {x: 0, y: 0}, king), [
             {x: 0, y: 1}, {x: 1, y: 1},
         ])
+    })
+})
+
+describe("isPawnPromotion", () => {
+    it("is true for a white pawn reaching the last rank", () => {
+        const whitePawn = piece("white", "PAWN")
+        expect(isPawnPromotion(whitePawn, {x: 4, y: 7})).toBe(true)
+    })
+
+    it("is true for a black pawn reaching the last rank", () => {
+        const blackPawn = piece("black", "PAWN")
+        expect(isPawnPromotion(blackPawn, {x: 4, y: 0})).toBe(true)
+    })
+
+    it("is false for a white pawn that hasn't reached the last rank", () => {
+        const whitePawn = piece("white", "PAWN")
+        expect(isPawnPromotion(whitePawn, {x: 4, y: 6})).toBe(false)
+    })
+
+    it("is false for a white pawn reaching its own back rank instead of the opponent's", () => {
+        const whitePawn = piece("white", "PAWN")
+        expect(isPawnPromotion(whitePawn, {x: 4, y: 0})).toBe(false)
+    })
+
+    it("is false for a non-pawn piece reaching the last rank", () => {
+        const whiteQueen = piece("white", "QUEEN")
+        expect(isPawnPromotion(whiteQueen, {x: 4, y: 7})).toBe(false)
     })
 })

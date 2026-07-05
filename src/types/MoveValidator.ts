@@ -62,6 +62,11 @@ function getPawnMoves(gameBoard: Square[][], currentCoordinates: BoardCoordinate
     return validMoves
 }
 
+function isPawnPromotion(piece: ChessPiece, destination: BoardCoordinates): boolean {
+    if(piece.type !== "PAWN") return false
+    return piece.color === "white" ? destination.y === 7 : destination.y === 0
+}
+
 const ROOK_DIRECTIONS = [
     {x: 0, y: 1},
     {x: 0, y: -1},
@@ -148,3 +153,4 @@ function getKingMoves(gameBoard: Square[][], currentCoordinates: BoardCoordinate
 }
 
 export default getValidMoves
+export { isPawnPromotion }

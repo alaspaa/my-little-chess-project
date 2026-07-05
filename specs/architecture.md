@@ -51,7 +51,13 @@ Move legality is split into two layers, each in its own file:
    chess movement rules (blocking pieces, captures, pawn double-step,
    etc.), **without** considering whether the move would leave the mover's
    own king in check. This is the layer to extend when adding new piece
-   movement rules (e.g. castling, en passant).
+   movement rules (e.g. castling, en passant). It also exports
+   `isPawnPromotion(piece, destination)`, a standalone predicate for
+   detecting when a pawn move lands on the opposite back rank — a rule,
+   not a move (it doesn't change what squares are legal), so it isn't
+   folded into `getValidMoves`. Nothing calls it yet; wiring it into
+   `GamePiece.tsx`'s move-commit step to actually prompt for and apply a
+   promotion is separate, tracked work.
 2. **`GameLogicValidator.ts`** — the game-rules layer built on top of
    `MoveValidator`:
    - `getLegalMoves` filters `getValidMoves`' output down to moves that
