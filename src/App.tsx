@@ -11,7 +11,9 @@ function App() {
   return (
     <>
       <Header />
-      {currentPage === "setup" ? <StartPage /> : <GamePage />}
+      <main className="app-content">
+        {currentPage === "setup" ? <StartPage /> : <GamePage />}
+      </main>
     </>
   )
 }

@@ -1,4 +1,8 @@
 #root {
+  width: 100%;
+}
+
+.app-content {
   max-width: 1280px;
   margin: 0 auto;
   padding: 3rem 2rem 2rem;
@@ -6,21 +10,24 @@
 }
 
 .app-header {
-  position: relative;
-  margin-bottom: 3rem;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1.5rem 2rem;
+  background-color: #242424;
+  border-bottom: 1px solid rgb(60, 60, 60);
+  z-index: 20;
 }
 
 .app-header h1 {
   margin: 0;
 }
 
-.settings-menu {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
 .settings-menu-toggle {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
   background-color: transparent;
   border: 1px solid rgb(140, 140, 140);
   border-radius: 6px;
@@ -28,26 +35,23 @@
   color: inherit;
 }
 
-.settings-menu-panel {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  min-width: 200px;
-  background-color: #242424;
-  border: 1px solid rgb(140, 140, 140);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  text-align: left;
-  z-index: 50;
+.settings-menu-title {
+  font-size: 1.5rem;
 }
 
 .settings-menu-option {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-top: 1.25rem;
   font-size: 0.9rem;
   color: rgb(180, 180, 180);
   cursor: pointer;
+}
+
+.settings-menu-close-button {
+  display: block;
+  margin: 1.5rem auto 0;
 }
 
 .logo {
@@ -87,8 +91,10 @@
 }
 
 .gameboard {
+    box-sizing: border-box;
+    width: 800px;
+    margin: 0 auto;
     border: black 1px solid;
-    
 }
 
 .gameboardrow {
@@ -144,7 +150,8 @@
 }
 
 .game-footer {
-    max-width: 800px;
+    box-sizing: border-box;
+    width: 800px;
     margin: 0.5rem auto 0;
     display: flex;
     flex-direction: column;

@@ -3,7 +3,8 @@
     "white": "White",
     "black": "Black",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "header": {
     "title": "Chess",
