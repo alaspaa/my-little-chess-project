@@ -77,10 +77,11 @@ since further game changes should build on that fresh board.
 
 ---
 
-## En passant is not implemented
+## En passant move-generation logic
 
-**Complexity:** Large — new move-history state plus capture logic that
-depends on the timing of the previous move, not just current board state.
+**Complexity:** Large — needs move-history state that doesn't exist yet,
+plus a rule that depends on the timing of the previous move, not just
+current board state.
 
 **Area:** move rules (`src/types/MoveValidator.ts`), state (`src/state.ts`)
 
@@ -88,28 +89,68 @@ A pawn that double-steps past an enemy pawn should be capturable "as if"
 it only moved one square, but only on the very next move. This needs move
 history that doesn't exist yet — specifically, which pawn (if any) just
 made a two-square advance. Add that as new state (e.g. a
-`lastMoveAtom`/field tracked in `GamePiece.tsx`'s move-commit step) before
-attempting the capture logic itself, since `getPawnMoves` currently has no
-way to know what the previous move was.
+`lastMoveAtom`/field tracked in `GamePiece.tsx`'s move-commit step), then
+extend `getPawnMoves` to use it and produce the extra diagonal capture
+square. This issue is move-generation only — actually applying the
+capture (removing a pawn that isn't on the destination square) is
+"En passant capture wiring" below, since neither half is useful alone:
+generating the move with nothing to apply it is dead code, and there's
+nothing to apply without the move existing first.
 
 ---
 
-## Castling is not implemented
+## En passant capture wiring
 
-**Complexity:** Large — several interacting preconditions (including
-reusing check detection), and requires extending the single-piece move
-architecture to move two pieces atomically.
+**Complexity:** Medium — one method, `updateGameBoardWithMovedPiece` in
+`GamePiece.tsx`, currently assumes a capture always happens on the
+destination square.
+
+**Area:** `src/GameBoard/GamePiece.tsx`
+
+Once "En passant move-generation logic" above produces a legal en passant
+destination, committing it needs to remove the *captured* pawn, which
+sits one square behind the destination (same file, the row the capturing
+pawn started from) — not on the destination square itself, where
+`updateGameBoardWithMovedPiece` looks today. Depends on the move-history
+state from the logic issue existing first, since the commit step needs
+to know it's an en passant capture (as opposed to a normal diagonal
+move onto an empty square, which is otherwise illegal for a pawn) to
+know which extra square to clear.
+
+---
+
+## Castling move-generation logic
+
+**Complexity:** Large — several interacting preconditions, including
+reusing check detection along the king's path.
 
 **Area:** move rules (`src/types/MoveValidator.ts`)
 
 King and rook castling (kingside and queenside) isn't in `getKingMoves` or
 anywhere else. Needs: neither piece has moved (`hasMoved` already exists on
-`ChessPiece`), no pieces between king and rook, king not currently in check,
-and king doesn't pass through or land on an attacked square (reuse
-`isKingInCheck` from `GameLogicValidator.ts` for the "passes through check"
-part). Also needs a way to move two pieces (king + rook) as one atomic move,
-which `updateGameBoardWithMovedPiece` in `GamePiece.tsx` doesn't currently
-support (it only relocates one piece per move).
+`ChessPiece`), no pieces between king and rook, king not currently in
+check, and king doesn't pass through or land on an attacked square (reuse
+`isKingInCheck` from `GameLogicValidator.ts` for the "passes through
+check" part). This issue is move-generation only — producing the castling
+destination square for the king; actually relocating the rook alongside
+it is "Castling atomic two-piece move" below, since the two need to land
+together for castling to be usable at all.
+
+---
+
+## Castling atomic two-piece move
+
+**Complexity:** Medium — the single-piece move architecture needs a second
+code path for the one move that relocates two pieces at once.
+
+**Area:** `src/GameBoard/GamePiece.tsx`
+
+`updateGameBoardWithMovedPiece` only relocates one piece per move today.
+Once "Castling move-generation logic" above can produce a legal castling
+destination for the king, committing that move needs to also move the
+corresponding rook to its post-castling square in the same board update,
+not as a separate move (the rook's move isn't independently legal and
+shouldn't flip the turn or be undoable on its own).
 
 ---
 
