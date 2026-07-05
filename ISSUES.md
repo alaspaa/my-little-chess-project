@@ -154,23 +154,38 @@ shouldn't flip the turn or be undoable on its own).
 
 ---
 
-## Threefold repetition draw is not implemented
+## Position history tracking
 
-**Complexity:** Largest — needs a full position history log (not just a
-running counter like the fifty-move rule, or "the last move" like en
-passant), plus a way to compare positions for equality.
+**Complexity:** Large — no existing notion of "position equality" to build
+on, and every move needs to feed it.
 
-**Area:** game state (`src/state.ts`, `src/types/GameLogicValidator.ts`)
+**Area:** game state (`src/state.ts`), `src/GameBoard/GamePiece.tsx`
 
-A game should be drawn if the same position (piece placement, side to
-move, and — once implemented — castling/en passant rights) occurs three
-times. Needs: a log of every position reached so far (e.g. a serialized
-board snapshot per move, since there's no existing notion of "position
-equality" — `Square[][]` objects are always structurally distinct even
-when the arrangement is identical), a way to detect when a new snapshot
-matches two earlier ones, and a new `gameStatusAtom` end state (e.g.
-`"draw"`). Depends on castling/en passant rights being tracked first if
-those are implemented, since two positions with different castling/en
-passant availability aren't actually the same position for repetition
-purposes — otherwise it can ship considering board+turn only, which is a
-reasonable simplification for now.
+Threefold repetition (below) needs a log of every position reached so
+far, which doesn't exist in any form today — `Square[][]` objects are
+always structurally distinct even when the arrangement is identical, so
+this needs an explicit serialization (e.g. a helper that turns a board +
+side-to-move into a comparable string or key) plus a new atom (e.g.
+`positionHistoryAtom`) appended to in `GamePiece.tsx`'s move-commit step.
+This issue is the tracking half only — recording history nobody reads is
+harmless but pointless on its own; "Threefold repetition detection" below
+is what actually consumes it. Once castling/en passant rights exist,
+revisit the serialization to include them, since two positions with
+different rights aren't truly the same position for repetition purposes
+— until then, board+turn is a reasonable simplification.
+
+---
+
+## Threefold repetition detection
+
+**Complexity:** Medium — once a history exists, this is a lookup plus a
+new end state.
+
+**Area:** `src/types/GameLogicValidator.ts`, state (`src/state.ts`)
+
+A game should be drawn if the same position occurs three times. Once
+"Position history tracking" above exists, this is: after appending the
+current position, count how many times it (or an equal entry) appears in
+`positionHistoryAtom`, and if three, set a new `gameStatusAtom` end state
+(e.g. `"draw"`). Depends entirely on the tracking issue above landing
+first — there's nothing to detect against without it.
