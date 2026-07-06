@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { type BoardCoordinates, type CHESS_PIECE_COLOR, type ChessPiece, type Player } from "./types/ChessObjects";
+import { type BoardCoordinates, type CHESS_PIECE_COLOR, type ChessPiece, type PendingPromotion, type Player, type Score } from "./types/ChessObjects";
 import { createEmptyBoard, populateBoardWithPieces } from "./types/GameBoard";
 import i18n from "./i18n";
 
@@ -37,25 +37,14 @@ export const languageAtom = atom<string>(i18n.language)
 // render its own trophies directly.
 export const capturedPiecesAtom = atom<Record<CHESS_PIECE_COLOR, ChessPiece[]>>({white: [], black: []})
 
-export type PendingPromotion = {
-    color: CHESS_PIECE_COLOR,
-    coordinates: BoardCoordinates,
-}
 export const pendingPromotionAtom = atom<PendingPromotion | null>(null)
 
 // Serialized (board + side-to-move) snapshot appended after every completed
 // move, for threefold repetition detection.
 export const positionHistoryAtom = atom<string[]>([])
 
-// Keyed by player slot (whoever started as White/Black in the first game),
-// not color - so a future "switch sides on rematch" feature doesn't
-// invalidate the tally. `resetGameAtom` deliberately never touches this,
-// since the whole point is for it to survive across rematches.
-export type Score = {
-    player1: number,
-    player2: number,
-    draws: number,
-}
+// `resetGameAtom` deliberately never touches this, since the whole point
+// is for it to survive across rematches.
 export const scoreAtom = atom<Score>({player1: 0, player2: 0, draws: 0})
 
 // Write-only action atom: puts every per-game (not per-session/settings)
