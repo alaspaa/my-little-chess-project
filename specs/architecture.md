@@ -53,6 +53,9 @@ All cross-component state is a Jotai atom in this one file:
   re-renders on a language change via Jotai's subscription instead of
   hooking into `i18next`'s own event emitter. Not persisted across a
   reload, same as `whitePlayerAtom`/`blackPlayerAtom`.
+- `positionHistoryAtom` — a serialized snapshot appended after every
+  completed move (see "Position history" below); currently unread —
+  it exists for threefold repetition detection to consume once written.
 
 ## Validation pipeline (`src/GameLogic/`)
 
@@ -183,6 +186,30 @@ used both by `GamePiece.tsx`'s move-commit step (to actually relocate the
 rook alongside the king) and by `GameLogicValidator.ts`'s `simulateMove`
 (so the check-safety simulation used by `getLegalMoves` reflects the
 rook's real post-castling position, not its pre-move one).
+
+## Position history (`src/GameLogic/Position.ts`)
+
+`serializePosition(gameBoard, turn)` turns a board + side-to-move into a
+plain string key — `Square[][]` objects are always structurally distinct
+even when the arrangement is identical, so there's no other way to compare
+"is this the same position as before". It only encodes color, piece type,
+and square (via `PAWN`/`ROOK`/etc. mapped to single letters, `N` for
+knight to avoid colliding with `K` for king) plus whose turn it is —
+deliberately not `hasMoved` or piece `id`, and not castling/en passant
+rights (neither is tracked yet; see the note on this in `ISSUES.md` if
+those land later).
+
+`GamePiece.tsx`'s move-commit step appends `serializePosition(...)` to
+`positionHistoryAtom` right after flipping the turn, and
+`PromotionPrompt.tsx` does the same once a promotion choice resolves —
+mirroring the same duplication-over-shared-helper tradeoff described in
+"Pawn promotion" above. Deliberately *not* appended while a promotion is
+still pending (`GamePiece.tsx`'s promotion branch skips it): the pawn
+sitting on the back rank with the turn not yet flipped isn't a real
+position reached in the game, just an intermediate UI state.
+
+Nothing reads `positionHistoryAtom` yet — it's tracking only, for
+threefold repetition detection to consume once that's built.
 
 ## User-facing text (`src/i18n.ts`, `src/locales/`)
 

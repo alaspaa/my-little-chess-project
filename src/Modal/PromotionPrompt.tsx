@@ -3,8 +3,9 @@ import { useTranslation } from "react-i18next"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import ModalFrame from "./ModalFrame"
 import getPieceIcon from "../GameBoard/pieceIcons"
-import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pendingPromotionAtom } from "../state"
+import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pendingPromotionAtom, positionHistoryAtom } from "../state"
 import { isCheckmate, isKingInCheck } from "../GameLogic/GameLogicValidator"
+import { serializePosition } from "../GameLogic/Position"
 import type { CHESS_PIECE_TYPE } from "../types/ChessObjects"
 
 const PROMOTION_CHOICES: CHESS_PIECE_TYPE[] = ["QUEEN", "ROOK", "BISHOP", "KNIGHT"]
@@ -15,6 +16,7 @@ function PromotionPrompt() {
     const [gameBoard, setGameBoard] = useAtom(gameBoardAtom)
     const setCurrentTurn = useSetAtom(currentTurnAtom)
     const setGameStatus = useSetAtom(gameStatusAtom)
+    const setPositionHistory = useSetAtom(positionHistoryAtom)
 
     if(!pendingPromotion) return null
 
@@ -34,6 +36,7 @@ function PromotionPrompt() {
 
         const nextTurn = color === "white" ? "black" : "white"
         setCurrentTurn(nextTurn)
+        setPositionHistory(previous => [...previous, serializePosition(newBoard, nextTurn)])
 
         if(isCheckmate(newBoard, nextTurn)) {
             setGameStatus({state: "checkmate", color: nextTurn})

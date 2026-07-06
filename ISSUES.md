@@ -259,38 +259,23 @@ know which extra square to clear.
 
 ---
 
-## Position history tracking
-
-**Complexity:** Large — no existing notion of "position equality" to build
-on, and every move needs to feed it.
-
-**Area:** game state (`src/state.ts`), `src/GameBoard/GamePiece.tsx`
-
-Threefold repetition (below) needs a log of every position reached so
-far, which doesn't exist in any form today — `Square[][]` objects are
-always structurally distinct even when the arrangement is identical, so
-this needs an explicit serialization (e.g. a helper that turns a board +
-side-to-move into a comparable string or key) plus a new atom (e.g.
-`positionHistoryAtom`) appended to in `GamePiece.tsx`'s move-commit step.
-This issue is the tracking half only — recording history nobody reads is
-harmless but pointless on its own; "Threefold repetition detection" below
-is what actually consumes it. Once castling/en passant rights exist,
-revisit the serialization to include them, since two positions with
-different rights aren't truly the same position for repetition purposes
-— until then, board+turn is a reasonable simplification.
-
----
-
 ## Threefold repetition detection
 
-**Complexity:** Medium — once a history exists, this is a lookup plus a
-new end state.
+**Complexity:** Medium — the history to check against already exists;
+this is a lookup plus a new end state.
 
 **Area:** `src/GameLogic/GameLogicValidator.ts`, state (`src/state.ts`)
 
-A game should be drawn if the same position occurs three times. Once
-"Position history tracking" above exists, this is: after appending the
-current position, count how many times it (or an equal entry) appears in
+A game should be drawn if the same position occurs three times.
+`positionHistoryAtom` (`src/state.ts`) and `serializePosition`
+(`src/GameLogic/Position.ts`) already exist and are appended to after
+every completed move (see "Position history" in `specs/architecture.md`)
+— what's missing is consuming that history: after appending the current
+position, count how many times it (or an equal entry) appears in
 `positionHistoryAtom`, and if three, set a new `gameStatusAtom` end state
-(e.g. `"draw"`). Depends entirely on the tracking issue above landing
-first — there's nothing to detect against without it.
+(e.g. `"draw"`). Note `serializePosition` deliberately doesn't encode
+castling rights (a king/rook's `hasMoved`) yet, even though castling
+itself is implemented — two positions with different castling rights
+aren't truly the same position for repetition purposes, but this is a
+reasonable simplification until it actually causes an incorrect draw in
+practice, per the note in `Position.ts`.

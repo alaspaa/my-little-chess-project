@@ -42,3 +42,7 @@ export type PendingPromotion = {
     coordinates: BoardCoordinates,
 }
 export const pendingPromotionAtom = atom<PendingPromotion | null>(null)
+
+// Serialized (board + side-to-move) snapshot appended after every completed
+// move, for threefold repetition detection.
+export const positionHistoryAtom = atom<string[]>([])

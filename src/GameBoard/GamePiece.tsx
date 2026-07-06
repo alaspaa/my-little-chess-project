@@ -1,11 +1,12 @@
 import { type BoardCoordinates, type ChessPiece, type Square } from "../types/ChessObjects"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, validMovesAtom } from "../state"
+import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../GameLogic/GameLogicValidator"
 import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../GameLogic/MoveResolver"
+import { serializePosition } from "../GameLogic/Position"
 import getPieceIcon from "./pieceIcons"
 
 interface opts {
@@ -24,6 +25,7 @@ function GamePiece(props: opts) {
     const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
     const [, setCapturedPieces] = useAtom(capturedPiecesAtom)
     const [pendingPromotion, setPendingPromotion] = useAtom(pendingPromotionAtom)
+    const [, setPositionHistory] = useAtom(positionHistoryAtom)
 
     // Read via refs inside the event listeners below instead of depending on
     // these atoms in the effect, so the listeners are attached once and
@@ -103,6 +105,7 @@ function GamePiece(props: opts) {
                     } else {
                         const nextTurn = capturingColor === "white" ? "black" : "white"
                         setCurrentTurn(nextTurn)
+                        setPositionHistory(previous => [...previous, serializePosition(newBoard, nextTurn)])
 
                         if(isCheckmate(newBoard, nextTurn)) {
                             setGameStatus({state: "checkmate", color: nextTurn})
@@ -137,7 +140,7 @@ function GamePiece(props: opts) {
         }
 
         return cleanup
-    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces, setPendingPromotion])
+    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces, setPendingPromotion, setPositionHistory])
 
     return(
         <div className="gamepiece" id={piece.id} ref={pieceRef}>
