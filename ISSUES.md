@@ -300,3 +300,57 @@ actually sets `gameStatusAtom` to the draw state. `positionHistoryAtom`
 itself (tracked unconditionally) doesn't need gating — only the
 draw-triggering check does, same reasoning as the fifty-move toggle
 above.
+
+---
+
+## Extend position history to support reviewing a game
+
+**Complexity:** Medium — the pieces needed don't exist yet, but nothing
+here is architecturally hard on its own.
+
+**Area:** `src/GameLogic/Position.ts`, state (`src/state.ts`)
+
+`positionHistoryAtom` (see "Position history" in `specs/architecture.md`)
+already has every position of the current game in order, which is most
+of what a "step through this game" review feature would need — but a
+few things are missing: `serializePosition` only goes board→string,
+there's no inverse (`deserializePosition`) to turn a saved entry back
+into a `Square[][]` for rendering (piece `id`/`hasMoved` can't be
+recovered since they were never encoded, but that's fine for pure
+review — only the visual position matters there). Also,
+`resetGameAtom` clears `positionHistoryAtom` on rematch (deliberately,
+so a new game's threefold-repetition count doesn't inherit the old
+game's positions), so reviewing a *previous* rematch would need an
+explicit archive step — e.g. copying the array somewhere else - before
+that reset fires, since nothing preserves it today. See "Record check/
+checkmate info in move history" below for the related question of
+per-move annotations (check, checkmate, whose move) that a review UI
+would likely also want alongside the raw positions.
+
+---
+
+## Record check/checkmate info in move history, including the checking piece
+
+**Complexity:** Medium-large — needs check detection to report *which*
+piece is checking, not just whether the king is in check, plus a shape
+change to how history is stored.
+
+**Area:** `src/GameLogic/GameLogicValidator.ts`, `src/GameLogic/moves/king.ts`,
+state (`src/state.ts`)
+
+`isKingInCheck`/`isSquareAttacked` currently only return a boolean —
+by design, since all `isKingInCheck` needs today is yes/no. Annotating
+history with "this move gave check" (and by which piece — useful for a
+review feature, and matches how real chess notation marks checks) needs
+`isSquareAttacked` (or a new function built on the same scan in
+`moves/king.ts`) to return the attacking piece(s)' coordinates instead of
+just `true`, since more than one piece can deliver check at once
+(discovered double check). Since `positionHistoryAtom` is currently a
+flat `string[]` (see "Position history" in `specs/architecture.md`),
+recording this means growing each entry into a small record (e.g.
+`{position: string, checkedBy: BoardCoordinates[] | null}`) instead of a
+bare string — `isThreefoldRepetition`'s comparison would need updating to
+compare the `position` field specifically rather than the whole entry.
+Depends on "Extend position history to support reviewing a game" above
+existing first if the goal is showing this in a review UI, though the
+detection/recording half could land independently.
