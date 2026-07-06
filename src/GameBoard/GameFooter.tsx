@@ -22,10 +22,16 @@ function GameFooter(props: opts) {
     const { t } = useTranslation()
     const setGameStatus = useSetAtom(gameStatusAtom)
     const [showResignConfirm, setShowResignConfirm] = useState(false)
+    const [showDrawOffer, setShowDrawOffer] = useState(false)
 
     const resign = () => {
         setGameStatus({state: 'resigned', color: currentTurn})
         setShowResignConfirm(false)
+    }
+
+    const acceptDraw = () => {
+        setGameStatus({state: 'draw', color: null})
+        setShowDrawOffer(false)
     }
 
     return (
@@ -59,7 +65,14 @@ function GameFooter(props: opts) {
                 <div className="game-footer-actions">
                     <button
                         type="button"
-                        className="resign-button"
+                        className="game-footer-action-button"
+                        onClick={() => setShowDrawOffer(true)}
+                    >
+                        {t('gameFooter.offerDrawButton')}
+                    </button>
+                    <button
+                        type="button"
+                        className="game-footer-action-button"
                         onClick={() => setShowResignConfirm(true)}
                     >
                         {t('gameFooter.resignButton')}
@@ -72,6 +85,14 @@ function GameFooter(props: opts) {
                     description={t('gameFooter.resignConfirmDescription')}
                     onAccept={resign}
                     onDecline={() => setShowResignConfirm(false)}
+                />
+            }
+            {showDrawOffer &&
+                <ConfirmModal
+                    title={t('gameFooter.drawOfferTitle', {opponent: getPlayerName(getOpponentColor(currentTurn), whitePlayer, blackPlayer, t)})}
+                    description={t('gameFooter.drawOfferDescription', {player: getPlayerName(currentTurn, whitePlayer, blackPlayer, t)})}
+                    onAccept={acceptDraw}
+                    onDecline={() => setShowDrawOffer(false)}
                 />
             }
         </footer>
@@ -116,8 +137,12 @@ function getGameStatusMessage(gameStatus: GameStatus, whitePlayer: Player | null
 }
 
 function getWinnerName(loserColor: CHESS_PIECE_COLOR | null, whitePlayer: Player | null, blackPlayer: Player | null, t: TFunction): string {
-    const winnerColor = loserColor === 'white' ? 'black' : 'white'
-    return getPlayerName(winnerColor, whitePlayer, blackPlayer, t)
+    if(!loserColor) return ''
+    return getPlayerName(getOpponentColor(loserColor), whitePlayer, blackPlayer, t)
+}
+
+function getOpponentColor(color: CHESS_PIECE_COLOR): CHESS_PIECE_COLOR {
+    return color === 'white' ? 'black' : 'white'
 }
 
 function getPlayerName(color: 'white' | 'black' | null, whitePlayer: Player | null, blackPlayer: Player | null, t: TFunction): string {

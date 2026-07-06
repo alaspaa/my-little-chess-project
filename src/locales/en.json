@@ -27,7 +27,10 @@
   "gameFooter": {
     "resignButton": "Resign",
     "resignConfirmTitle": "{{player}}, resign?",
-    "resignConfirmDescription": "Are you sure you want to resign? This will end the game."
+    "resignConfirmDescription": "Are you sure you want to resign? This will end the game.",
+    "offerDrawButton": "Offer Draw",
+    "drawOfferTitle": "{{opponent}}, accept the draw?",
+    "drawOfferDescription": "{{player}} has offered a draw. This will end the game."
   },
   "pawnPromotion": {
     "title": "Congratulations on your promotion!",

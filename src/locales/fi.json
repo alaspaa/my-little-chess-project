@@ -27,7 +27,10 @@
   "gameFooter": {
     "resignButton": "Luovuta",
     "resignConfirmTitle": "{{player}}, luovutatko?",
-    "resignConfirmDescription": "Oletko varma, että haluat luovuttaa? Tämä päättää pelin."
+    "resignConfirmDescription": "Oletko varma, että haluat luovuttaa? Tämä päättää pelin.",
+    "offerDrawButton": "Tarjoa tasapeliä",
+    "drawOfferTitle": "{{opponent}}, hyväksytkö tasapelin?",
+    "drawOfferDescription": "{{player}} on tarjonnut tasapeliä. Tämä päättää pelin."
   },
   "pawnPromotion": {
     "title": "Onnittelut ylennyksestä!",

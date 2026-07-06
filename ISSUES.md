@@ -134,25 +134,6 @@ the rook move is self-explanatory enough once it happens.
 
 ---
 
-## Add a button to offer/accept a draw
-
-**Complexity:** Medium — needs a two-sided offer/accept interaction, not
-just a single button, to prevent a player accepting their own offer.
-
-**Area:** UI (`src/GameBoard/GameFooter.tsx`), state (`src/state.ts`)
-
-No way to end the game as a mutually agreed draw. Needs a two-step
-interaction (one player offers, the other accepts/declines) — a single
-button isn't quite enough, since one player accepting their own offer
-would need to be prevented. The `"draw"` `gameStatusAtom` end state,
-`gameStatus.draw` translation key, and `getGameStatusMessage` rendering
-already exist (added for threefold repetition) — this issue can just set
-`gameStatusAtom` to `{state: "draw", color: null}` directly once both
-players agree, following the pattern the resign button already
-established for the offer/accept UI itself.
-
----
-
 ## Fifty-move rule draw is not implemented
 
 **Complexity:** Medium — just a counter (moves since the last pawn move
