@@ -63,6 +63,29 @@ is a separate, harder problem than this issue's scope.
 
 ---
 
+## Consider a distinct highlight for promotion-triggering moves
+
+**Complexity:** Small — mostly a design question; the code hook needed to
+answer it already exists.
+
+**Area:** UI (`src/GameBoard/GameSquare.tsx`, `src/App.css`)
+
+`GameSquare.tsx` already highlights a picked-up piece's legal destinations
+with two states — `.validmove` and `.validcapture` (see `isValidMove`/
+`isValidCapture` there) — but a destination that would trigger a pawn
+promotion looks identical to any other move or capture square today, even
+though dropping on it doesn't just move the piece, it also pops open
+`PromotionPrompt`. Worth thinking about whether that's worth a third
+visual state (e.g. a `.validpromotion` class) before building it:
+`isPawnPromotion(piece, destination)` in `src/types/MoveValidator.ts`
+already exists and could be called per candidate square in
+`GameSquare.tsx` the same way `isValidCapture` is computed now, so the
+implementation is small — the open question is purely whether a distinct
+highlight is actually useful (arguably self-evident once you drop a pawn
+there) or just visual noise.
+
+---
+
 ## Add a button to offer/accept a draw
 
 **Complexity:** Medium — needs a two-sided offer/accept interaction, not
