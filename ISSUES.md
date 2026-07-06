@@ -214,6 +214,35 @@ and never touched by a later swap) instead of inferring it from
 
 ---
 
+## Unify player-identity naming (`whitePlayerAtom`/`blackPlayerAtom` vs `scoreAtom`'s `player1`/`player2`)
+
+**Complexity:** Small-medium — a naming/modeling question more than new
+functionality; likely worth solving together with "Allow switching sides
+on rematch" above rather than separately.
+
+**Area:** state (`src/state.ts`)
+
+Two different conventions now represent "the two people playing" in
+`state.ts`: `whitePlayerAtom`/`blackPlayerAtom` (set once at setup,
+keyed by *current color*) and `scoreAtom`'s `player1`/`player2` fields
+(added for score tracking, meant to stay stable *regardless* of color —
+see "Score tracking" in `specs/architecture.md`). These are conceptually
+the same two people described two different ways, and it's only a naming
+inconsistency today because sides can't be swapped yet — once "Allow
+switching sides on rematch" above lands, `whitePlayerAtom`/
+`blackPlayerAtom` and "player1"/"player2" identity will actively diverge
+(a player's color can change between games, but their player-1-ness
+shouldn't), making the two namings actively confusing rather than just
+inconsistent. Worth deciding on one model — e.g. a `player1Atom`/
+`player2Atom` holding the `Player` objects directly (position-stable,
+set once at setup) plus a small separate atom/derivation for which slot
+currently plays which color, with `whitePlayerAtom`/`blackPlayerAtom`
+either removed in favor of that or made explicitly derived from it — and
+updating every current consumer of the color-keyed atoms
+(`GameFooter.tsx`, `GamePage.tsx`, `StartPage`, etc.) to match.
+
+---
+
 ## Add a chess clock
 
 **Complexity:** Large — new atoms, a per-turn ticking mechanism that has
