@@ -45,7 +45,8 @@ assertions themselves (did the right elements render) are simple.
 **Area:** test config (`vite.config.ts`), new dev dependencies,
 `src/**/*.test.tsx` next to each component
 
-Only the logic layer (`src/types/*.ts`) has tests today — components
+Only the logic layer (`src/GameLogic/*.ts`, `src/types/GameBoard.ts`) has
+tests today — components
 (`GamePiece`, `GameBoard`, `StartPage`, etc.) aren't covered at all (see
 "Testability" in `specs/code-style.md`), so there's no safety net against
 a component silently failing to render or a prop being wired up wrong.
@@ -77,7 +78,7 @@ promotion looks identical to any other move or capture square today, even
 though dropping on it doesn't just move the piece, it also pops open
 `PromotionPrompt`. Worth thinking about whether that's worth a third
 visual state (e.g. a `.validpromotion` class) before building it:
-`isPawnPromotion(piece, destination)` in `src/types/MoveValidator.ts`
+`isPawnPromotion(piece, destination)` in `src/GameLogic/MoveGenerator.ts`
 already exists and could be called per candidate square in
 `GameSquare.tsx` the same way `isValidCapture` is computed now, so the
 implementation is small — the open question is purely whether a distinct
@@ -98,7 +99,7 @@ promotion-triggering moves" above, for castling instead: a castling
 destination is just another square in the king's `.validmove` set today,
 indistinguishable from an ordinary one-step king move, even though
 dropping on it also relocates a rook two squares away.
-`isCastlingMove(piece, from, to)` in `src/types/MoveValidator.ts` already
+`isCastlingMove(piece, from, to)` in `src/GameLogic/MoveGenerator.ts` already
 exists and could be called per candidate square the same way
 `isValidCapture` is computed now, so — as with promotion — the
 implementation is small; the open question is whether a distinct
@@ -113,17 +114,17 @@ the rook move is self-explanatory enough once it happens.
 there's a real design question buried in it around where multi-piece
 rules live.
 
-**Area:** `src/types/MoveValidator.ts` (to be split), likely a new
-`src/types/moves/` folder
+**Area:** `src/GameLogic/MoveGenerator.ts` (to be split), likely a new
+`src/GameLogic/moves/` folder
 
-`MoveValidator.ts` has grown into a single ~220-line file covering all
+`MoveGenerator.ts` has grown into a single ~220-line file covering all
 six piece types (`getPawnMoves`, `getRookMoves`, `getKnightMoves`,
 `getBishopMoves`, `getQueenMoves`, `getKingMoves`/`getKingStepMoves`/
 `getCastlingMoves`), shared geometry helpers (`isOnBoard`,
 `squareIsEmpty`, `isOpponentPiece`, `getSlidingMoves`, `isSquareAttacked`),
 and cross-cutting predicates (`isPawnPromotion`, `isCastlingMove`,
 `getCastlingRookMove`). Worth splitting into one file per piece type
-(e.g. `src/types/moves/pawn.ts`, `rook.ts`, ..., `king.ts`), with
+(e.g. `src/GameLogic/moves/pawn.ts`, `rook.ts`, ..., `king.ts`), with
 `getValidMoves`'s switch statement staying as a thin dispatcher that
 imports from each. The shared geometry helpers need a common home too
 (e.g. `moves/shared.ts`), since rook/bishop/queen/king all depend on them.
@@ -167,7 +168,7 @@ the shape) rendered the same way in `GameFooter.tsx`'s
 **Complexity:** Medium — just a counter (moves since the last pawn move
 or capture), reset on the right conditions and checked each turn.
 
-**Area:** game state (`src/state.ts`, `src/types/GameLogicValidator.ts`)
+**Area:** game state (`src/state.ts`, `src/GameLogic/GameLogicValidator.ts`)
 
 A game should be drawn if 50 full moves pass with no pawn move and no
 capture. Needs: a new counter in state (e.g. `halfmoveClockAtom`),
@@ -257,7 +258,7 @@ the game is already effectively paused then (see "Pawn promotion" in
 plus a rule that depends on the timing of the previous move, not just
 current board state.
 
-**Area:** move rules (`src/types/MoveValidator.ts`), state (`src/state.ts`)
+**Area:** move rules (`src/GameLogic/MoveGenerator.ts`), state (`src/state.ts`)
 
 A pawn that double-steps past an enemy pawn should be capturable "as if"
 it only moved one square, but only on the very next move. This needs move
@@ -320,7 +321,7 @@ different rights aren't truly the same position for repetition purposes
 **Complexity:** Medium — once a history exists, this is a lookup plus a
 new end state.
 
-**Area:** `src/types/GameLogicValidator.ts`, state (`src/state.ts`)
+**Area:** `src/GameLogic/GameLogicValidator.ts`, state (`src/state.ts`)
 
 A game should be drawn if the same position occurs three times. Once
 "Position history tracking" above exists, this is: after appending the

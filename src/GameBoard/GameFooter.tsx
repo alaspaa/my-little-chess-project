@@ -6,7 +6,7 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import type { TFunction } from 'i18next'
 import { gameStatusAtom, isGameOver, type GameStatus } from '../state'
 import type { CHESS_PIECE_COLOR, ChessPiece, Player } from '../types/ChessObjects'
-import ConfirmModal from '../ConfirmModal/ConfirmModal'
+import ConfirmModal from '../Modal/ConfirmModal'
 import getPieceIcon from './pieceIcons'
 
 interface opts {

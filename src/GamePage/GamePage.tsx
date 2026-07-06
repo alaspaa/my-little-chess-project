@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai'
 import GameBoard from '../GameBoard/GameBoard'
 import GameFooter from '../GameBoard/GameFooter'
-import PromotionPrompt from '../PawnPromotion/PromotionPrompt'
+import PromotionPrompt from '../Modal/PromotionPrompt'
 import { blackPlayerAtom, capturedPiecesAtom, currentTurnAtom, gameStatusAtom, whitePlayerAtom } from '../state'
 
 function GamePage() {

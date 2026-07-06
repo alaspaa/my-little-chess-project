@@ -69,42 +69,46 @@ undocumented.
   (`getPawnMoves`, `getRookMoves`, `getKnightMoves`, ...) dispatched from
   one `switch` in `getValidMoves`, rather than one function handling every
   piece type inline.
-- Business/domain logic (move generation, check detection, board setup) is
-  kept in plain `.ts` files under `src/types/`, separate from the React
-  components that call it. Components stay focused on rendering and
-  wiring DOM events to that logic. This split is deliberate and required
-  going forward: don't inline game-rule logic inside a `.tsx` component
-  body — write it as a plain function in `src/types/`, then call it from
-  the component. This is also what makes the logic testable (see
-  Testability below) without needing to render anything.
+- Business/domain logic is kept in plain `.ts` files, separate from the
+  React components that call it: move generation and check detection in
+  `src/GameLogic/`, board setup and other shared types in `src/types/`.
+  Components stay focused on rendering and wiring DOM events to that
+  logic. This split is deliberate and required going forward: don't
+  inline game-rule logic inside a `.tsx` component body — write it as a
+  plain function in `src/GameLogic/` (or `src/types/` for non-rule
+  domain code), then call it from the component. This is also what makes
+  the logic testable (see Testability below) without needing to render
+  anything.
 
 ## Testability
 
 Tests run on [Vitest](https://vitest.dev) (`npm test`). Test files sit
 next to the code they cover as `*.test.ts` (e.g.
-`src/types/MoveValidator.test.ts`), not in a separate `__tests__` tree.
-Import `describe`/`it`/`expect` explicitly from `"vitest"` rather than
-relying on injected globals, so files type-check without extra config.
-Shared test-only helpers (e.g. `buildBoard`/`piece` for constructing a
-board with specific pieces on it) live in `src/testUtils.ts`.
+`src/GameLogic/MoveGenerator.test.ts`), not in a separate `__tests__`
+tree. Import `describe`/`it`/`expect` explicitly from `"vitest"` rather
+than relying on injected globals, so files type-check without extra
+config. Shared test-only helpers (e.g. `buildBoard`/`piece` for
+constructing a board with specific pieces on it) live in
+`src/testUtils.ts`.
 
-Only the logic layer (`src/types/*.ts`) is covered so far — components
-(`GamePiece`, `GameBoard`, `StartPage`) aren't tested yet, since they drive
-everything through raw DOM mouse events and imperative style mutation
-rather than props/return values; testing them meaningfully would need
-that interaction extracted into something callable without a real drag.
+Only the logic layer (`src/GameLogic/*.ts`, `src/types/GameBoard.ts`) is
+covered so far — components (`GamePiece`, `GameBoard`, `StartPage`)
+aren't tested yet, since they drive everything through raw DOM mouse
+events and imperative style mutation rather than props/return values;
+testing them meaningfully would need that interaction extracted into
+something callable without a real drag.
 
 What makes the logic layer testable, and should be preserved as more of
 it is written:
 
-- Keep game-rule logic (`src/types/*.ts`) as plain functions of
+- Keep game-rule logic (`src/GameLogic/*.ts`) as plain functions of
   `(gameBoard, coordinates, piece, ...)` that return a value — no DOM
   access, no atoms, no React — so they can be called directly in a test
   with a hand-built board, no rendering or event simulation required.
-  `MoveValidator.ts` and `GameLogicValidator.ts` already follow this.
+  `MoveGenerator.ts` and `GameLogicValidator.ts` already follow this.
 - Avoid hidden dependencies on global/module state inside logic functions;
   pass in everything a function needs as a parameter instead of reaching
-  out to an atom or `document` from inside `src/types/`.
+  out to an atom or `document` from inside `src/GameLogic/`.
 - Where a function's correctness matters most (move legality, check/
   checkmate detection), favor a form that's easy to assert against —
   return data (`BoardCoordinates[]`, `boolean`) rather than performing a
@@ -115,7 +119,7 @@ it is written:
 - Type-only imports use inline `type` markers:
   `import { type BoardCoordinates, type ChessPiece } from "./ChessObjects"`,
   not a separate `import type { ... }` statement.
-- Relative imports (`../state`, `./MoveValidator`) throughout — no path
+- Relative imports (`../state`, `./MoveGenerator`) throughout — no path
   aliases are configured.
 
 ## React patterns

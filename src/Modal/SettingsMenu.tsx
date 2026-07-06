@@ -4,7 +4,7 @@ import { useAtom } from "jotai"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faGear } from "@fortawesome/free-solid-svg-icons"
 import { highlightMovesEnabledAtom, languageAtom } from "../state"
-import Modal from "../Modal/Modal"
+import ModalFrame from "./ModalFrame"
 import i18n from "../i18n"
 import { LANGUAGES } from "./languages"
 
@@ -30,7 +30,7 @@ function SettingsMenu() {
                 <FontAwesomeIcon icon={faGear} />
             </button>
             {isOpen &&
-                <Modal onDismiss={() => setIsOpen(false)}>
+                <ModalFrame onDismiss={() => setIsOpen(false)}>
                     <h2 className="modal-title settings-menu-title">{t("header.settingsButtonLabel")}</h2>
                     <label className="settings-menu-option">
                         <input
@@ -61,7 +61,7 @@ function SettingsMenu() {
                     >
                         {t("common.close")}
                     </button>
-                </Modal>
+                </ModalFrame>
             }
         </>
     )

@@ -1,10 +1,10 @@
 import { useAtom, useSetAtom } from "jotai"
 import { useTranslation } from "react-i18next"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import Modal from "../Modal/Modal"
+import ModalFrame from "./ModalFrame"
 import getPieceIcon from "../GameBoard/pieceIcons"
 import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pendingPromotionAtom } from "../state"
-import { isCheckmate, isKingInCheck } from "../types/GameLogicValidator"
+import { isCheckmate, isKingInCheck } from "../GameLogic/GameLogicValidator"
 import type { CHESS_PIECE_TYPE } from "../types/ChessObjects"
 
 const PROMOTION_CHOICES: CHESS_PIECE_TYPE[] = ["QUEEN", "ROOK", "BISHOP", "KNIGHT"]
@@ -47,7 +47,7 @@ function PromotionPrompt() {
     }
 
     return (
-        <Modal>
+        <ModalFrame>
             <h2 className="modal-title">{t("pawnPromotion.title")}</h2>
             <p className="modal-description">{t("pawnPromotion.description")}</p>
             <div className="promotion-choices">
@@ -63,7 +63,7 @@ function PromotionPrompt() {
                     </button>
                 )}
             </div>
-        </Modal>
+        </ModalFrame>
     )
 }
 

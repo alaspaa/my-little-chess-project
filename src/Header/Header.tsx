@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import SettingsMenu from "./SettingsMenu"
+import SettingsMenu from "../Modal/SettingsMenu"
 
 function Header() {
     const { t } = useTranslation()

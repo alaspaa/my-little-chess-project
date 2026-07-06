@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react"
 import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
-import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../types/GameLogicValidator"
-import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../types/MoveValidator"
+import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../GameLogic/GameLogicValidator"
+import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../GameLogic/MoveGenerator"
 import getPieceIcon from "./pieceIcons"
 
 interface opts {

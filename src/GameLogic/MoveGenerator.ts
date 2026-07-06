@@ -1,4 +1,4 @@
-import type { BoardCoordinates, CHESS_PIECE_COLOR, ChessPiece, Square } from "./ChessObjects";
+import type { BoardCoordinates, CHESS_PIECE_COLOR, ChessPiece, Square } from "../types/ChessObjects";
 
 function getValidMoves(
     gameBoard: Square[][],

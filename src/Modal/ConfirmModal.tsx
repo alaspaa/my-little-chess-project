@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import Modal from '../Modal/Modal'
+import ModalFrame from './ModalFrame'
 
 interface opts {
     title: string,
@@ -15,7 +15,7 @@ function ConfirmModal(props: opts) {
     const { t } = useTranslation()
 
     return (
-        <Modal onDismiss={onDecline}>
+        <ModalFrame onDismiss={onDecline}>
             <h2 className="modal-title">{title}</h2>
             {description && <p className="modal-description">{description}</p>}
             <div className="modal-actions">
@@ -26,7 +26,7 @@ function ConfirmModal(props: opts) {
                     {declineLabel ?? t('common.cancel')}
                 </button>
             </div>
-        </Modal>
+        </ModalFrame>
     )
 }
 

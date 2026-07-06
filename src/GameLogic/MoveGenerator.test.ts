@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import getValidMoves, { getCastlingRookMove, isCastlingMove, isPawnPromotion, isSquareAttacked } from "./MoveValidator"
+import getValidMoves, { getCastlingRookMove, isCastlingMove, isPawnPromotion, isSquareAttacked } from "./MoveGenerator"
 import { buildBoard, expectMoves, piece } from "../testUtils"
 
 describe("pawn moves", () => {

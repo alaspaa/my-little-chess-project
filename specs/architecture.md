@@ -47,18 +47,18 @@ All cross-component state is a Jotai atom in this one file:
   pawn move lands on the back rank; see "Pawn promotion" below.
 - `languageAtom` — mirrors `i18n.language`, initialized from it directly
   (`src/i18n.ts`'s `i18n` instance is imported into `state.ts` for this).
-  `SettingsMenu.tsx`'s language dropdown (`src/Header/languages.ts` holds
+  `SettingsMenu.tsx`'s language dropdown (`src/Modal/languages.ts` holds
   the `{code, label, flag}` list) sets both this atom and calls
   `i18n.changeLanguage(code)` together — the atom exists purely so React
   re-renders on a language change via Jotai's subscription instead of
   hooking into `i18next`'s own event emitter. Not persisted across a
   reload, same as `whitePlayerAtom`/`blackPlayerAtom`.
 
-## Validation pipeline (`src/types/`)
+## Validation pipeline (`src/GameLogic/`)
 
 Move legality is split into two layers, each in its own file:
 
-1. **`MoveValidator.ts`** — pseudo-legal move generation. `getValidMoves`
+1. **`MoveGenerator.ts`** — pseudo-legal move generation. `getValidMoves`
    returns every square a piece could physically move to, per standard
    chess movement rules (blocking pieces, captures, pawn double-step,
    etc.), **without** considering whether the move would leave the mover's
@@ -70,9 +70,12 @@ Move legality is split into two layers, each in its own file:
    folded into `getValidMoves`. `GamePiece.tsx` calls it right after a
    move commits; see "Pawn promotion" below for what happens next.
    `getKingMoves` folds in castling (`getCastlingMoves`) alongside the
-   king's normal one-step moves; see "Castling" below.
+   king's normal one-step moves; see "Castling" below. Despite the name
+   of the layer, this file doesn't itself validate anything — it only
+   generates candidate moves; `GameLogicValidator.ts` below is where
+   actual yes/no validation happens.
 2. **`GameLogicValidator.ts`** — the game-rules layer built on top of
-   `MoveValidator`:
+   `MoveGenerator`:
    - `getLegalMoves` filters `getValidMoves`' output down to moves that
      don't leave the mover's own king in check (simulates the move on a
      cloned board and checks `isKingInCheck`).
@@ -111,7 +114,7 @@ atom/field rather than inferring it from the board alone.
    `gameStatusAtom` immediately — not both. See "Pawn promotion" below for
    how the deferred case gets finished.
 
-## Pawn promotion (`src/PawnPromotion/PromotionPrompt.tsx`)
+## Pawn promotion (`src/Modal/PromotionPrompt.tsx`)
 
 When `GamePiece.tsx` detects a promotion, it does **not** flip the turn or
 recompute check/checkmate status right away — it sets `pendingPromotionAtom`
@@ -120,8 +123,8 @@ While that atom is non-null, `GamePiece.tsx`'s `mousedown` handler refuses
 to start any drag (for either color), so the game is effectively paused.
 
 `PromotionPrompt` (rendered from `GamePage.tsx`, a sibling of `GameBoard`/
-`GameFooter`) watches `pendingPromotionAtom` and renders `Modal` with a
-2x2 grid of piece choices when it's set. Choosing a piece:
+`GameFooter`) watches `pendingPromotionAtom` and renders `ModalFrame` with
+a row of piece choices when it's set. Choosing a piece:
 
 1. Replaces the pawn at `pendingPromotion.coordinates` with `{...pawn,
    type: chosenType}` (same `id`, so nothing else needs to know a
@@ -138,7 +141,7 @@ deliberate, since the two files don't have a natural common parent to
 own that logic, and the snippet is small enough that the duplication is
 cheaper than the plumbing to share it.
 
-## Castling (`src/types/MoveValidator.ts`, `GamePiece.tsx`)
+## Castling (`src/GameLogic/MoveGenerator.ts`, `GamePiece.tsx`)
 
 `getKingMoves` appends castling destinations (`{x: 6}` kingside, `{x: 2}`
 queenside, same `y`) via `getCastlingMoves`, which requires: the king and
@@ -159,7 +162,7 @@ move pipeline doesn't otherwise support (`updateGameBoardWithMovedPiece`
 only relocates one piece per move) — `isCastlingMove(piece, from, to)`
 (true when a king moves two squares) and `getCastlingRookMove(kingDestX)`
 (mapping the king's landing file to the rook's `{from, to}` files) live in
-`MoveValidator.ts` as the one place that mapping is spelled out, and are
+`MoveGenerator.ts` as the one place that mapping is spelled out, and are
 used both by `GamePiece.tsx`'s move-commit step (to actually relocate the
 rook alongside the king) and by `GameLogicValidator.ts`'s `simulateMove`
 (so the check-safety simulation used by `getLegalMoves` reflects the

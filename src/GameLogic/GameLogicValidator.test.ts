@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "./GameLogicValidator"
-import getValidMoves from "./MoveValidator"
+import getValidMoves from "./MoveGenerator"
 import { buildBoard, expectMoves, piece } from "../testUtils"
 
 describe("isKingInCheck", () => {

@@ -5,7 +5,7 @@ interface opts {
     children: ReactNode,
 }
 
-function Modal(props: opts) {
+function ModalFrame(props: opts) {
     const { onDismiss, children } = props
 
     return (
@@ -17,4 +17,4 @@ function Modal(props: opts) {
     )
 }
 
-export default Modal
+export default ModalFrame
