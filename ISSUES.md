@@ -37,6 +37,32 @@ position, not derived from player color or recomputed per game.
 
 ---
 
+## Add component rendering tests
+
+**Complexity:** Small-medium — mostly test-infrastructure setup, since the
+assertions themselves (did the right elements render) are simple.
+
+**Area:** test config (`vite.config.ts`), new dev dependencies,
+`src/**/*.test.tsx` next to each component
+
+Only the logic layer (`src/types/*.ts`) has tests today — components
+(`GamePiece`, `GameBoard`, `StartPage`, etc.) aren't covered at all (see
+"Testability" in `specs/code-style.md`), so there's no safety net against
+a component silently failing to render or a prop being wired up wrong.
+Needs: a DOM test environment for Vitest (e.g. `jsdom`, since the current
+`vitest.config`'s `test` block has no `environment` set and runs in plain
+Node), `@testing-library/react` for rendering into that DOM, and
+`vite.config.ts`'s `test.include` extended to also pick up `*.test.tsx`
+(currently only matches `*.test.ts`). Start at the minimum bar of one
+smoke test per component asserting it renders its expected elements (e.g.
+`GameSquare` renders a piece icon when its square has one, `StartPage`
+renders both username inputs and the start button) — the existing
+components' reliance on raw DOM mouse events for interaction (also called
+out in `specs/code-style.md`) means testing drag-and-drop behavior itself
+is a separate, harder problem than this issue's scope.
+
+---
+
 ## Add a button to offer/accept a draw
 
 **Complexity:** Medium — needs a two-sided offer/accept interaction, not
