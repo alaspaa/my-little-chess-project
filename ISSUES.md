@@ -172,45 +172,45 @@ counting just because the auto-draw is disabled.
 
 ---
 
-## Track wins/losses/draws in state
-
-**Complexity:** Medium — the tricky part is incrementing exactly once per
-game, not the counter itself.
-
-**Area:** state (`src/state.ts`)
-
-There's no running tally of results across games — a game's outcome
-(`gameStatusAtom`) is only ever reflected once, in the status bar.
-Rematches are possible now (`resetGameAtom`, `RematchPrompt.tsx` — see
-"Rematch" in `specs/architecture.md`), so this is unblocked: needs a
-score atom (e.g. `scoreAtom: {white: number, black: number, draws:
-number}`, or keyed by player name instead of color if a future rematch
-variant can swap sides), incremented once when `gameStatusAtom` reaches
-an end state, and reset only on a full page reload — the new score atom
-should *not* be added to `resetGameAtom`'s reset list, since the whole
-point is to keep counting across rematches. The main design question:
-`gameStatusAtom` is set from several places (`GamePiece.tsx`,
-`PromotionPrompt.tsx`, `GameFooter.tsx`'s resign/draw handlers), so
-incrementing inline at each call site would duplicate the "did this just
-become game-over" logic four times — likely cleaner as a single `useEffect`
-(e.g. in `GamePage.tsx`) that watches `gameStatusAtom` and increments once
-per transition into an end state, rather than incrementing at the source.
-This issue is state only — rendering the counters is "Display
-wins/losses/draws" below.
-
----
-
 ## Display wins/losses/draws
 
 **Complexity:** Small — read-only rendering of an existing atom.
 
 **Area:** UI (`src/GameBoard/GameFooter.tsx` or `src/Header/Header.tsx`)
 
-Depends on "Track wins/losses/draws in state" above landing first —
-nothing to render without it. Once `scoreAtom` exists, render its
-White/Black/draws counts somewhere in the persistent chrome (`GameFooter`
-alongside the player names, or `Header` if it should survive independent
-of `GamePage`) — plain text is enough, no new interaction needed.
+`scoreAtom` (`{player1, player2, draws}`, see "Score tracking" in
+`specs/architecture.md`) exists and is already incremented correctly
+across rematches — nothing renders it yet. Render its counts somewhere in
+the persistent chrome (`GameFooter` alongside the player names, or
+`Header` if it should survive independent of `GamePage`) — plain text is
+enough, no new interaction needed. Note the atom's `player1`/`player2`
+fields don't currently correspond to fixed people if "Allow switching
+sides on rematch" below ever lands — see that issue's note on this.
+
+---
+
+## Allow switching sides on rematch
+
+**Complexity:** Small-medium — swapping two atoms is trivial; the open
+question is the trigger, plus a real knock-on effect on score tracking.
+
+**Area:** state (`src/state.ts`), UI (`src/Modal/RematchPrompt.tsx`)
+
+`resetGameAtom` always restarts with the same colors each player had
+before (White stays White). Needs deciding how sides get swapped before
+implementing: a checkbox in `RematchPrompt.tsx` ("swap sides"), or
+swapping automatically every rematch, or a dedicated button alongside
+"Rematch". Whichever is chosen, it's just swapping `whitePlayerAtom` and
+`blackPlayerAtom`'s values (or leaving `resetGameAtom` to do it
+conditionally). The real complication: `scoreAtom`'s `player1`/`player2`
+tally (see "Score tracking" in `specs/architecture.md`) currently
+attributes wins by *whichever color is currently White/Black* at the
+moment a game ends — that's only correct because sides never change
+today. Once they can, `GamePage.tsx`'s scoring effect needs a stable way
+to know which physical player is "player1" independent of color (e.g. an
+atom capturing each player's original color, set once at the first game
+and never touched by a later swap) instead of inferring it from
+`whitePlayerAtom` at increment time.
 
 ---
 

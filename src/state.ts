@@ -47,6 +47,17 @@ export const pendingPromotionAtom = atom<PendingPromotion | null>(null)
 // move, for threefold repetition detection.
 export const positionHistoryAtom = atom<string[]>([])
 
+// Keyed by player slot (whoever started as White/Black in the first game),
+// not color - so a future "switch sides on rematch" feature doesn't
+// invalidate the tally. `resetGameAtom` deliberately never touches this,
+// since the whole point is for it to survive across rematches.
+export type Score = {
+    player1: number,
+    player2: number,
+    draws: number,
+}
+export const scoreAtom = atom<Score>({player1: 0, player2: 0, draws: 0})
+
 // Write-only action atom: puts every per-game (not per-session/settings)
 // atom back to its starting value, for RematchPrompt's "play again" button.
 // whitePlayerAtom/blackPlayerAtom and settings atoms are deliberately left

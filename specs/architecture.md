@@ -64,6 +64,9 @@ All cross-component state is a Jotai atom in this one file:
   `whitePlayerAtom`/`blackPlayerAtom` and settings atoms
   (`highlightMovesEnabledAtom`, `languageAtom`) untouched — a rematch is
   the same two players playing again, not a return to the setup page.
+- `scoreAtom` — `{ player1: number, player2: number, draws: number }`,
+  tallying results across rematches; see "Score tracking" below. Keyed by
+  player slot, not color, and deliberately not reset by `resetGameAtom`.
 
 ## Validation pipeline (`src/GameLogic/`)
 
@@ -236,6 +239,22 @@ e.g. "Bob wins by resignation", so this modal doesn't repeat it) with a
 single "Rematch" button that calls `resetGameAtom`. Rendered from
 `GamePage.tsx` as another sibling of `GameBoard`/`GameFooter`, same as
 `PromotionPrompt`.
+
+## Score tracking (`GamePage.tsx`)
+
+`gameStatusAtom` is set to an end state from four different call sites
+(`GamePiece.tsx`, `PromotionPrompt.tsx`, and `GameFooter.tsx`'s
+resign/draw-offer handlers), so rather than duplicate "did the game just
+end" logic in all four, `GamePage.tsx` has a single `useEffect` that
+watches `gameStatusAtom` and increments `scoreAtom` once per transition
+into an end state (tracked via a `wasGameOverRef`, so a rematch resetting
+`gameStatusAtom` back to `"playing"` doesn't itself count as a result,
+and re-renders while already game-over don't double-count). For
+checkmate/resigned, `gameStatus.color` is the *loser's* color (same
+convention `GameFooter.tsx`'s `getWinnerName` already relies on), so the
+winner is the opposite color, mapped to `player1`/`player2` via which
+color is currently White/Black — since sides can't be swapped between
+games yet, `player1` is simply whoever is currently `whitePlayerAtom`.
 
 ## User-facing text (`src/i18n.ts`, `src/locales/`)
 
