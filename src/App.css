@@ -264,6 +264,10 @@
     background-color: rgba(120, 130, 200, 0.2);
 }
 
+.game-footer-status-wrapper.draw {
+    background-color: rgba(150, 150, 150, 0.2);
+}
+
 .game-footer-status {
     flex: 1;
     text-align: center;
@@ -281,6 +285,10 @@
 
 .game-footer-status.resigned {
     color: rgb(120, 130, 200);
+}
+
+.game-footer-status.draw {
+    color: rgb(150, 150, 150);
 }
 
 .turn-arrow {

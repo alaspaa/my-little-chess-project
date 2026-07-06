@@ -68,5 +68,9 @@ function isCheckmate(gameBoard: Square[][], color: CHESS_PIECE_COLOR): boolean {
     )
 }
 
+function isThreefoldRepetition(positionHistory: string[], position: string): boolean {
+    return positionHistory.filter(entry => entry === position).length >= 3
+}
+
 export default validateMove
-export { getLegalMoves, isKingInCheck, isCheckmate }
+export { getLegalMoves, isKingInCheck, isCheckmate, isThreefoldRepetition }

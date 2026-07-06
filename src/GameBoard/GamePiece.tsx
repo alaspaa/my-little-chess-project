@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react"
 import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
-import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../GameLogic/GameLogicValidator"
+import validateMove, { getLegalMoves, isCheckmate, isKingInCheck, isThreefoldRepetition } from "../GameLogic/GameLogicValidator"
 import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../GameLogic/MoveResolver"
 import { serializePosition } from "../GameLogic/Position"
 import getPieceIcon from "./pieceIcons"
@@ -25,7 +25,7 @@ function GamePiece(props: opts) {
     const [gameStatus, setGameStatus] = useAtom(gameStatusAtom)
     const [, setCapturedPieces] = useAtom(capturedPiecesAtom)
     const [pendingPromotion, setPendingPromotion] = useAtom(pendingPromotionAtom)
-    const [, setPositionHistory] = useAtom(positionHistoryAtom)
+    const [positionHistory, setPositionHistory] = useAtom(positionHistoryAtom)
 
     // Read via refs inside the event listeners below instead of depending on
     // these atoms in the effect, so the listeners are attached once and
@@ -36,6 +36,7 @@ function GamePiece(props: opts) {
     const currentTurnRef = useRef(currentTurn)
     const gameStatusRef = useRef(gameStatus)
     const pendingPromotionRef = useRef(pendingPromotion)
+    const positionHistoryRef = useRef(positionHistory)
     useEffect(() => {
         pieceClickedRef.current = pieceClicked
         boardCoordinatesRef.current = boardCoordinates
@@ -43,6 +44,7 @@ function GamePiece(props: opts) {
         currentTurnRef.current = currentTurn
         gameStatusRef.current = gameStatus
         pendingPromotionRef.current = pendingPromotion
+        positionHistoryRef.current = positionHistory
     })
 
     useEffect(() => {
@@ -105,10 +107,15 @@ function GamePiece(props: opts) {
                     } else {
                         const nextTurn = capturingColor === "white" ? "black" : "white"
                         setCurrentTurn(nextTurn)
-                        setPositionHistory(previous => [...previous, serializePosition(newBoard, nextTurn)])
+
+                        const position = serializePosition(newBoard, nextTurn)
+                        const newPositionHistory = [...positionHistoryRef.current, position]
+                        setPositionHistory(newPositionHistory)
 
                         if(isCheckmate(newBoard, nextTurn)) {
                             setGameStatus({state: "checkmate", color: nextTurn})
+                        } else if(isThreefoldRepetition(newPositionHistory, position)) {
+                            setGameStatus({state: "draw", color: null})
                         } else if(isKingInCheck(newBoard, nextTurn)) {
                             setGameStatus({state: "check", color: nextTurn})
                         } else {

@@ -21,7 +21,8 @@
   "gameStatus": {
     "checkmate": "Shakkimatti! {{winner}} voittaa",
     "check": "{{player}} on shakissa",
-    "resigned": "{{winner}} voittaa luovutuksella"
+    "resigned": "{{winner}} voittaa luovutuksella",
+    "draw": "Peli päättyi tasapeliin"
   },
   "gameFooter": {
     "resignButton": "Luovuta",

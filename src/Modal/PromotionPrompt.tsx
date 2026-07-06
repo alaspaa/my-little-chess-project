@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import ModalFrame from "./ModalFrame"
 import getPieceIcon from "../GameBoard/pieceIcons"
 import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pendingPromotionAtom, positionHistoryAtom } from "../state"
-import { isCheckmate, isKingInCheck } from "../GameLogic/GameLogicValidator"
+import { isCheckmate, isKingInCheck, isThreefoldRepetition } from "../GameLogic/GameLogicValidator"
 import { serializePosition } from "../GameLogic/Position"
 import type { CHESS_PIECE_TYPE } from "../types/ChessObjects"
 
@@ -16,7 +16,7 @@ function PromotionPrompt() {
     const [gameBoard, setGameBoard] = useAtom(gameBoardAtom)
     const setCurrentTurn = useSetAtom(currentTurnAtom)
     const setGameStatus = useSetAtom(gameStatusAtom)
-    const setPositionHistory = useSetAtom(positionHistoryAtom)
+    const [positionHistory, setPositionHistory] = useAtom(positionHistoryAtom)
 
     if(!pendingPromotion) return null
 
@@ -36,10 +36,15 @@ function PromotionPrompt() {
 
         const nextTurn = color === "white" ? "black" : "white"
         setCurrentTurn(nextTurn)
-        setPositionHistory(previous => [...previous, serializePosition(newBoard, nextTurn)])
+
+        const position = serializePosition(newBoard, nextTurn)
+        const newPositionHistory = [...positionHistory, position]
+        setPositionHistory(newPositionHistory)
 
         if(isCheckmate(newBoard, nextTurn)) {
             setGameStatus({state: "checkmate", color: nextTurn})
+        } else if(isThreefoldRepetition(newPositionHistory, position)) {
+            setGameStatus({state: "draw", color: null})
         } else if(isKingInCheck(newBoard, nextTurn)) {
             setGameStatus({state: "check", color: nextTurn})
         } else {

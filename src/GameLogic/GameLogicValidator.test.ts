@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "./GameLogicValidator"
+import validateMove, { getLegalMoves, isCheckmate, isKingInCheck, isThreefoldRepetition } from "./GameLogicValidator"
 import getValidMoves from "./MoveResolver"
 import { buildBoard, expectMoves, piece } from "../testUtils"
 
@@ -150,5 +150,21 @@ describe("isCheckmate", () => {
         ])
 
         expect(isCheckmate(board, "white")).toBe(true)
+    })
+})
+
+describe("isThreefoldRepetition", () => {
+    it("is false the first and second time a position occurs", () => {
+        expect(isThreefoldRepetition(["a"], "a")).toBe(false)
+        expect(isThreefoldRepetition(["a", "b", "a"], "a")).toBe(false)
+    })
+
+    it("is true once a position has occurred three times", () => {
+        expect(isThreefoldRepetition(["a", "b", "a", "b", "a"], "a")).toBe(true)
+    })
+
+    it("is unaffected by other positions in the history", () => {
+        expect(isThreefoldRepetition(["a", "a", "b", "b", "b"], "a")).toBe(false)
+        expect(isThreefoldRepetition(["a", "a", "b", "b", "b"], "b")).toBe(true)
     })
 })

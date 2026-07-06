@@ -144,13 +144,12 @@ just a single button, to prevent a player accepting their own offer.
 No way to end the game as a mutually agreed draw. Needs a two-step
 interaction (one player offers, the other accepts/declines) — a single
 button isn't quite enough, since one player accepting their own offer
-would need to be prevented — plus a new `gameStatusAtom` end state (e.g.
-`"draw"`). Follow the pattern the resign button already established:
-add `"draw"` to `GameStatus["state"]` in `src/state.ts`, extend the
-`isGameOver` helper there to include it, and add a `gameStatus.draw`
-translation key in `src/locales/en.json` (see `gameStatus.resigned` for
-the shape) rendered the same way in `GameFooter.tsx`'s
-`getGameStatusMessage`.
+would need to be prevented. The `"draw"` `gameStatusAtom` end state,
+`gameStatus.draw` translation key, and `getGameStatusMessage` rendering
+already exist (added for threefold repetition) — this issue can just set
+`gameStatusAtom` to `{state: "draw", color: null}` directly once both
+players agree, following the pattern the resign button already
+established for the offer/accept UI itself.
 
 ---
 
@@ -165,10 +164,11 @@ A game should be drawn if 50 full moves pass with no pawn move and no
 capture. Needs: a new counter in state (e.g. `halfmoveClockAtom`),
 incremented after every move and reset to 0 whenever the moved piece is a
 `"PAWN"` or the destination square was occupied (a capture) — both already
-knowable at the point `GamePiece.tsx` commits a move — plus a new
-`gameStatusAtom` end state (e.g. `"draw"`) once the counter reaches 100
-half-moves. Doesn't need full position history, unlike threefold
-repetition below — just the running count.
+knowable at the point `GamePiece.tsx` commits a move — then setting
+`gameStatusAtom` to the existing `"draw"` end state (added for threefold
+repetition; see `gameStatus.draw` in `src/locales/en.json`) once the
+counter reaches 100 half-moves. Doesn't need full position history like
+threefold repetition — just the running count.
 
 ---
 
@@ -304,29 +304,6 @@ know which extra square to clear.
 
 ---
 
-## Threefold repetition detection
-
-**Complexity:** Medium — the history to check against already exists;
-this is a lookup plus a new end state.
-
-**Area:** `src/GameLogic/GameLogicValidator.ts`, state (`src/state.ts`)
-
-A game should be drawn if the same position occurs three times.
-`positionHistoryAtom` (`src/state.ts`) and `serializePosition`
-(`src/GameLogic/Position.ts`) already exist and are appended to after
-every completed move (see "Position history" in `specs/architecture.md`)
-— what's missing is consuming that history: after appending the current
-position, count how many times it (or an equal entry) appears in
-`positionHistoryAtom`, and if three, set a new `gameStatusAtom` end state
-(e.g. `"draw"`). Note `serializePosition` deliberately doesn't encode
-castling rights (a king/rook's `hasMoved`) yet, even though castling
-itself is implemented — two positions with different castling rights
-aren't truly the same position for repetition purposes, but this is a
-reasonable simplification until it actually causes an incorrect draw in
-practice, per the note in `Position.ts`.
-
----
-
 ## Make threefold repetition configurable
 
 **Complexity:** Small — same shape as "Make the fifty-move rule
@@ -334,11 +311,13 @@ configurable" above, applied to the other draw rule.
 
 **Area:** state (`src/state.ts`), UI (`src/Modal/SettingsMenu.tsx`)
 
-Depends on "Threefold repetition detection" above landing first — there's
-nothing to gate without it. Once it exists, add a
+Threefold repetition detection is implemented (`isThreefoldRepetition` in
+`GameLogicValidator.ts`, checked by `GamePiece.tsx`/`PromotionPrompt.tsx`
+right after appending to `positionHistoryAtom`; see "Position history" in
+`specs/architecture.md`) but always-on. Add a
 `threefoldRepetitionEnabledAtom` (default `true`) and a matching settings
 checkbox, gating whether reaching three occurrences of a position
 actually sets `gameStatusAtom` to the draw state. `positionHistoryAtom`
-itself (already tracked unconditionally, see "Position history" in
-`specs/architecture.md`) doesn't need gating — only the draw-triggering
-check does, same reasoning as the fifty-move toggle above.
+itself (tracked unconditionally) doesn't need gating — only the
+draw-triggering check does, same reasoning as the fifty-move toggle
+above.

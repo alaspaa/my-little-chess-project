@@ -38,7 +38,8 @@ All cross-component state is a Jotai atom in this one file:
 - `validMovesAtom` — the legal destination squares for whatever piece is
   currently picked up; consumed by `GameSquare` to render the highlight.
 - `currentTurnAtom` — whose color may move next.
-- `gameStatusAtom` — `{ state: "playing" | "check" | "checkmate" | "resigned", color }`.
+- `gameStatusAtom` — `{ state: "playing" | "check" | "checkmate" | "resigned" | "draw", color }`.
+  `color` is `null` for `"draw"` — a draw has no winner to point to.
 - `whitePlayerAtom` / `blackPlayerAtom` — the `Player` entered on the setup
   page for each color.
 - `capturedPiecesAtom` — keyed by the *capturing* color (e.g. `.white` is
@@ -54,8 +55,7 @@ All cross-component state is a Jotai atom in this one file:
   hooking into `i18next`'s own event emitter. Not persisted across a
   reload, same as `whitePlayerAtom`/`blackPlayerAtom`.
 - `positionHistoryAtom` — a serialized snapshot appended after every
-  completed move (see "Position history" below); currently unread —
-  it exists for threefold repetition detection to consume once written.
+  completed move; see "Position history" below.
 
 ## Validation pipeline (`src/GameLogic/`)
 
@@ -196,8 +196,9 @@ even when the arrangement is identical, so there's no other way to compare
 and square (via `PAWN`/`ROOK`/etc. mapped to single letters, `N` for
 knight to avoid colliding with `K` for king) plus whose turn it is —
 deliberately not `hasMoved` or piece `id`, and not castling/en passant
-rights (neither is tracked yet; see the note on this in `ISSUES.md` if
-those land later).
+rights — two positions that only differ in those rights are (for now)
+treated as the same position, a reasonable simplification per the note
+in `Position.ts` until it actually causes an incorrect draw in practice.
 
 `GamePiece.tsx`'s move-commit step appends `serializePosition(...)` to
 `positionHistoryAtom` right after flipping the turn, and
@@ -208,8 +209,15 @@ still pending (`GamePiece.tsx`'s promotion branch skips it): the pawn
 sitting on the back rank with the turn not yet flipped isn't a real
 position reached in the game, just an intermediate UI state.
 
-Nothing reads `positionHistoryAtom` yet — it's tracking only, for
-threefold repetition detection to consume once that's built.
+`isThreefoldRepetition(positionHistory, position)` in
+`GameLogicValidator.ts` is the consumer: a plain count of how many times
+`position` appears in `positionHistory`, true once it's 3 or more. Both
+`GamePiece.tsx` and `PromotionPrompt.tsx` call it right after appending
+the new position, and set `gameStatusAtom` to `{state: "draw", color:
+null}` if it's true — checked after checkmate (checkmate wins if a move
+somehow satisfies both) but before an ordinary check, since a draw ends
+the game regardless of whether the final position also happens to check
+the mover's opponent.
 
 ## User-facing text (`src/i18n.ts`, `src/locales/`)
 

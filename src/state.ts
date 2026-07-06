@@ -6,12 +6,12 @@ import i18n from "./i18n";
 export type Page = "setup" | "game"
 
 export type GameStatus = {
-    state: "playing" | "check" | "checkmate" | "resigned",
+    state: "playing" | "check" | "checkmate" | "resigned" | "draw",
     color: CHESS_PIECE_COLOR | null,
 }
 
 export function isGameOver(state: GameStatus["state"]): boolean {
-    return state === "checkmate" || state === "resigned"
+    return state === "checkmate" || state === "resigned" || state === "draw"
 }
 
 export const pieceClickedAtom = atom<string | null>(null)

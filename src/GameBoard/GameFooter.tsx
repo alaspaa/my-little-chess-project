@@ -108,6 +108,10 @@ function getGameStatusMessage(gameStatus: GameStatus, whitePlayer: Player | null
         return t('gameStatus.check', {player: getPlayerName(gameStatus.color, whitePlayer, blackPlayer, t)})
     }
 
+    if(gameStatus.state === 'draw') {
+        return t('gameStatus.draw')
+    }
+
     return ''
 }
 
