@@ -146,6 +146,25 @@ repetition below — just the running count.
 
 ---
 
+## Make the fifty-move rule configurable
+
+**Complexity:** Small — one boolean atom and a settings checkbox, gating
+an existing check.
+
+**Area:** state (`src/state.ts`), UI (`src/Modal/SettingsMenu.tsx`)
+
+Depends on "Fifty-move rule draw is not implemented" above landing first
+— there's nothing to gate without it. Once it exists, add a
+`fiftyMoveRuleEnabledAtom` (default `true`), following the same pattern
+as `highlightMovesEnabledAtom`, and a matching checkbox in
+`SettingsMenu.tsx`'s modal (same shape as the existing "Highlight legal
+moves" toggle). Gate only the *end-state* check — whether the halfmove clock reaching
+100 actually sets `gameStatusAtom` to the draw state — not the counter
+itself, since tracking it is cheap and there's no reason to stop
+counting just because the auto-draw is disabled.
+
+---
+
 ## Offer a rematch/restart prompt when the game ends
 
 **Complexity:** Medium-large — needs a "reset the game to its initial
@@ -279,3 +298,21 @@ itself is implemented — two positions with different castling rights
 aren't truly the same position for repetition purposes, but this is a
 reasonable simplification until it actually causes an incorrect draw in
 practice, per the note in `Position.ts`.
+
+---
+
+## Make threefold repetition configurable
+
+**Complexity:** Small — same shape as "Make the fifty-move rule
+configurable" above, applied to the other draw rule.
+
+**Area:** state (`src/state.ts`), UI (`src/Modal/SettingsMenu.tsx`)
+
+Depends on "Threefold repetition detection" above landing first — there's
+nothing to gate without it. Once it exists, add a
+`threefoldRepetitionEnabledAtom` (default `true`) and a matching settings
+checkbox, gating whether reaching three occurrences of a position
+actually sets `gameStatusAtom` to the draw state. `positionHistoryAtom`
+itself (already tracked unconditionally, see "Position history" in
+`specs/architecture.md`) doesn't need gating — only the draw-triggering
+check does, same reasoning as the fifty-move toggle above.
