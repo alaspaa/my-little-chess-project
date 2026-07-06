@@ -1,5 +1,5 @@
 import type { BoardCoordinates, CHESS_PIECE_COLOR, ChessPiece, Square } from "./ChessObjects";
-import getValidMoves from "./MoveValidator";
+import getValidMoves, { getCastlingRookMove, isCastlingMove, isSquareAttacked } from "./MoveValidator";
 
 function validateMove(
     gameBoard: Square[][],
@@ -25,6 +25,14 @@ function simulateMove(gameBoard: Square[][], from: BoardCoordinates, to: BoardCo
     const newBoard = gameBoard.map(row => row.map(square => ({...square})))
     newBoard[from.y][from.x] = {piece: null}
     newBoard[to.y][to.x] = {piece}
+
+    if(isCastlingMove(piece, from, to)) {
+        const rookMove = getCastlingRookMove(to.x)
+        const rook = newBoard[from.y][rookMove.from].piece
+        newBoard[from.y][rookMove.from] = {piece: null}
+        newBoard[from.y][rookMove.to] = {piece: rook}
+    }
+
     return newBoard
 }
 
@@ -32,15 +40,8 @@ function isKingInCheck(gameBoard: Square[][], color: CHESS_PIECE_COLOR): boolean
     const kingCoordinates = findKingCoordinates(gameBoard, color)
     if(!kingCoordinates) return false
 
-    return gameBoard.some((row, y) =>
-        row.some((square, x) => {
-            const attacker = square.piece
-            if(!attacker || attacker.color === color) return false
-            return getValidMoves(gameBoard, {x, y}, attacker).some(
-                move => move.x === kingCoordinates.x && move.y === kingCoordinates.y
-            )
-        })
-    )
+    const opponentColor = color === "white" ? "black" : "white"
+    return isSquareAttacked(gameBoard, kingCoordinates, opponentColor)
 }
 
 function findKingCoordinates(gameBoard: Square[][], color: CHESS_PIECE_COLOR): BoardCoordinates | null {

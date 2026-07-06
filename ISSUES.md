@@ -86,6 +86,62 @@ there) or just visual noise.
 
 ---
 
+## Consider a distinct highlight for castling moves
+
+**Complexity:** Small — mostly a design question; the code hook needed to
+answer it already exists.
+
+**Area:** UI (`src/GameBoard/GameSquare.tsx`, `src/App.css`)
+
+Same open question as "Consider a distinct highlight for
+promotion-triggering moves" above, for castling instead: a castling
+destination is just another square in the king's `.validmove` set today,
+indistinguishable from an ordinary one-step king move, even though
+dropping on it also relocates a rook two squares away.
+`isCastlingMove(piece, from, to)` in `src/types/MoveValidator.ts` already
+exists and could be called per candidate square the same way
+`isValidCapture` is computed now, so — as with promotion — the
+implementation is small; the open question is whether a distinct
+highlight (e.g. a `.validcastle` class) is worth it, or whether seeing
+the rook move is self-explanatory enough once it happens.
+
+---
+
+## Split move-generation rules into per-piece files
+
+**Complexity:** Medium — mostly mechanical (moving code around), but
+there's a real design question buried in it around where multi-piece
+rules live.
+
+**Area:** `src/types/MoveValidator.ts` (to be split), likely a new
+`src/types/moves/` folder
+
+`MoveValidator.ts` has grown into a single ~220-line file covering all
+six piece types (`getPawnMoves`, `getRookMoves`, `getKnightMoves`,
+`getBishopMoves`, `getQueenMoves`, `getKingMoves`/`getKingStepMoves`/
+`getCastlingMoves`), shared geometry helpers (`isOnBoard`,
+`squareIsEmpty`, `isOpponentPiece`, `getSlidingMoves`, `isSquareAttacked`),
+and cross-cutting predicates (`isPawnPromotion`, `isCastlingMove`,
+`getCastlingRookMove`). Worth splitting into one file per piece type
+(e.g. `src/types/moves/pawn.ts`, `rook.ts`, ..., `king.ts`), with
+`getValidMoves`'s switch statement staying as a thin dispatcher that
+imports from each. The shared geometry helpers need a common home too
+(e.g. `moves/shared.ts`), since rook/bishop/queen/king all depend on them.
+
+The open question is where a rule that isn't cleanly one piece's alone
+should live: castling reads as a king move today (`getKingMoves` folds
+`getCastlingMoves` into it, gated by the king's own `hasMoved`/check
+safety), so it could just stay in `king.ts` — but it also reaches into
+the rook's `hasMoved` flag and relocates it, which a strict
+one-file-per-piece split has no obvious home for. En passant would raise
+the same question if/when it lands (a pawn rule that depends on another
+pawn's last move). No need to solve this generally now — just pick a
+placement for castling (`king.ts` is the pragmatic default, per the
+reasoning above) and treat it as a call that can move later if a second
+shared-rule case makes the right pattern clearer.
+
+---
+
 ## Add a button to offer/accept a draw
 
 **Complexity:** Medium — needs a two-sided offer/accept interaction, not
@@ -234,41 +290,6 @@ state from the logic issue existing first, since the commit step needs
 to know it's an en passant capture (as opposed to a normal diagonal
 move onto an empty square, which is otherwise illegal for a pawn) to
 know which extra square to clear.
-
----
-
-## Castling move-generation logic
-
-**Complexity:** Large — several interacting preconditions, including
-reusing check detection along the king's path.
-
-**Area:** move rules (`src/types/MoveValidator.ts`)
-
-King and rook castling (kingside and queenside) isn't in `getKingMoves` or
-anywhere else. Needs: neither piece has moved (`hasMoved` already exists on
-`ChessPiece`), no pieces between king and rook, king not currently in
-check, and king doesn't pass through or land on an attacked square (reuse
-`isKingInCheck` from `GameLogicValidator.ts` for the "passes through
-check" part). This issue is move-generation only — producing the castling
-destination square for the king; actually relocating the rook alongside
-it is "Castling atomic two-piece move" below, since the two need to land
-together for castling to be usable at all.
-
----
-
-## Castling atomic two-piece move
-
-**Complexity:** Medium — the single-piece move architecture needs a second
-code path for the one move that relocates two pieces at once.
-
-**Area:** `src/GameBoard/GamePiece.tsx`
-
-`updateGameBoardWithMovedPiece` only relocates one piece per move today.
-Once "Castling move-generation logic" above can produce a legal castling
-destination for the king, committing that move needs to also move the
-corresponding rook to its post-castling square in the same board update,
-not as a separate move (the rook's move isn't independently legal and
-shouldn't flip the turn or be undoable on its own).
 
 ---
 

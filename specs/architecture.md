@@ -63,12 +63,14 @@ Move legality is split into two layers, each in its own file:
    chess movement rules (blocking pieces, captures, pawn double-step,
    etc.), **without** considering whether the move would leave the mover's
    own king in check. This is the layer to extend when adding new piece
-   movement rules (e.g. castling, en passant). It also exports
+   movement rules (e.g. en passant). It also exports
    `isPawnPromotion(piece, destination)`, a standalone predicate for
    detecting when a pawn move lands on the opposite back rank — a rule,
    not a move (it doesn't change what squares are legal), so it isn't
    folded into `getValidMoves`. `GamePiece.tsx` calls it right after a
    move commits; see "Pawn promotion" below for what happens next.
+   `getKingMoves` folds in castling (`getCastlingMoves`) alongside the
+   king's normal one-step moves; see "Castling" below.
 2. **`GameLogicValidator.ts`** — the game-rules layer built on top of
    `MoveValidator`:
    - `getLegalMoves` filters `getValidMoves`' output down to moves that
@@ -82,9 +84,9 @@ Move legality is split into two layers, each in its own file:
   ever shows truly legal squares) and `validateMove` to decide whether to
   commit a drop.
 
-En passant and castling are not implemented. En passant would need move
-history state (which pawn just double-stepped) that doesn't exist yet —
-add it as a new atom/field rather than inferring it from the board alone.
+En passant is not implemented. It would need move history state (which
+pawn just double-stepped) that doesn't exist yet — add it as a new
+atom/field rather than inferring it from the board alone.
 
 ## Turn flow (`GamePiece.tsx`)
 
@@ -135,6 +137,33 @@ This duplicates a small (~6 line) turn-flip/status snippet between
 deliberate, since the two files don't have a natural common parent to
 own that logic, and the snippet is small enough that the duplication is
 cheaper than the plumbing to share it.
+
+## Castling (`src/types/MoveValidator.ts`, `GamePiece.tsx`)
+
+`getKingMoves` appends castling destinations (`{x: 6}` kingside, `{x: 2}`
+queenside, same `y`) via `getCastlingMoves`, which requires: the king and
+the relevant corner `ROOK` both have `hasMoved === false`, the squares
+between them are empty, and the king isn't currently in check, doesn't
+pass through, and doesn't land on a square attacked by the opponent.
+That last check reuses `isSquareAttacked(gameBoard, coordinates, byColor)`
+— a generalization of "is this square attacked" that `isKingInCheck` in
+`GameLogicValidator.ts` is also built on now (it used to duplicate this
+scan inline). `isSquareAttacked` deliberately treats a king's *own*
+castling squares as not-an-attack, using only its plain one-step moves —
+otherwise checking whether white's castling path is safe could require
+computing black's castling eligibility, which could require checking
+white's again, recursing forever.
+
+Castling moves two pieces (king + rook) atomically, which the rest of the
+move pipeline doesn't otherwise support (`updateGameBoardWithMovedPiece`
+only relocates one piece per move) — `isCastlingMove(piece, from, to)`
+(true when a king moves two squares) and `getCastlingRookMove(kingDestX)`
+(mapping the king's landing file to the rook's `{from, to}` files) live in
+`MoveValidator.ts` as the one place that mapping is spelled out, and are
+used both by `GamePiece.tsx`'s move-commit step (to actually relocate the
+rook alongside the king) and by `GameLogicValidator.ts`'s `simulateMove`
+(so the check-safety simulation used by `getLegalMoves` reflects the
+rook's real post-castling position, not its pre-move one).
 
 ## User-facing text (`src/i18n.ts`, `src/locales/`)
 

@@ -5,7 +5,7 @@ import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isG
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../types/GameLogicValidator"
-import { isPawnPromotion } from "../types/MoveValidator"
+import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../types/MoveValidator"
 import getPieceIcon from "./pieceIcons"
 
 interface opts {
@@ -193,11 +193,24 @@ function validateAndUpdateGameBoardWithMovedPiece(
     chessPiece: ChessPiece,
 ): Square[][] {
  if(!validateMove(currentGameBoard, originalCoordinates, newCoordinates, chessPiece)) return currentGameBoard
-    
+
 
     newGameBoard[newCoordinates.y][newCoordinates.x] = {
         ...newGameBoard[newCoordinates.y][newCoordinates.x],
         piece: {...chessPiece, hasMoved: true}
+    }
+
+    if(isCastlingMove(chessPiece, originalCoordinates, newCoordinates)) {
+        const rookMove = getCastlingRookMove(newCoordinates.x)
+        const rook = newGameBoard[originalCoordinates.y][rookMove.from].piece
+        newGameBoard[originalCoordinates.y][rookMove.from] = {
+            ...newGameBoard[originalCoordinates.y][rookMove.from],
+            piece: null
+        }
+        newGameBoard[originalCoordinates.y][rookMove.to] = {
+            ...newGameBoard[originalCoordinates.y][rookMove.to],
+            piece: rook && {...rook, hasMoved: true}
+        }
     }
 
     return newGameBoard
