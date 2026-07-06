@@ -172,47 +172,23 @@ counting just because the auto-draw is disabled.
 
 ---
 
-## Offer a rematch/restart prompt when the game ends
-
-**Complexity:** Medium-large — needs a "reset the game to its initial
-state" mechanism that doesn't exist anywhere yet, in addition to the modal
-itself.
-
-**Area:** UI (`src/GamePage/GamePage.tsx` or a new component), state
-(`src/state.ts`)
-
-When the game reaches an end state (checkmate today; resignation/draw once
-those exist), there's currently no way to start a new game short of
-reloading the page. Needs a popup/modal shown when `gameStatusAtom.state`
-is any end state, with a restart action that resets `gameBoardAtom`,
-`currentTurnAtom`, and `gameStatusAtom` back to their initial values.
-Note there's no existing "reset to initial state" helper for
-`gameBoardAtom` (it's currently initialized once at module load via
-`populateBoardWithPieces(createEmptyBoard())`) — resetting it will need
-that same construction callable again, not just a stored initial value,
-since further game changes should build on that fresh board.
-
----
-
 ## Track wins/losses/draws across games
 
-**Complexity:** Medium — new counters plus a UI spot to render them, but
-depends on being able to play more than one game per session.
+**Complexity:** Medium — new counters plus a UI spot to render them.
 
 **Area:** state (`src/state.ts`), UI (`src/GameBoard/GameFooter.tsx` or
 `src/Header/Header.tsx`)
 
 There's no running tally of results across games — a game's outcome
-(`gameStatusAtom`) is only ever shown once, and the page has to be
-reloaded to play again today. Needs a score atom (e.g. `scoreAtom:
-{white: number, black: number, draws: number}`, or keyed by player name
-instead of color if a rematch can swap sides), incremented once when
-`gameStatusAtom` reaches an end state (checkmate/resignation/draw once
-that exists), and reset only on a full page reload — not by "Offer a
-rematch/restart prompt" above, since the whole point is to keep counting
-across rematches. Depends on that rematch/restart issue existing first,
-since without a way to start a new game in the same session this would
-never go above one result.
+(`gameStatusAtom`) is only ever shown once. Rematches are possible now
+(`resetGameAtom`, `RematchPrompt.tsx` — see "Rematch" in
+`specs/architecture.md`), so this is unblocked: needs a score atom (e.g.
+`scoreAtom: {white: number, black: number, draws: number}`, or keyed by
+player name instead of color if a future rematch variant can swap sides),
+incremented once when `gameStatusAtom` reaches an end state, and reset
+only on a full page reload — the new score atom should *not* be added to
+`resetGameAtom`'s reset list, since the whole point is to keep counting
+across rematches.
 
 ---
 

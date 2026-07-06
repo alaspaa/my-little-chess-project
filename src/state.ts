@@ -46,3 +46,19 @@ export const pendingPromotionAtom = atom<PendingPromotion | null>(null)
 // Serialized (board + side-to-move) snapshot appended after every completed
 // move, for threefold repetition detection.
 export const positionHistoryAtom = atom<string[]>([])
+
+// Write-only action atom: puts every per-game (not per-session/settings)
+// atom back to its starting value, for RematchPrompt's "play again" button.
+// whitePlayerAtom/blackPlayerAtom and settings atoms are deliberately left
+// alone - a rematch keeps the same two players, not just the same board.
+export const resetGameAtom = atom(null, (_get, set) => {
+    set(gameBoardAtom, populateBoardWithPieces(createEmptyBoard()))
+    set(currentTurnAtom, "white")
+    set(gameStatusAtom, {state: "playing", color: null})
+    set(capturedPiecesAtom, {white: [], black: []})
+    set(positionHistoryAtom, [])
+    set(pendingPromotionAtom, null)
+    set(validMovesAtom, [])
+    set(pieceClickedAtom, null)
+    set(boardCoordinatesAtom, null)
+})

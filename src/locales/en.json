@@ -32,6 +32,11 @@
     "drawOfferTitle": "{{opponent}}, accept the draw?",
     "drawOfferDescription": "{{player}} has offered a draw. This will end the game."
   },
+  "rematchPrompt": {
+    "title": "Game over",
+    "description": "Would you like to play again?",
+    "rematchButton": "Rematch"
+  },
   "pawnPromotion": {
     "title": "Congratulations on your promotion!",
     "description": "Choose your new rank",

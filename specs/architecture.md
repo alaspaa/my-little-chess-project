@@ -56,6 +56,14 @@ All cross-component state is a Jotai atom in this one file:
   reload, same as `whitePlayerAtom`/`blackPlayerAtom`.
 - `positionHistoryAtom` — a serialized snapshot appended after every
   completed move; see "Position history" below.
+- `resetGameAtom` — write-only action atom (no read value) that puts
+  every per-game atom (`gameBoardAtom`, `currentTurnAtom`,
+  `gameStatusAtom`, `capturedPiecesAtom`, `positionHistoryAtom`,
+  `pendingPromotionAtom`, and the transient drag atoms) back to its
+  starting value; see "Rematch" below. Deliberately leaves
+  `whitePlayerAtom`/`blackPlayerAtom` and settings atoms
+  (`highlightMovesEnabledAtom`, `languageAtom`) untouched — a rematch is
+  the same two players playing again, not a return to the setup page.
 
 ## Validation pipeline (`src/GameLogic/`)
 
@@ -218,6 +226,16 @@ null}` if it's true — checked after checkmate (checkmate wins if a move
 somehow satisfies both) but before an ordinary check, since a draw ends
 the game regardless of whether the final position also happens to check
 the mover's opponent.
+
+## Rematch (`src/Modal/RematchPrompt.tsx`)
+
+`RematchPrompt` watches `gameStatusAtom` via `isGameOver` and renders a
+non-dismissible `ModalFrame` (same choice as `PromotionPrompt` — the
+underlying `game-footer-status` bar already shows the specific outcome,
+e.g. "Bob wins by resignation", so this modal doesn't repeat it) with a
+single "Rematch" button that calls `resetGameAtom`. Rendered from
+`GamePage.tsx` as another sibling of `GameBoard`/`GameFooter`, same as
+`PromotionPrompt`.
 
 ## User-facing text (`src/i18n.ts`, `src/locales/`)
 

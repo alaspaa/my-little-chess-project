@@ -32,6 +32,11 @@
     "drawOfferTitle": "{{opponent}}, hyväksytkö tasapelin?",
     "drawOfferDescription": "{{player}} on tarjonnut tasapeliä. Tämä päättää pelin."
   },
+  "rematchPrompt": {
+    "title": "Peli päättyi",
+    "description": "Haluatko pelata uudelleen?",
+    "rematchButton": "Uusintaottelu"
+  },
   "pawnPromotion": {
     "title": "Onnittelut ylennyksestä!",
     "description": "Valitse uusi arvo",

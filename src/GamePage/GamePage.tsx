@@ -2,6 +2,7 @@ import { useAtomValue } from 'jotai'
 import GameBoard from '../GameBoard/GameBoard'
 import GameFooter from '../GameBoard/GameFooter'
 import PromotionPrompt from '../Modal/PromotionPrompt'
+import RematchPrompt from '../Modal/RematchPrompt'
 import { blackPlayerAtom, capturedPiecesAtom, currentTurnAtom, gameStatusAtom, whitePlayerAtom } from '../state'
 
 function GamePage() {
@@ -22,6 +23,7 @@ function GamePage() {
                 capturedPieces={capturedPieces}
             />
             <PromotionPrompt />
+            <RematchPrompt />
         </>
     )
 }
