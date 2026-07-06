@@ -172,23 +172,45 @@ counting just because the auto-draw is disabled.
 
 ---
 
-## Track wins/losses/draws across games
+## Track wins/losses/draws in state
 
-**Complexity:** Medium — new counters plus a UI spot to render them.
+**Complexity:** Medium — the tricky part is incrementing exactly once per
+game, not the counter itself.
 
-**Area:** state (`src/state.ts`), UI (`src/GameBoard/GameFooter.tsx` or
-`src/Header/Header.tsx`)
+**Area:** state (`src/state.ts`)
 
 There's no running tally of results across games — a game's outcome
-(`gameStatusAtom`) is only ever shown once. Rematches are possible now
-(`resetGameAtom`, `RematchPrompt.tsx` — see "Rematch" in
-`specs/architecture.md`), so this is unblocked: needs a score atom (e.g.
-`scoreAtom: {white: number, black: number, draws: number}`, or keyed by
-player name instead of color if a future rematch variant can swap sides),
-incremented once when `gameStatusAtom` reaches an end state, and reset
-only on a full page reload — the new score atom should *not* be added to
-`resetGameAtom`'s reset list, since the whole point is to keep counting
-across rematches.
+(`gameStatusAtom`) is only ever reflected once, in the status bar.
+Rematches are possible now (`resetGameAtom`, `RematchPrompt.tsx` — see
+"Rematch" in `specs/architecture.md`), so this is unblocked: needs a
+score atom (e.g. `scoreAtom: {white: number, black: number, draws:
+number}`, or keyed by player name instead of color if a future rematch
+variant can swap sides), incremented once when `gameStatusAtom` reaches
+an end state, and reset only on a full page reload — the new score atom
+should *not* be added to `resetGameAtom`'s reset list, since the whole
+point is to keep counting across rematches. The main design question:
+`gameStatusAtom` is set from several places (`GamePiece.tsx`,
+`PromotionPrompt.tsx`, `GameFooter.tsx`'s resign/draw handlers), so
+incrementing inline at each call site would duplicate the "did this just
+become game-over" logic four times — likely cleaner as a single `useEffect`
+(e.g. in `GamePage.tsx`) that watches `gameStatusAtom` and increments once
+per transition into an end state, rather than incrementing at the source.
+This issue is state only — rendering the counters is "Display
+wins/losses/draws" below.
+
+---
+
+## Display wins/losses/draws
+
+**Complexity:** Small — read-only rendering of an existing atom.
+
+**Area:** UI (`src/GameBoard/GameFooter.tsx` or `src/Header/Header.tsx`)
+
+Depends on "Track wins/losses/draws in state" above landing first —
+nothing to render without it. Once `scoreAtom` exists, render its
+White/Black/draws counts somewhere in the persistent chrome (`GameFooter`
+alongside the player names, or `Header` if it should survive independent
+of `GamePage`) — plain text is enough, no new interaction needed.
 
 ---
 
