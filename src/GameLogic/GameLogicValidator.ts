@@ -1,5 +1,5 @@
 import type { BoardCoordinates, CHESS_PIECE_COLOR, ChessPiece, Square } from "../types/ChessObjects";
-import getValidMoves, { getCastlingRookMove, isCastlingMove, isSquareAttacked } from "./MoveGenerator";
+import getValidMoves, { getCastlingRookMove, isCastlingMove, isSquareAttacked } from "./MoveResolver";
 
 function validateMove(
     gameBoard: Square[][],

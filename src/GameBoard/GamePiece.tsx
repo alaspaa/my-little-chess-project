@@ -5,7 +5,7 @@ import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isG
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck } from "../GameLogic/GameLogicValidator"
-import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../GameLogic/MoveGenerator"
+import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../GameLogic/MoveResolver"
 import getPieceIcon from "./pieceIcons"
 
 interface opts {

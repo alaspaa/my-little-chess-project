@@ -78,7 +78,7 @@ promotion looks identical to any other move or capture square today, even
 though dropping on it doesn't just move the piece, it also pops open
 `PromotionPrompt`. Worth thinking about whether that's worth a third
 visual state (e.g. a `.validpromotion` class) before building it:
-`isPawnPromotion(piece, destination)` in `src/GameLogic/MoveGenerator.ts`
+`isPawnPromotion(piece, destination)` in `src/GameLogic/moves/pawn.ts`
 already exists and could be called per candidate square in
 `GameSquare.tsx` the same way `isValidCapture` is computed now, so the
 implementation is small — the open question is purely whether a distinct
@@ -99,47 +99,12 @@ promotion-triggering moves" above, for castling instead: a castling
 destination is just another square in the king's `.validmove` set today,
 indistinguishable from an ordinary one-step king move, even though
 dropping on it also relocates a rook two squares away.
-`isCastlingMove(piece, from, to)` in `src/GameLogic/MoveGenerator.ts` already
+`isCastlingMove(piece, from, to)` in `src/GameLogic/moves/king.ts` already
 exists and could be called per candidate square the same way
 `isValidCapture` is computed now, so — as with promotion — the
 implementation is small; the open question is whether a distinct
 highlight (e.g. a `.validcastle` class) is worth it, or whether seeing
 the rook move is self-explanatory enough once it happens.
-
----
-
-## Split move-generation rules into per-piece files
-
-**Complexity:** Medium — mostly mechanical (moving code around), but
-there's a real design question buried in it around where multi-piece
-rules live.
-
-**Area:** `src/GameLogic/MoveGenerator.ts` (to be split), likely a new
-`src/GameLogic/moves/` folder
-
-`MoveGenerator.ts` has grown into a single ~220-line file covering all
-six piece types (`getPawnMoves`, `getRookMoves`, `getKnightMoves`,
-`getBishopMoves`, `getQueenMoves`, `getKingMoves`/`getKingStepMoves`/
-`getCastlingMoves`), shared geometry helpers (`isOnBoard`,
-`squareIsEmpty`, `isOpponentPiece`, `getSlidingMoves`, `isSquareAttacked`),
-and cross-cutting predicates (`isPawnPromotion`, `isCastlingMove`,
-`getCastlingRookMove`). Worth splitting into one file per piece type
-(e.g. `src/GameLogic/moves/pawn.ts`, `rook.ts`, ..., `king.ts`), with
-`getValidMoves`'s switch statement staying as a thin dispatcher that
-imports from each. The shared geometry helpers need a common home too
-(e.g. `moves/shared.ts`), since rook/bishop/queen/king all depend on them.
-
-The open question is where a rule that isn't cleanly one piece's alone
-should live: castling reads as a king move today (`getKingMoves` folds
-`getCastlingMoves` into it, gated by the king's own `hasMoved`/check
-safety), so it could just stay in `king.ts` — but it also reaches into
-the rook's `hasMoved` flag and relocates it, which a strict
-one-file-per-piece split has no obvious home for. En passant would raise
-the same question if/when it lands (a pawn rule that depends on another
-pawn's last move). No need to solve this generally now — just pick a
-placement for castling (`king.ts` is the pragmatic default, per the
-reasoning above) and treat it as a call that can move later if a second
-shared-rule case makes the right pattern clearer.
 
 ---
 
@@ -258,7 +223,7 @@ the game is already effectively paused then (see "Pawn promotion" in
 plus a rule that depends on the timing of the previous move, not just
 current board state.
 
-**Area:** move rules (`src/GameLogic/MoveGenerator.ts`), state (`src/state.ts`)
+**Area:** move rules (`src/GameLogic/moves/pawn.ts`), state (`src/state.ts`)
 
 A pawn that double-steps past an enemy pawn should be capturable "as if"
 it only moved one square, but only on the very next move. This needs move

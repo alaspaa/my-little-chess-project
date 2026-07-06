@@ -58,24 +58,39 @@ All cross-component state is a Jotai atom in this one file:
 
 Move legality is split into two layers, each in its own file:
 
-1. **`MoveGenerator.ts`** — pseudo-legal move generation. `getValidMoves`
+1. **`MoveResolver.ts`** — pseudo-legal move generation. `getValidMoves`
    returns every square a piece could physically move to, per standard
    chess movement rules (blocking pieces, captures, pawn double-step,
    etc.), **without** considering whether the move would leave the mover's
-   own king in check. This is the layer to extend when adding new piece
-   movement rules (e.g. en passant). It also exports
+   own king in check. Despite the name of the layer, this file doesn't
+   itself validate anything — it only generates candidate moves;
+   `GameLogicValidator.ts` below is where actual yes/no validation
+   happens. `MoveResolver.ts` itself is just a thin dispatcher: each
+   piece type's actual move rules live in their own file under
+   `src/GameLogic/moves/` (`pawn.ts`, `rook.ts`, `knight.ts`, `bishop.ts`,
+   `queen.ts`, `king.ts`), with shared geometry helpers (`isOnBoard`,
+   `squareIsEmpty`, `isOpponentPiece`, `getSlidingMoves`,
+   `ROOK_DIRECTIONS`/`BISHOP_DIRECTIONS`) factored into `moves/shared.ts`.
+   This is the layer to extend when adding new piece movement rules (e.g.
+   en passant, in `moves/pawn.ts`). `moves/pawn.ts` also exports
    `isPawnPromotion(piece, destination)`, a standalone predicate for
    detecting when a pawn move lands on the opposite back rank — a rule,
    not a move (it doesn't change what squares are legal), so it isn't
-   folded into `getValidMoves`. `GamePiece.tsx` calls it right after a
+   folded into `getPawnMoves`. `GamePiece.tsx` calls it right after a
    move commits; see "Pawn promotion" below for what happens next.
-   `getKingMoves` folds in castling (`getCastlingMoves`) alongside the
-   king's normal one-step moves; see "Castling" below. Despite the name
-   of the layer, this file doesn't itself validate anything — it only
-   generates candidate moves; `GameLogicValidator.ts` below is where
-   actual yes/no validation happens.
+   `moves/king.ts`'s `getKingMoves` folds in castling (`getCastlingMoves`)
+   alongside the king's normal one-step moves; see "Castling" below. Note
+   `moves/king.ts` imports `getValidMoves` back from `MoveResolver.ts`
+   (for `isSquareAttacked`'s non-king attacker case) while
+   `MoveResolver.ts` imports `getKingMoves` from `moves/king.ts` — a
+   deliberate circular import that works because both sides only call
+   into the other from inside a function body, never at module-load time.
+   `MoveResolver.ts` re-exports everything `moves/*.ts` needs to expose
+   externally (`isPawnPromotion`, `isSquareAttacked`, `isCastlingMove`,
+   `getCastlingRookMove`), so nothing outside `src/GameLogic/` needs to
+   know about the `moves/` folder at all.
 2. **`GameLogicValidator.ts`** — the game-rules layer built on top of
-   `MoveGenerator`:
+   `MoveResolver`:
    - `getLegalMoves` filters `getValidMoves`' output down to moves that
      don't leave the mover's own king in check (simulates the move on a
      cloned board and checks `isKingInCheck`).
@@ -141,7 +156,7 @@ deliberate, since the two files don't have a natural common parent to
 own that logic, and the snippet is small enough that the duplication is
 cheaper than the plumbing to share it.
 
-## Castling (`src/GameLogic/MoveGenerator.ts`, `GamePiece.tsx`)
+## Castling (`src/GameLogic/moves/king.ts`, `GamePiece.tsx`)
 
 `getKingMoves` appends castling destinations (`{x: 6}` kingside, `{x: 2}`
 queenside, same `y`) via `getCastlingMoves`, which requires: the king and
@@ -162,7 +177,8 @@ move pipeline doesn't otherwise support (`updateGameBoardWithMovedPiece`
 only relocates one piece per move) — `isCastlingMove(piece, from, to)`
 (true when a king moves two squares) and `getCastlingRookMove(kingDestX)`
 (mapping the king's landing file to the rook's `{from, to}` files) live in
-`MoveGenerator.ts` as the one place that mapping is spelled out, and are
+`moves/king.ts` (re-exported from `MoveResolver.ts`) as the one place
+that mapping is spelled out, and are
 used both by `GamePiece.tsx`'s move-commit step (to actually relocate the
 rook alongside the king) and by `GameLogicValidator.ts`'s `simulateMove`
 (so the check-safety simulation used by `getLegalMoves` reflects the

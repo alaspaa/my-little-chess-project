@@ -84,7 +84,7 @@ undocumented.
 
 Tests run on [Vitest](https://vitest.dev) (`npm test`). Test files sit
 next to the code they cover as `*.test.ts` (e.g.
-`src/GameLogic/MoveGenerator.test.ts`), not in a separate `__tests__`
+`src/GameLogic/MoveResolver.test.ts`), not in a separate `__tests__`
 tree. Import `describe`/`it`/`expect` explicitly from `"vitest"` rather
 than relying on injected globals, so files type-check without extra
 config. Shared test-only helpers (e.g. `buildBoard`/`piece` for
@@ -101,11 +101,12 @@ something callable without a real drag.
 What makes the logic layer testable, and should be preserved as more of
 it is written:
 
-- Keep game-rule logic (`src/GameLogic/*.ts`) as plain functions of
-  `(gameBoard, coordinates, piece, ...)` that return a value — no DOM
-  access, no atoms, no React — so they can be called directly in a test
-  with a hand-built board, no rendering or event simulation required.
-  `MoveGenerator.ts` and `GameLogicValidator.ts` already follow this.
+- Keep game-rule logic (`src/GameLogic/*.ts`, `src/GameLogic/moves/*.ts`)
+  as plain functions of `(gameBoard, coordinates, piece, ...)` that
+  return a value — no DOM access, no atoms, no React — so they can be
+  called directly in a test with a hand-built board, no rendering or
+  event simulation required. `MoveResolver.ts`, `GameLogicValidator.ts`,
+  and the per-piece files under `moves/` already follow this.
 - Avoid hidden dependencies on global/module state inside logic functions;
   pass in everything a function needs as a parameter instead of reaching
   out to an atom or `document` from inside `src/GameLogic/`.
@@ -119,7 +120,7 @@ it is written:
 - Type-only imports use inline `type` markers:
   `import { type BoardCoordinates, type ChessPiece } from "./ChessObjects"`,
   not a separate `import type { ... }` statement.
-- Relative imports (`../state`, `./MoveGenerator`) throughout — no path
+- Relative imports (`../state`, `./MoveResolver`) throughout — no path
   aliases are configured.
 
 ## React patterns
