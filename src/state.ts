@@ -23,8 +23,23 @@ export const gameBoardAtom = atom(
 )
 
 export const currentPageAtom = atom<Page>("setup")
-export const whitePlayerAtom = atom<Player | null>(null)
-export const blackPlayerAtom = atom<Player | null>(null)
+
+// Player identity is tracked by slot (player1/player2), independent of
+// color, so either player can play either color - `player1ColorAtom` is
+// the only thing that says who currently plays white. `whitePlayerAtom`/
+// `blackPlayerAtom` below are derived from these for call sites that need
+// "whoever is playing white right now" (e.g. rendering board columns).
+export const player1Atom = atom<Player | null>(null)
+export const player2Atom = atom<Player | null>(null)
+export const player1ColorAtom = atom<CHESS_PIECE_COLOR>("white")
+
+export const whitePlayerAtom = atom(get =>
+    get(player1ColorAtom) === "white" ? get(player1Atom) : get(player2Atom)
+)
+export const blackPlayerAtom = atom(get =>
+    get(player1ColorAtom) === "black" ? get(player1Atom) : get(player2Atom)
+)
+
 export const currentTurnAtom = atom<CHESS_PIECE_COLOR>("white")
 export const gameStatusAtom = atom<GameStatus>({state: "playing", color: null})
 export const highlightMovesEnabledAtom = atom(true)
@@ -49,8 +64,9 @@ export const scoreAtom = atom<Score>({player1: 0, player2: 0, draws: 0})
 
 // Write-only action atom: puts every per-game (not per-session/settings)
 // atom back to its starting value, for RematchPrompt's "play again" button.
-// whitePlayerAtom/blackPlayerAtom and settings atoms are deliberately left
-// alone - a rematch keeps the same two players, not just the same board.
+// player1Atom/player2Atom/player1ColorAtom and settings atoms are
+// deliberately left alone - a rematch keeps the same two players (and
+// colors, until switching sides is supported), not just the same board.
 export const resetGameAtom = atom(null, (_get, set) => {
     set(gameBoardAtom, populateBoardWithPieces(createEmptyBoard()))
     set(currentTurnAtom, "white")

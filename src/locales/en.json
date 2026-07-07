@@ -13,8 +13,8 @@
     "languageLabel": "Language"
   },
   "startPage": {
-    "whiteUsernameLabel": "White username",
-    "blackUsernameLabel": "Black username",
+    "player1UsernameLabel": "Player 1",
+    "player2UsernameLabel": "Player 2",
     "startButton": "Start",
     "usernameRequiredError": "Both players need a username to start the game"
   },

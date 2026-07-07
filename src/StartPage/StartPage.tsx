@@ -1,51 +1,51 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useSetAtom } from "jotai"
-import { blackPlayerAtom, currentPageAtom, whitePlayerAtom } from "../state"
+import { currentPageAtom, player1Atom, player2Atom } from "../state"
 import type { Player } from "../types/ChessObjects"
 
 function StartPage() {
     const { t } = useTranslation()
-    const [whiteName, setWhiteName] = useState("")
-    const [blackName, setBlackName] = useState("")
+    const [player1Name, setPlayer1Name] = useState("")
+    const [player2Name, setPlayer2Name] = useState("")
     const [error, setError] = useState("")
 
-    const setWhitePlayer = useSetAtom(whitePlayerAtom)
-    const setBlackPlayer = useSetAtom(blackPlayerAtom)
+    const setPlayer1 = useSetAtom(player1Atom)
+    const setPlayer2 = useSetAtom(player2Atom)
     const setCurrentPage = useSetAtom(currentPageAtom)
 
     const onStart = () => {
-        const trimmedWhiteName = whiteName.trim()
-        const trimmedBlackName = blackName.trim()
+        const trimmedPlayer1Name = player1Name.trim()
+        const trimmedPlayer2Name = player2Name.trim()
 
-        if(!trimmedWhiteName || !trimmedBlackName) {
+        if(!trimmedPlayer1Name || !trimmedPlayer2Name) {
             setError(t("startPage.usernameRequiredError"))
             return
         }
 
-        setWhitePlayer(createPlayer(trimmedWhiteName))
-        setBlackPlayer(createPlayer(trimmedBlackName))
+        setPlayer1(createPlayer(trimmedPlayer1Name))
+        setPlayer2(createPlayer(trimmedPlayer2Name))
         setCurrentPage("game")
     }
 
     return (
         <div className="startpage">
             <div className="startpage-field">
-                <label htmlFor="white-username">{t("startPage.whiteUsernameLabel")}</label>
+                <label htmlFor="player1-username">{t("startPage.player1UsernameLabel")}</label>
                 <input
-                    id="white-username"
+                    id="player1-username"
                     type="text"
-                    value={whiteName}
-                    onChange={e => setWhiteName(e.target.value)}
+                    value={player1Name}
+                    onChange={e => setPlayer1Name(e.target.value)}
                 />
             </div>
             <div className="startpage-field">
-                <label htmlFor="black-username">{t("startPage.blackUsernameLabel")}</label>
+                <label htmlFor="player2-username">{t("startPage.player2UsernameLabel")}</label>
                 <input
-                    id="black-username"
+                    id="player2-username"
                     type="text"
-                    value={blackName}
-                    onChange={e => setBlackName(e.target.value)}
+                    value={player2Name}
+                    onChange={e => setPlayer2Name(e.target.value)}
                 />
             </div>
             {error && <p className="startpage-error">{error}</p>}

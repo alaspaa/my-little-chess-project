@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import type { TFunction } from 'i18next'
 import { gameStatusAtom, isGameOver, type GameStatus } from '../state'
 import type { CHESS_PIECE_COLOR, ChessPiece, Player } from '../types/ChessObjects'
@@ -43,17 +42,9 @@ function GameFooter(props: opts) {
                     <CapturedPieces pieces={capturedPieces.white} />
                 </div>
                 <div className={`game-footer-status-wrapper ${gameStatus.state}`}>
-                    <FontAwesomeIcon
-                        icon={faArrowLeft}
-                        className={'turn-arrow' + (currentTurn === 'white' ? ' active' : '')}
-                    />
                     <div className={`game-footer-status ${gameStatus.state}`}>
                         {getGameStatusMessage(gameStatus, whitePlayer, blackPlayer, t)}
                     </div>
-                    <FontAwesomeIcon
-                        icon={faArrowRight}
-                        className={'turn-arrow' + (currentTurn === 'black' ? ' active' : '')}
-                    />
                 </div>
                 <div className={'gameboard-player player-black' + (currentTurn === 'black' ? ' active' : '')}>
                     <div className="gameboard-player-color">{t('common.black')}</div>

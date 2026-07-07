@@ -17,6 +17,28 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
+## Add a quick glow animation to the active side's pieces
+
+**Complexity:** Small — a CSS class + keyframe animation, keyed off state
+that's already read where it'd apply.
+
+**Area:** `src/GameBoard/GamePiece.tsx`, `src/App.css`
+
+Now that the turn-arrow indicator is gone from `GameFooter.tsx` (the
+active player is already clear enough from the highlighted name/color
+there), the pieces themselves could use a small one-shot visual cue when
+their side's turn begins — a quick glow, not a persistent effect for the
+whole turn. `GamePiece.tsx` already reads `currentTurnAtom` internally
+(for drag-eligibility checks); rendering could add a class like
+`.active-side` when `piece.color === currentTurn`, paired with a CSS
+`@keyframes` animation (e.g. a brief `box-shadow`/`filter: drop-shadow`
+pulse, non-`infinite` so it plays once and settles). Since all pieces of
+the newly-active color pick up the class at the same moment the turn
+flips, they'd all glow together — worth checking that feels right rather
+than gimmicky before committing to per-piece vs. some other grouping.
+
+---
+
 ## Add board coordinate labels (ranks/files)
 
 **Complexity:** Small — a wrapper around the existing board rendering, no
@@ -165,55 +187,22 @@ sides on rematch" below ever lands — see that issue's note on this.
 
 ## Allow switching sides on rematch
 
-**Complexity:** Small-medium — swapping two atoms is trivial; the open
-question is the trigger, plus a real knock-on effect on score tracking.
+**Complexity:** Small — the state model already supports this; only the
+trigger is missing.
 
 **Area:** state (`src/state.ts`), UI (`src/Modal/RematchPrompt.tsx`)
 
-`resetGameAtom` always restarts with the same colors each player had
-before (White stays White). Needs deciding how sides get swapped before
-implementing: a checkbox in `RematchPrompt.tsx` ("swap sides"), or
-swapping automatically every rematch, or a dedicated button alongside
-"Rematch". Whichever is chosen, it's just swapping `whitePlayerAtom` and
-`blackPlayerAtom`'s values (or leaving `resetGameAtom` to do it
-conditionally). The real complication: `scoreAtom`'s `player1`/`player2`
-tally (see "Score tracking" in `specs/architecture.md`) currently
-attributes wins by *whichever color is currently White/Black* at the
-moment a game ends — that's only correct because sides never change
-today. Once they can, `GamePage.tsx`'s scoring effect needs a stable way
-to know which physical player is "player1" independent of color (e.g. an
-atom capturing each player's original color, set once at the first game
-and never touched by a later swap) instead of inferring it from
-`whitePlayerAtom` at increment time.
-
----
-
-## Unify player-identity naming (`whitePlayerAtom`/`blackPlayerAtom` vs `scoreAtom`'s `player1`/`player2`)
-
-**Complexity:** Small-medium — a naming/modeling question more than new
-functionality; likely worth solving together with "Allow switching sides
-on rematch" above rather than separately.
-
-**Area:** state (`src/state.ts`)
-
-Two different conventions now represent "the two people playing" in
-`state.ts`: `whitePlayerAtom`/`blackPlayerAtom` (set once at setup,
-keyed by *current color*) and `scoreAtom`'s `player1`/`player2` fields
-(added for score tracking, meant to stay stable *regardless* of color —
-see "Score tracking" in `specs/architecture.md`). These are conceptually
-the same two people described two different ways, and it's only a naming
-inconsistency today because sides can't be swapped yet — once "Allow
-switching sides on rematch" above lands, `whitePlayerAtom`/
-`blackPlayerAtom` and "player1"/"player2" identity will actively diverge
-(a player's color can change between games, but their player-1-ness
-shouldn't), making the two namings actively confusing rather than just
-inconsistent. Worth deciding on one model — e.g. a `player1Atom`/
-`player2Atom` holding the `Player` objects directly (position-stable,
-set once at setup) plus a small separate atom/derivation for which slot
-currently plays which color, with `whitePlayerAtom`/`blackPlayerAtom`
-either removed in favor of that or made explicitly derived from it — and
-updating every current consumer of the color-keyed atoms
-(`GameFooter.tsx`, `GamePage.tsx`, `StartPage`, etc.) to match.
+Player identity is already tracked independent of color (`player1Atom`/
+`player2Atom`/`player1ColorAtom` — see the "State" section in
+`specs/architecture.md`), and `scoreAtom` already attributes wins via
+`player1ColorAtom` rather than assuming `player1` is always White (see
+"Score tracking"). What's still missing is a way to actually flip
+`player1ColorAtom` between rematches — `resetGameAtom` never touches it
+today, so a player always keeps the same color. Needs deciding on a
+trigger: a checkbox in `RematchPrompt.tsx` ("swap sides"), swapping
+automatically every rematch, or a dedicated button alongside "Rematch".
+Whichever is chosen, the implementation is a one-line flip of
+`player1ColorAtom` — no other state needs to change.
 
 ---
 

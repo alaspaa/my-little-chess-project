@@ -40,8 +40,16 @@ All cross-component state is a Jotai atom in this one file:
 - `currentTurnAtom` — whose color may move next.
 - `gameStatusAtom` — `{ state: "playing" | "check" | "checkmate" | "resigned" | "draw", color }`.
   `color` is `null` for `"draw"` — a draw has no winner to point to.
-- `whitePlayerAtom` / `blackPlayerAtom` — the `Player` entered on the setup
-  page for each color.
+- `player1Atom` / `player2Atom` — the `Player` entered on the setup page
+  for each slot. Identity is tracked by slot, not color, so either player
+  can play either color (`StartPage.tsx` asks for "Player 1"/"Player 2"
+  usernames, not "White"/"Black"). `player1ColorAtom` (`CHESS_PIECE_COLOR`,
+  default `"white"`) says which color `player1Atom` currently plays;
+  `player2Atom` always plays the other. `whitePlayerAtom`/`blackPlayerAtom`
+  are derived read-only atoms computed from these three, kept around for
+  call sites that need "whoever is playing white/black right now" (e.g.
+  `GameFooter` laying out board columns) without needing to know about
+  slots at all.
 - `capturedPiecesAtom` — keyed by the *capturing* color (e.g. `.white` is
   the black pieces white has taken), rendered in `GameFooter`.
 - `pendingPromotionAtom` — `{ color, coordinates } | null`, set when a
@@ -53,7 +61,7 @@ All cross-component state is a Jotai atom in this one file:
   `i18n.changeLanguage(code)` together — the atom exists purely so React
   re-renders on a language change via Jotai's subscription instead of
   hooking into `i18next`'s own event emitter. Not persisted across a
-  reload, same as `whitePlayerAtom`/`blackPlayerAtom`.
+  reload, same as `player1Atom`/`player2Atom`.
 - `positionHistoryAtom` — a serialized snapshot appended after every
   completed move; see "Position history" below.
 - `resetGameAtom` — write-only action atom (no read value) that puts
@@ -61,9 +69,10 @@ All cross-component state is a Jotai atom in this one file:
   `gameStatusAtom`, `capturedPiecesAtom`, `positionHistoryAtom`,
   `pendingPromotionAtom`, and the transient drag atoms) back to its
   starting value; see "Rematch" below. Deliberately leaves
-  `whitePlayerAtom`/`blackPlayerAtom` and settings atoms
+  `player1Atom`/`player2Atom`/`player1ColorAtom` and settings atoms
   (`highlightMovesEnabledAtom`, `languageAtom`) untouched — a rematch is
-  the same two players playing again, not a return to the setup page.
+  the same two players (and colors, until switching sides is supported)
+  playing again, not a return to the setup page.
 - `scoreAtom` — `{ player1: number, player2: number, draws: number }`,
   tallying results across rematches; see "Score tracking" below. Keyed by
   player slot, not color, and deliberately not reset by `resetGameAtom`.
@@ -252,9 +261,10 @@ into an end state (tracked via a `wasGameOverRef`, so a rematch resetting
 and re-renders while already game-over don't double-count). For
 checkmate/resigned, `gameStatus.color` is the *loser's* color (same
 convention `GameFooter.tsx`'s `getWinnerName` already relies on), so the
-winner is the opposite color, mapped to `player1`/`player2` via which
-color is currently White/Black — since sides can't be swapped between
-games yet, `player1` is simply whoever is currently `whitePlayerAtom`.
+winner is the opposite color, compared against `player1ColorAtom` to
+decide whether `player1` or `player2` gets credited — this stays correct
+even if sides are swapped between games, since it reads the actual
+current color assignment rather than assuming `player1` is always White.
 
 ## User-facing text (`src/i18n.ts`, `src/locales/`)
 

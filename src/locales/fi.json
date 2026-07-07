@@ -13,8 +13,8 @@
     "languageLabel": "Kieli"
   },
   "startPage": {
-    "whiteUsernameLabel": "Valkoisen käyttäjänimi",
-    "blackUsernameLabel": "Mustan käyttäjänimi",
+    "player1UsernameLabel": "Pelaaja 1",
+    "player2UsernameLabel": "Pelaaja 2",
     "startButton": "Aloita",
     "usernameRequiredError": "Molemmilla pelaajilla täytyy olla käyttäjänimi pelin aloittamiseksi"
   },
