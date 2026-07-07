@@ -9,32 +9,11 @@ of what was fixed and when.
 Each entry: a title, complexity, the area it touches, what's
 missing/wrong, and enough context to start without re-deriving it from
 scratch. Ordered simplest to most complex, so it doubles as a suggested
-pickup order — except "Prevent page scroll during touch drag" at the
-top, pinned there as the current highest priority regardless of size.
+pickup order.
 
 We tried migrating one entry to [GitHub Issues](https://github.com/alaspaa/my-little-chess-project/issues)
 (issue #1, resolved via #2) but are sticking with this file as the
 source of truth for now rather than maintaining two backlogs.
-
----
-
-## Prevent page scroll during touch drag
-
-**Complexity:** Small — a CSS property (or a `preventDefault()` call),
-but not optional polish — needed for touch dragging to actually work.
-
-**Area:** `src/GameBoard/GamePiece.tsx`, `src/App.css`
-
-`GamePiece.tsx`/`GameBoard.tsx` already use Pointer Events
-(`pointerdown`/`pointermove`/`pointerup`, see "Turn flow" in
-`specs/architecture.md`), so pieces do respond to touch input now — but
-starting a drag on a phone will also trigger the browser's default
-scroll/pan gesture unless told otherwise, fighting the piece's own
-movement. Needs `touch-action: none` (or equivalent) on draggable pieces
-so the browser doesn't try to scroll the page while a drag is in
-progress. The layout itself already scales to fit a phone viewport (see
-"Responsive layout" in `specs/architecture.md`) — this is the last piece
-needed to make the board actually playable by touch.
 
 ---
 

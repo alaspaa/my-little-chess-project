@@ -141,6 +141,9 @@ atom/field rather than inferring it from the board alone.
    (`pendingPromotionAtom`) — otherwise populate `validMovesAtom` via
    `getLegalMoves`. Uses Pointer Events (not mouse-specific events) so
    the same listeners handle mouse, touch, and pen input uniformly.
+   `.gamepiece` also sets `touch-action: none` in `App.css`, so starting
+   a drag on a touch device doesn't also trigger the browser's own
+   scroll/pan gesture fighting the piece's movement.
 2. `pointermove` (in `GameBoard.tsx`, not `GamePiece.tsx`): follows the
    cursor/finger by directly setting the dragged piece's inline
    `style.top`/`left` — this is imperative DOM manipulation, not React

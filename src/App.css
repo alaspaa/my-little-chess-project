@@ -127,6 +127,10 @@
   padding: 0;
 }
 
+.gamepiece {
+  touch-action: none;
+}
+
  .square-black {
     background-color: rgb(35, 34, 34);
  }
