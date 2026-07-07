@@ -7,8 +7,7 @@ currently runs entirely client-side (no backend), with the aspiration of
 adding more robust backend handling (persistence, multiplayer, etc.) as
 the project matures.
 
-See [CLAUDE.md](CLAUDE.md) and [specs/](specs/) for architecture and
-conventions, and [ISSUES.md](ISSUES.md) for the current backlog.
+See [ISSUES.md](ISSUES.md) for the current backlog.
 
 ## Getting started
 
