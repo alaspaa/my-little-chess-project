@@ -71,65 +71,69 @@ function GamePiece(props: opts) {
 
         const onMouseUp = () => {
             const boardCoordinates = boardCoordinatesRef.current
-            if(!boardCoordinates) return
-
-            const gameSquare = document.elementsFromPoint(boardCoordinates.x, boardCoordinates.y)
-            .find(el => {
-                return el instanceof HTMLElement && el.classList.contains('gamesquare')
-            })
-
             const pieceClicked = pieceClickedRef.current
-            const currentGameBoard = gameBoardRef.current
 
-            const gameBoardCoordinates = getGameBoardCoordinatesFromGameSquare(gameSquare)
-            if(gameBoardCoordinates) {
-                //console.log(`${gameBoardCoordinates?.x}, ${gameBoardCoordinates?.y}, ${pieceClicked}`)
+            // No mousemove means no drag - nothing to drop onto.
+            if(boardCoordinates) {
+                const gameSquare = document.elementsFromPoint(boardCoordinates.x, boardCoordinates.y)
+                .find(el => {
+                    return el instanceof HTMLElement && el.classList.contains('gamesquare')
+                })
 
-                const capturedPiece = currentGameBoard[gameBoardCoordinates.y][gameBoardCoordinates.x].piece
-                const newBoard = updateGameBoardWithMovedPiece(currentGameBoard, pieceClicked!, gameBoardCoordinates!)
-                if(newBoard !== currentGameBoard) {
-                    setGameBoard(newBoard)
+                const currentGameBoard = gameBoardRef.current
 
-                    const capturingColor = currentTurnRef.current
-                    if(capturedPiece) {
-                        setCapturedPieces(previous => ({
-                            ...previous,
-                            [capturingColor]: [...previous[capturingColor], capturedPiece],
-                        }))
-                    }
+                const gameBoardCoordinates = getGameBoardCoordinatesFromGameSquare(gameSquare)
+                if(gameBoardCoordinates) {
+                    //console.log(`${gameBoardCoordinates?.x}, ${gameBoardCoordinates?.y}, ${pieceClicked}`)
 
-                    const movedPiece = newBoard[gameBoardCoordinates.y][gameBoardCoordinates.x].piece
-                    if(movedPiece && isPawnPromotion(movedPiece, gameBoardCoordinates)) {
-                        // Hold off on flipping the turn/status until the
-                        // player picks a piece - PromotionPrompt finishes
-                        // the move once that happens.
-                        setPendingPromotion({color: capturingColor, coordinates: gameBoardCoordinates})
-                    } else {
-                        const nextTurn = capturingColor === "white" ? "black" : "white"
-                        setCurrentTurn(nextTurn)
+                    const capturedPiece = currentGameBoard[gameBoardCoordinates.y][gameBoardCoordinates.x].piece
+                    const newBoard = updateGameBoardWithMovedPiece(currentGameBoard, pieceClicked!, gameBoardCoordinates!)
+                    if(newBoard !== currentGameBoard) {
+                        setGameBoard(newBoard)
 
-                        const position = serializePosition(newBoard, nextTurn)
-                        const newPositionHistory = [...positionHistoryRef.current, position]
-                        setPositionHistory(newPositionHistory)
+                        const capturingColor = currentTurnRef.current
+                        if(capturedPiece) {
+                            setCapturedPieces(previous => ({
+                                ...previous,
+                                [capturingColor]: [...previous[capturingColor], capturedPiece],
+                            }))
+                        }
 
-                        if(isCheckmate(newBoard, nextTurn)) {
-                            setGameStatus({state: "checkmate", color: nextTurn})
-                        } else if(isThreefoldRepetition(newPositionHistory, position)) {
-                            setGameStatus({state: "draw", color: null})
-                        } else if(isKingInCheck(newBoard, nextTurn)) {
-                            setGameStatus({state: "check", color: nextTurn})
+                        const movedPiece = newBoard[gameBoardCoordinates.y][gameBoardCoordinates.x].piece
+                        if(movedPiece && isPawnPromotion(movedPiece, gameBoardCoordinates)) {
+                            // Hold off on flipping the turn/status until the
+                            // player picks a piece - PromotionPrompt finishes
+                            // the move once that happens.
+                            setPendingPromotion({color: capturingColor, coordinates: gameBoardCoordinates})
                         } else {
-                            setGameStatus({state: "playing", color: null})
+                            const nextTurn = capturingColor === "white" ? "black" : "white"
+                            setCurrentTurn(nextTurn)
+
+                            const position = serializePosition(newBoard, nextTurn)
+                            const newPositionHistory = [...positionHistoryRef.current, position]
+                            setPositionHistory(newPositionHistory)
+
+                            if(isCheckmate(newBoard, nextTurn)) {
+                                setGameStatus({state: "checkmate", color: nextTurn})
+                            } else if(isThreefoldRepetition(newPositionHistory, position)) {
+                                setGameStatus({state: "draw", color: null})
+                            } else if(isKingInCheck(newBoard, nextTurn)) {
+                                setGameStatus({state: "check", color: nextTurn})
+                            } else {
+                                setGameStatus({state: "playing", color: null})
+                            }
                         }
                     }
                 }
             }
 
-            const piece = (document.getElementById(pieceClicked!) as HTMLElement).firstChild as HTMLElement
-            if(piece) {
-                piece.style.removeProperty('position')
-                piece.style.removeProperty('top')
-                piece.style.removeProperty('left')
+            if(pieceClicked) {
+                const piece = (document.getElementById(pieceClicked) as HTMLElement).firstChild as HTMLElement
+                if(piece) {
+                    piece.style.removeProperty('position')
+                    piece.style.removeProperty('top')
+                    piece.style.removeProperty('left')
+                }
             }
 
             setBoardCoordinates(null)
