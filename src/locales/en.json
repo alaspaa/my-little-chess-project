@@ -36,7 +36,8 @@
   "rematchPrompt": {
     "title": "Game over",
     "description": "Would you like to play again?",
-    "rematchButton": "Rematch"
+    "rematchButton": "Rematch",
+    "rematchSwapSidesButton": "Rematch (Swap Sides)"
   },
   "pawnPromotion": {
     "title": "Congratulations on your promotion!",

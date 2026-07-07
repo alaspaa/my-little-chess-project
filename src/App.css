@@ -328,6 +328,25 @@
     gap: 1.5rem;
 }
 
+.rematch-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.rematch-button {
+    background-color: transparent;
+    color: inherit;
+    border-color: rgb(140, 140, 140);
+}
+
+.rematch-swap-button {
+    background-color: rgb(60, 140, 95);
+    border-color: rgb(60, 140, 95);
+    color: rgb(20, 20, 20);
+    font-weight: bold;
+}
+
 .modal:has(.promotion-choices) {
     max-width: 480px;
 }

@@ -251,10 +251,12 @@ just because the auto-draw is disabled.
 `RematchPrompt` watches `gameStatusAtom` via `isGameOver` and renders a
 non-dismissible `ModalFrame` (same choice as `PromotionPrompt` — the
 underlying `game-footer-status` bar already shows the specific outcome,
-e.g. "Bob wins by resignation", so this modal doesn't repeat it) with a
-single "Rematch" button that calls `resetGameAtom`. Rendered from
-`GamePage.tsx` as another sibling of `GameBoard`/`GameFooter`, same as
-`PromotionPrompt`.
+e.g. "Bob wins by resignation", so this modal doesn't repeat it) with two
+buttons: "Rematch" calls `resetGameAtom` alone, and "Rematch (Swap Sides)"
+calls it too but also flips `player1ColorAtom` — the only state that
+needs to change, since player identity is already tracked independent of
+color (see the "State" section above). Rendered from `GamePage.tsx` as
+another sibling of `GameBoard`/`GameFooter`, same as `PromotionPrompt`.
 
 ## Score tracking (`GamePage.tsx`)
 

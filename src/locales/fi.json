@@ -36,7 +36,8 @@
   "rematchPrompt": {
     "title": "Peli päättyi",
     "description": "Haluatko pelata uudelleen?",
-    "rematchButton": "Uusintaottelu"
+    "rematchButton": "Uusintaottelu",
+    "rematchSwapSidesButton": "Uusintaottelu (vaihda puolia)"
   },
   "pawnPromotion": {
     "title": "Onnittelut ylennyksestä!",

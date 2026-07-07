@@ -185,27 +185,6 @@ sides on rematch" below ever lands — see that issue's note on this.
 
 ---
 
-## Allow switching sides on rematch
-
-**Complexity:** Small — the state model already supports this; only the
-trigger is missing.
-
-**Area:** state (`src/state.ts`), UI (`src/Modal/RematchPrompt.tsx`)
-
-Player identity is already tracked independent of color (`player1Atom`/
-`player2Atom`/`player1ColorAtom` — see the "State" section in
-`specs/architecture.md`), and `scoreAtom` already attributes wins via
-`player1ColorAtom` rather than assuming `player1` is always White (see
-"Score tracking"). What's still missing is a way to actually flip
-`player1ColorAtom` between rematches — `resetGameAtom` never touches it
-today, so a player always keeps the same color. Needs deciding on a
-trigger: a checkbox in `RematchPrompt.tsx` ("swap sides"), swapping
-automatically every rematch, or a dedicated button alongside "Rematch".
-Whichever is chosen, the implementation is a one-line flip of
-`player1ColorAtom` — no other state needs to change.
-
----
-
 ## Add a chess clock
 
 **Complexity:** Large — new atoms, a per-turn ticking mechanism that has
