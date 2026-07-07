@@ -17,6 +17,27 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
+## A quick click (no drag) leaves a piece stuck "selected"
+
+**Complexity:** Small — a bug fix scoped to one early return.
+
+**Area:** `src/GameBoard/GamePiece.tsx`
+
+`onMouseUp`'s first line is `if(!boardCoordinatesRef.current) return` —
+but `boardCoordinatesAtom` is only ever set by `GameBoard.tsx`'s
+`mousemove` listener, never by `mousedown`. A genuine click (press and
+release with zero mouse movement in between) never fires a `mousemove`,
+so this guard returns before reaching the cleanup code at the bottom of
+`onMouseUp` (resetting `pieceClickedAtom`, `validMovesAtom`, and the
+piece's inline drag styles). The result: `onMouseDown`'s effects (the
+piece marked "picked up", its legal moves highlighted) never get undone,
+leaving the piece stuck in a selected state until some later interaction
+happens to clear it. The early return should still reset the transient
+selection state before bailing, since a click-without-drag is a valid
+input to handle, not an error case to ignore.
+
+---
+
 ## Investigate hosting on GitHub Pages
 
 **Complexity:** Small — a spike, not a build task: figure out whether it
