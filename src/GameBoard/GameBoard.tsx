@@ -22,7 +22,7 @@ function GameBoard() {
         if(!boardRef.current) return
         const board = boardRef.current
 
-        const onMouseMove = (e: MouseEvent) => {
+        const onPointerMove = (e: PointerEvent) => {
             const clickedId = pieceClickedRef.current
             if(!clickedId) return
             const piece = document.getElementById(clickedId)?.childNodes[0] as SVGSVGElement
@@ -38,10 +38,10 @@ function GameBoard() {
             }
         }
 
-        board.addEventListener('mousemove', onMouseMove)
+        board.addEventListener('pointermove', onPointerMove)
 
         const cleanup = () => {
-            board.removeEventListener('mousemove', onMouseMove)
+            board.removeEventListener('pointermove', onPointerMove)
         }
 
         return cleanup

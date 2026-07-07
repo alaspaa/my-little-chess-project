@@ -134,6 +134,6 @@ it is written:
 - Imperative DOM work (drag-follow behavior, `getElementById`,
   `elementsFromPoint`) is done inside `useEffect` + native event listeners
   on a `ref`, not through React's synthetic event props, because the drag
-  interaction needs raw `mousemove`/`mouseup` coordinates. Keep this pattern
+  interaction needs raw `pointermove`/`pointerup` coordinates. Keep this pattern
   contained to the component that owns the ref; don't reach into another
   component's DOM node from outside it.

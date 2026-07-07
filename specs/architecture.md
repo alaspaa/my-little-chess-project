@@ -134,17 +134,18 @@ atom/field rather than inferring it from the board alone.
 
 ## Turn flow (`GamePiece.tsx`)
 
-1. `mousedown` on a piece: look up its board coordinates
+1. `pointerdown` on a piece: look up its board coordinates
    (`findPieceCoordinates`), refuse to start a drag if it's not that
    piece's color's turn (`currentTurnAtom`), the game already ended
    (`isGameOver(gameStatusAtom.state)`), or a promotion choice is pending
    (`pendingPromotionAtom`) — otherwise populate `validMovesAtom` via
-   `getLegalMoves`.
-2. `mousemove` (in `GameBoard.tsx`, not `GamePiece.tsx`): follows the cursor
-   by directly setting the dragged piece's inline `style.top`/`left` —
-   this is imperative DOM manipulation, not React state, for drag
-   smoothness.
-3. `mouseup`: resolve the square under the cursor, call
+   `getLegalMoves`. Uses Pointer Events (not mouse-specific events) so
+   the same listeners handle mouse, touch, and pen input uniformly.
+2. `pointermove` (in `GameBoard.tsx`, not `GamePiece.tsx`): follows the
+   cursor/finger by directly setting the dragged piece's inline
+   `style.top`/`left` — this is imperative DOM manipulation, not React
+   state, for drag smoothness.
+3. `pointerup`: resolve the square under the cursor, call
    `updateGameBoardWithMovedPiece`, which internally calls `validateMove`.
    Success is detected by **reference equality** — the update functions
    return the original `gameBoard` object unchanged when a move is
@@ -160,7 +161,7 @@ atom/field rather than inferring it from the board alone.
 When `GamePiece.tsx` detects a promotion, it does **not** flip the turn or
 recompute check/checkmate status right away — it sets `pendingPromotionAtom`
 to `{ color, coordinates }` and leaves the pawn sitting on the back rank.
-While that atom is non-null, `GamePiece.tsx`'s `mousedown` handler refuses
+While that atom is non-null, `GamePiece.tsx`'s `pointerdown` handler refuses
 to start any drag (for either color), so the game is effectively paused.
 
 `PromotionPrompt` (rendered from `GamePage.tsx`, a sibling of `GameBoard`/

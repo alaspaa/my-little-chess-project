@@ -55,7 +55,7 @@ function GamePiece(props: opts) {
 
         const piece = pieceRef.current
 
-        const onMouseDown = (e: MouseEvent) => {
+        const onPointerDown = (e: PointerEvent) => {
             if(isGameOver(gameStatusRef.current.state)) return
             if(pendingPromotionRef.current) return
 
@@ -72,11 +72,11 @@ function GamePiece(props: opts) {
             setValidMoves(getLegalMoves(currentGameBoard, currentCoordinates, clickedPiece))
         }
 
-        const onMouseUp = () => {
+        const onPointerUp = () => {
             const boardCoordinates = boardCoordinatesRef.current
             const pieceClicked = pieceClickedRef.current
 
-            // No mousemove means no drag - nothing to drop onto.
+            // No pointermove means no drag - nothing to drop onto.
             if(boardCoordinates) {
                 const gameSquare = document.elementsFromPoint(boardCoordinates.x, boardCoordinates.y)
                 .find(el => {
@@ -144,13 +144,13 @@ function GamePiece(props: opts) {
             setValidMoves([])
         }
 
-        piece.addEventListener('mousedown', onMouseDown)
+        piece.addEventListener('pointerdown', onPointerDown)
 
-        piece.addEventListener('mouseup', onMouseUp)
+        piece.addEventListener('pointerup', onPointerUp)
 
         const cleanup = () => {
-            piece.removeEventListener('mousedown', onMouseDown)
-            piece.removeEventListener('mouseup', onMouseUp)
+            piece.removeEventListener('pointerdown', onPointerDown)
+            piece.removeEventListener('pointerup', onPointerUp)
         }
 
         return cleanup
