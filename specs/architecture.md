@@ -64,6 +64,9 @@ All cross-component state is a Jotai atom in this one file:
   reload, same as `player1Atom`/`player2Atom`.
 - `positionHistoryAtom` — a serialized snapshot appended after every
   completed move; see "Position history" below.
+- `threefoldRepetitionEnabledAtom` — default `true`, a settings toggle
+  (`SettingsMenu.tsx`) gating whether reaching three occurrences of a
+  position actually ends the game; see "Position history" below.
 - `resetGameAtom` — write-only action atom (no read value) that puts
   every per-game atom (`gameBoardAtom`, `currentTurnAtom`,
   `gameStatusAtom`, `capturedPiecesAtom`, `positionHistoryAtom`,
@@ -233,11 +236,15 @@ position reached in the game, just an intermediate UI state.
 `GameLogicValidator.ts` is the consumer: a plain count of how many times
 `position` appears in `positionHistory`, true once it's 3 or more. Both
 `GamePiece.tsx` and `PromotionPrompt.tsx` call it right after appending
-the new position, and set `gameStatusAtom` to `{state: "draw", color:
-null}` if it's true — checked after checkmate (checkmate wins if a move
-somehow satisfies both) but before an ordinary check, since a draw ends
-the game regardless of whether the final position also happens to check
-the mover's opponent.
+the new position, gated by `threefoldRepetitionEnabledAtom` (default
+`true`) — only when both are true does it set `gameStatusAtom` to
+`{state: "draw", color: null}` — checked after checkmate (checkmate wins
+if a move somehow satisfies both) but before an ordinary check, since a
+draw ends the game regardless of whether the final position also happens
+to check the mover's opponent. `positionHistoryAtom` itself is always
+appended to regardless of the toggle — only the draw-triggering check is
+gated, since tracking is cheap and there's no reason to stop counting
+just because the auto-draw is disabled.
 
 ## Rematch (`src/Modal/RematchPrompt.tsx`)
 

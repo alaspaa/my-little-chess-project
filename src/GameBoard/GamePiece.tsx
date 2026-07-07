@@ -1,7 +1,7 @@
 import { type BoardCoordinates, type ChessPiece, type Square } from "../types/ChessObjects"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, validMovesAtom } from "../state"
+import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, threefoldRepetitionEnabledAtom, validMovesAtom } from "../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck, isThreefoldRepetition } from "../GameLogic/GameLogicValidator"
@@ -26,6 +26,7 @@ function GamePiece(props: opts) {
     const [, setCapturedPieces] = useAtom(capturedPiecesAtom)
     const [pendingPromotion, setPendingPromotion] = useAtom(pendingPromotionAtom)
     const [positionHistory, setPositionHistory] = useAtom(positionHistoryAtom)
+    const [threefoldRepetitionEnabled] = useAtom(threefoldRepetitionEnabledAtom)
 
     // Read via refs inside the event listeners below instead of depending on
     // these atoms in the effect, so the listeners are attached once and
@@ -37,6 +38,7 @@ function GamePiece(props: opts) {
     const gameStatusRef = useRef(gameStatus)
     const pendingPromotionRef = useRef(pendingPromotion)
     const positionHistoryRef = useRef(positionHistory)
+    const threefoldRepetitionEnabledRef = useRef(threefoldRepetitionEnabled)
     useEffect(() => {
         pieceClickedRef.current = pieceClicked
         boardCoordinatesRef.current = boardCoordinates
@@ -45,6 +47,7 @@ function GamePiece(props: opts) {
         gameStatusRef.current = gameStatus
         pendingPromotionRef.current = pendingPromotion
         positionHistoryRef.current = positionHistory
+        threefoldRepetitionEnabledRef.current = threefoldRepetitionEnabled
     })
 
     useEffect(() => {
@@ -115,7 +118,7 @@ function GamePiece(props: opts) {
 
                             if(isCheckmate(newBoard, nextTurn)) {
                                 setGameStatus({state: "checkmate", color: nextTurn})
-                            } else if(isThreefoldRepetition(newPositionHistory, position)) {
+                            } else if(threefoldRepetitionEnabledRef.current && isThreefoldRepetition(newPositionHistory, position)) {
                                 setGameStatus({state: "draw", color: null})
                             } else if(isKingInCheck(newBoard, nextTurn)) {
                                 setGameStatus({state: "check", color: nextTurn})

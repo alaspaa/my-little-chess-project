@@ -1,9 +1,9 @@
-import { useAtom, useSetAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useTranslation } from "react-i18next"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import ModalFrame from "./ModalFrame"
 import getPieceIcon from "../GameBoard/pieceIcons"
-import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pendingPromotionAtom, positionHistoryAtom } from "../state"
+import { currentTurnAtom, gameBoardAtom, gameStatusAtom, pendingPromotionAtom, positionHistoryAtom, threefoldRepetitionEnabledAtom } from "../state"
 import { isCheckmate, isKingInCheck, isThreefoldRepetition } from "../GameLogic/GameLogicValidator"
 import { serializePosition } from "../GameLogic/Position"
 import type { CHESS_PIECE_TYPE } from "../types/ChessObjects"
@@ -17,6 +17,7 @@ function PromotionPrompt() {
     const setCurrentTurn = useSetAtom(currentTurnAtom)
     const setGameStatus = useSetAtom(gameStatusAtom)
     const [positionHistory, setPositionHistory] = useAtom(positionHistoryAtom)
+    const threefoldRepetitionEnabled = useAtomValue(threefoldRepetitionEnabledAtom)
 
     if(!pendingPromotion) return null
 
@@ -43,7 +44,7 @@ function PromotionPrompt() {
 
         if(isCheckmate(newBoard, nextTurn)) {
             setGameStatus({state: "checkmate", color: nextTurn})
-        } else if(isThreefoldRepetition(newPositionHistory, position)) {
+        } else if(threefoldRepetitionEnabled && isThreefoldRepetition(newPositionHistory, position)) {
             setGameStatus({state: "draw", color: null})
         } else if(isKingInCheck(newBoard, nextTurn)) {
             setGameStatus({state: "check", color: nextTurn})

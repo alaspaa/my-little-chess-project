@@ -275,26 +275,6 @@ know which extra square to clear.
 
 ---
 
-## Make threefold repetition configurable
-
-**Complexity:** Small — same shape as "Make the fifty-move rule
-configurable" above, applied to the other draw rule.
-
-**Area:** state (`src/state.ts`), UI (`src/Modal/SettingsMenu.tsx`)
-
-Threefold repetition detection is implemented (`isThreefoldRepetition` in
-`GameLogicValidator.ts`, checked by `GamePiece.tsx`/`PromotionPrompt.tsx`
-right after appending to `positionHistoryAtom`; see "Position history" in
-`specs/architecture.md`) but always-on. Add a
-`threefoldRepetitionEnabledAtom` (default `true`) and a matching settings
-checkbox, gating whether reaching three occurrences of a position
-actually sets `gameStatusAtom` to the draw state. `positionHistoryAtom`
-itself (tracked unconditionally) doesn't need gating — only the
-draw-triggering check does, same reasoning as the fifty-move toggle
-above.
-
----
-
 ## Extend position history to support reviewing a game
 
 **Complexity:** Medium — the pieces needed don't exist yet, but nothing

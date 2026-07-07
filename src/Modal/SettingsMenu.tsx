@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { useAtom } from "jotai"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faGear } from "@fortawesome/free-solid-svg-icons"
-import { highlightMovesEnabledAtom, languageAtom } from "../state"
+import { highlightMovesEnabledAtom, languageAtom, threefoldRepetitionEnabledAtom } from "../state"
 import ModalFrame from "./ModalFrame"
 import i18n from "../i18n"
 import { LANGUAGES } from "./languages"
@@ -11,6 +11,7 @@ import { LANGUAGES } from "./languages"
 function SettingsMenu() {
     const { t } = useTranslation()
     const [highlightMovesEnabled, setHighlightMovesEnabled] = useAtom(highlightMovesEnabledAtom)
+    const [threefoldRepetitionEnabled, setThreefoldRepetitionEnabled] = useAtom(threefoldRepetitionEnabledAtom)
     const [language, setLanguage] = useAtom(languageAtom)
     const [isOpen, setIsOpen] = useState(false)
 
@@ -39,6 +40,14 @@ function SettingsMenu() {
                             onChange={e => setHighlightMovesEnabled(e.target.checked)}
                         />
                         {t("header.highlightMovesLabel")}
+                    </label>
+                    <label className="settings-menu-option">
+                        <input
+                            type="checkbox"
+                            checked={threefoldRepetitionEnabled}
+                            onChange={e => setThreefoldRepetitionEnabled(e.target.checked)}
+                        />
+                        {t("header.threefoldRepetitionLabel")}
                     </label>
                     <label className="settings-menu-option">
                         {t("header.languageLabel")}

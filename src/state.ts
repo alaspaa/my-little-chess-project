@@ -43,6 +43,7 @@ export const blackPlayerAtom = atom(get =>
 export const currentTurnAtom = atom<CHESS_PIECE_COLOR>("white")
 export const gameStatusAtom = atom<GameStatus>({state: "playing", color: null})
 export const highlightMovesEnabledAtom = atom(true)
+export const threefoldRepetitionEnabledAtom = atom(true)
 // Mirrors i18n.language into an atom so components re-render on change via
 // Jotai's subscription rather than hooking into i18next's own event emitter.
 export const languageAtom = atom<string>(i18n.language)

@@ -10,6 +10,7 @@
     "title": "Chess",
     "settingsButtonLabel": "Settings",
     "highlightMovesLabel": "Highlight legal moves",
+    "threefoldRepetitionLabel": "Draw on threefold repetition",
     "languageLabel": "Language"
   },
   "startPage": {
