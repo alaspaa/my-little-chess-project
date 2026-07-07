@@ -1,0 +1,51 @@
+name: Deploy to pages
+
+on:
+    push:
+        branches:
+            - main
+
+env:
+    NODE_VERSION: 22.0.0
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup-node
+
+            - run: npm run lint
+            - run: npm test
+
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup-node
+
+            - run: npm run build
+
+            - uses: actions/upload-pages-artifact@v3
+              with:
+                  path: dist
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+
+        steps:
+            - uses: actions/deploy-pages@v4
+              id: deployment
