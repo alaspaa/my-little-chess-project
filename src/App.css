@@ -122,9 +122,9 @@
   width: var(--square-size);
   height: var(--square-size);
   display: inline-block;
+  vertical-align: top;
   margin: 0;
   padding: 0;
-
 }
 
  .square-black {
