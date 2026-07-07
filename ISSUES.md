@@ -9,8 +9,8 @@ of what was fixed and when.
 Each entry: a title, complexity, the area it touches, what's
 missing/wrong, and enough context to start without re-deriving it from
 scratch. Ordered simplest to most complex, so it doubles as a suggested
-pickup order — except "Support touch input for dragging pieces" is
-pinned to the top as the current highest priority regardless of size.
+pickup order — except the two touch-input issues at the top, pinned
+there as the current highest priority regardless of size.
 
 We tried migrating one entry to [GitHub Issues](https://github.com/alaspaa/my-little-chess-project/issues)
 (issue #1, resolved via #2) but are sticking with this file as the
@@ -18,10 +18,10 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
-## Support touch input for dragging pieces
+## Switch drag listeners from mouse events to Pointer Events
 
-**Complexity:** Medium-large — needs a parallel (or replacement) event
-path for the existing mouse-only drag implementation.
+**Complexity:** Medium — a rename across two files, but touching the
+core of the drag interaction.
 
 **Area:** `src/GameBoard/GamePiece.tsx`, `src/GameBoard/GameBoard.tsx`
 
@@ -33,17 +33,35 @@ listener on the board container to track the drag position into
 None of these fire on a touch-only device — touch interactions dispatch
 `touchstart`/`touchmove`/`touchend` instead, with coordinates read from
 `e.touches[0].clientX`/`clientY` rather than `e.clientX`/`clientY`, so a
-piece currently can't be picked up at all on a phone. The likely cleanest
-fix is switching the existing listeners from `mousedown`/`mousemove`/
-`mouseup` to their `pointerdown`/`pointermove`/`pointerup` equivalents,
-since Pointer Events fire for mouse, touch, and pen uniformly with the
-same `clientX`/`clientY` shape — replacing the mouse-specific listeners
-rather than adding a second parallel set for touch. Also needs
+piece currently can't be picked up at all on a phone. The fix is
+switching the existing listeners from `mousedown`/`mousemove`/`mouseup`
+to their `pointerdown`/`pointermove`/`pointerup` equivalents, since
+Pointer Events fire for mouse, touch, and pen uniformly with the same
+`clientX`/`clientY` shape — replacing the mouse-specific listeners
+rather than adding a second parallel set for touch. This alone is
+testable on desktop too, since Pointer Events fire identically for
+mouse input — but on an actual touch device it will likely still feel
+broken without "Prevent page scroll during touch drag" below, since the
+browser's own scroll/pan gesture will fight the drag.
+
+---
+
+## Prevent page scroll during touch drag
+
+**Complexity:** Small — a CSS property (or a `preventDefault()` call),
+but not optional polish — needed for touch dragging to actually work.
+
+**Area:** `src/GameBoard/GamePiece.tsx`, `src/App.css`
+
+Depends on "Switch drag listeners from mouse events to Pointer Events"
+above landing first. Once pieces respond to pointer/touch input, starting
+a drag on a phone will also trigger the browser's default scroll/pan
+gesture unless told otherwise, fighting the piece's own movement. Needs
 `touch-action: none` (or equivalent) on draggable pieces so the browser
 doesn't try to scroll the page while a drag is in progress. The layout
 itself already scales to fit a phone viewport (see "Responsive layout"
-in `specs/architecture.md`) — this is the remaining piece needed to make
-the board actually playable by touch.
+in `specs/architecture.md`) — these two issues together are what's left
+to make the board actually playable by touch.
 
 ---
 
