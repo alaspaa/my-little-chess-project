@@ -9,11 +9,41 @@ of what was fixed and when.
 Each entry: a title, complexity, the area it touches, what's
 missing/wrong, and enough context to start without re-deriving it from
 scratch. Ordered simplest to most complex, so it doubles as a suggested
-pickup order.
+pickup order — except "Support touch input for dragging pieces" is
+pinned to the top as the current highest priority regardless of size.
 
 We tried migrating one entry to [GitHub Issues](https://github.com/alaspaa/my-little-chess-project/issues)
 (issue #1, resolved via #2) but are sticking with this file as the
 source of truth for now rather than maintaining two backlogs.
+
+---
+
+## Support touch input for dragging pieces
+
+**Complexity:** Medium-large — needs a parallel (or replacement) event
+path for the existing mouse-only drag implementation.
+
+**Area:** `src/GameBoard/GamePiece.tsx`, `src/GameBoard/GameBoard.tsx`
+
+Piece drag-and-drop only responds to `mousedown`/`mousemove`/`mouseup` —
+`GamePiece.tsx` attaches native `mousedown`/`mouseup` listeners directly
+to each piece's DOM node, and `GameBoard.tsx` attaches a `mousemove`
+listener on the board container to track the drag position into
+`boardCoordinatesAtom` (see "Turn flow" in `specs/architecture.md`).
+None of these fire on a touch-only device — touch interactions dispatch
+`touchstart`/`touchmove`/`touchend` instead, with coordinates read from
+`e.touches[0].clientX`/`clientY` rather than `e.clientX`/`clientY`, so a
+piece currently can't be picked up at all on a phone. The likely cleanest
+fix is switching the existing listeners from `mousedown`/`mousemove`/
+`mouseup` to their `pointerdown`/`pointermove`/`pointerup` equivalents,
+since Pointer Events fire for mouse, touch, and pen uniformly with the
+same `clientX`/`clientY` shape — replacing the mouse-specific listeners
+rather than adding a second parallel set for touch. Also needs
+`touch-action: none` (or equivalent) on draggable pieces so the browser
+doesn't try to scroll the page while a drag is in progress. The layout
+itself already scales to fit a phone viewport (see "Responsive layout"
+in `specs/architecture.md`) — this is the remaining piece needed to make
+the board actually playable by touch.
 
 ---
 
@@ -56,33 +86,6 @@ row numbers (1-8) along another, styled to line up with the 100px
 White's back rank rendered at top (see "Board coordinate system" in
 `specs/architecture.md`) — the labels are static text in a fixed
 position, not derived from player color or recomputed per game.
-
----
-
-## Add component rendering tests
-
-**Complexity:** Small-medium — mostly test-infrastructure setup, since the
-assertions themselves (did the right elements render) are simple.
-
-**Area:** test config (`vite.config.ts`), new dev dependencies,
-`src/**/*.test.tsx` next to each component
-
-Only the logic layer (`src/GameLogic/*.ts`, `src/types/GameBoard.ts`) has
-tests today — components
-(`GamePiece`, `GameBoard`, `StartPage`, etc.) aren't covered at all (see
-"Testability" in `specs/code-style.md`), so there's no safety net against
-a component silently failing to render or a prop being wired up wrong.
-Needs: a DOM test environment for Vitest (e.g. `jsdom`, since the current
-`vitest.config`'s `test` block has no `environment` set and runs in plain
-Node), `@testing-library/react` for rendering into that DOM, and
-`vite.config.ts`'s `test.include` extended to also pick up `*.test.tsx`
-(currently only matches `*.test.ts`). Start at the minimum bar of one
-smoke test per component asserting it renders its expected elements (e.g.
-`GameSquare` renders a piece icon when its square has one, `StartPage`
-renders both username inputs and the start button) — the existing
-components' reliance on raw DOM mouse events for interaction (also called
-out in `specs/code-style.md`) means testing drag-and-drop behavior itself
-is a separate, harder problem than this issue's scope.
 
 ---
 
@@ -130,32 +133,46 @@ the rook move is self-explanatory enough once it happens.
 
 ---
 
-## Support touch input for dragging pieces
+## Display wins/losses/draws
 
-**Complexity:** Medium-large — needs a parallel (or replacement) event
-path for the existing mouse-only drag implementation.
+**Complexity:** Small — read-only rendering of an existing atom.
 
-**Area:** `src/GameBoard/GamePiece.tsx`, `src/GameBoard/GameBoard.tsx`
+**Area:** UI (`src/GameBoard/GameFooter.tsx` or `src/Header/Header.tsx`)
 
-Piece drag-and-drop only responds to `mousedown`/`mousemove`/`mouseup` —
-`GamePiece.tsx` attaches native `mousedown`/`mouseup` listeners directly
-to each piece's DOM node, and `GameBoard.tsx` attaches a `mousemove`
-listener on the board container to track the drag position into
-`boardCoordinatesAtom` (see "Turn flow" in `specs/architecture.md`).
-None of these fire on a touch-only device — touch interactions dispatch
-`touchstart`/`touchmove`/`touchend` instead, with coordinates read from
-`e.touches[0].clientX`/`clientY` rather than `e.clientX`/`clientY`, so a
-piece currently can't be picked up at all on a phone. The likely cleanest
-fix is switching the existing listeners from `mousedown`/`mousemove`/
-`mouseup` to their `pointerdown`/`pointermove`/`pointerup` equivalents,
-since Pointer Events fire for mouse, touch, and pen uniformly with the
-same `clientX`/`clientY` shape — replacing the mouse-specific listeners
-rather than adding a second parallel set for touch. Also needs
-`touch-action: none` (or equivalent) on draggable pieces so the browser
-doesn't try to scroll the page while a drag is in progress. The layout
-itself already scales to fit a phone viewport (see "Responsive layout"
-in `specs/architecture.md`) — this is the remaining piece needed to make
-the board actually playable by touch.
+`scoreAtom` (`{player1, player2, draws}`, see "Score tracking" in
+`specs/architecture.md`) exists and is already incremented correctly
+across rematches, using `player1ColorAtom` so the tally stays correct
+even after "Rematch (Swap Sides)" — but nothing renders it yet. Render
+its counts somewhere in the persistent chrome (`GameFooter` alongside the
+player names, or `Header` if it should survive independent of
+`GamePage`) — plain text is enough, no new interaction needed.
+
+---
+
+## Add component rendering tests
+
+**Complexity:** Small-medium — mostly test-infrastructure setup, since the
+assertions themselves (did the right elements render) are simple.
+
+**Area:** test config (`vite.config.ts`), new dev dependencies,
+`src/**/*.test.tsx` next to each component
+
+Only the logic layer (`src/GameLogic/*.ts`, `src/types/GameBoard.ts`) has
+tests today — components
+(`GamePiece`, `GameBoard`, `StartPage`, etc.) aren't covered at all (see
+"Testability" in `specs/code-style.md`), so there's no safety net against
+a component silently failing to render or a prop being wired up wrong.
+Needs: a DOM test environment for Vitest (e.g. `jsdom`, since the current
+`vitest.config`'s `test` block has no `environment` set and runs in plain
+Node), `@testing-library/react` for rendering into that DOM, and
+`vite.config.ts`'s `test.include` extended to also pick up `*.test.tsx`
+(currently only matches `*.test.ts`). Start at the minimum bar of one
+smoke test per component asserting it renders its expected elements (e.g.
+`GameSquare` renders a piece icon when its square has one, `StartPage`
+renders both username inputs and the start button) — the existing
+components' reliance on raw DOM mouse events for interaction (also called
+out in `specs/code-style.md`) means testing drag-and-drop behavior itself
+is a separate, harder problem than this issue's scope.
 
 ---
 
@@ -197,20 +214,57 @@ counting just because the auto-draw is disabled.
 
 ---
 
-## Display wins/losses/draws
+## Extend position history to support reviewing a game
 
-**Complexity:** Small — read-only rendering of an existing atom.
+**Complexity:** Medium — the pieces needed don't exist yet, but nothing
+here is architecturally hard on its own.
 
-**Area:** UI (`src/GameBoard/GameFooter.tsx` or `src/Header/Header.tsx`)
+**Area:** `src/GameLogic/Position.ts`, state (`src/state.ts`)
 
-`scoreAtom` (`{player1, player2, draws}`, see "Score tracking" in
-`specs/architecture.md`) exists and is already incremented correctly
-across rematches — nothing renders it yet. Render its counts somewhere in
-the persistent chrome (`GameFooter` alongside the player names, or
-`Header` if it should survive independent of `GamePage`) — plain text is
-enough, no new interaction needed. Note the atom's `player1`/`player2`
-fields don't currently correspond to fixed people if "Allow switching
-sides on rematch" below ever lands — see that issue's note on this.
+`positionHistoryAtom` (see "Position history" in `specs/architecture.md`)
+already has every position of the current game in order, which is most
+of what a "step through this game" review feature would need — but a
+few things are missing: `serializePosition` only goes board→string,
+there's no inverse (`deserializePosition`) to turn a saved entry back
+into a `Square[][]` for rendering (piece `id`/`hasMoved` can't be
+recovered since they were never encoded, but that's fine for pure
+review — only the visual position matters there). Also,
+`resetGameAtom` clears `positionHistoryAtom` on rematch (deliberately,
+so a new game's threefold-repetition count doesn't inherit the old
+game's positions), so reviewing a *previous* rematch would need an
+explicit archive step — e.g. copying the array somewhere else - before
+that reset fires, since nothing preserves it today. See "Record check/
+checkmate info in move history" below for the related question of
+per-move annotations (check, checkmate, whose move) that a review UI
+would likely also want alongside the raw positions.
+
+---
+
+## Record check/checkmate info in move history, including the checking piece
+
+**Complexity:** Medium-large — needs check detection to report *which*
+piece is checking, not just whether the king is in check, plus a shape
+change to how history is stored.
+
+**Area:** `src/GameLogic/GameLogicValidator.ts`, `src/GameLogic/moves/king.ts`,
+state (`src/state.ts`)
+
+`isKingInCheck`/`isSquareAttacked` currently only return a boolean —
+by design, since all `isKingInCheck` needs today is yes/no. Annotating
+history with "this move gave check" (and by which piece — useful for a
+review feature, and matches how real chess notation marks checks) needs
+`isSquareAttacked` (or a new function built on the same scan in
+`moves/king.ts`) to return the attacking piece(s)' coordinates instead of
+just `true`, since more than one piece can deliver check at once
+(discovered double check). Since `positionHistoryAtom` is currently a
+flat `string[]` (see "Position history" in `specs/architecture.md`),
+recording this means growing each entry into a small record (e.g.
+`{position: string, checkedBy: BoardCoordinates[] | null}`) instead of a
+bare string — `isThreefoldRepetition`'s comparison would need updating to
+compare the `position` field specifically rather than the whole entry.
+Depends on "Extend position history to support reviewing a game" above
+existing first if the goal is showing this in a review UI, though the
+detection/recording half could land independently.
 
 ---
 
@@ -280,57 +334,3 @@ state from the logic issue existing first, since the commit step needs
 to know it's an en passant capture (as opposed to a normal diagonal
 move onto an empty square, which is otherwise illegal for a pawn) to
 know which extra square to clear.
-
----
-
-## Extend position history to support reviewing a game
-
-**Complexity:** Medium — the pieces needed don't exist yet, but nothing
-here is architecturally hard on its own.
-
-**Area:** `src/GameLogic/Position.ts`, state (`src/state.ts`)
-
-`positionHistoryAtom` (see "Position history" in `specs/architecture.md`)
-already has every position of the current game in order, which is most
-of what a "step through this game" review feature would need — but a
-few things are missing: `serializePosition` only goes board→string,
-there's no inverse (`deserializePosition`) to turn a saved entry back
-into a `Square[][]` for rendering (piece `id`/`hasMoved` can't be
-recovered since they were never encoded, but that's fine for pure
-review — only the visual position matters there). Also,
-`resetGameAtom` clears `positionHistoryAtom` on rematch (deliberately,
-so a new game's threefold-repetition count doesn't inherit the old
-game's positions), so reviewing a *previous* rematch would need an
-explicit archive step — e.g. copying the array somewhere else - before
-that reset fires, since nothing preserves it today. See "Record check/
-checkmate info in move history" below for the related question of
-per-move annotations (check, checkmate, whose move) that a review UI
-would likely also want alongside the raw positions.
-
----
-
-## Record check/checkmate info in move history, including the checking piece
-
-**Complexity:** Medium-large — needs check detection to report *which*
-piece is checking, not just whether the king is in check, plus a shape
-change to how history is stored.
-
-**Area:** `src/GameLogic/GameLogicValidator.ts`, `src/GameLogic/moves/king.ts`,
-state (`src/state.ts`)
-
-`isKingInCheck`/`isSquareAttacked` currently only return a boolean —
-by design, since all `isKingInCheck` needs today is yes/no. Annotating
-history with "this move gave check" (and by which piece — useful for a
-review feature, and matches how real chess notation marks checks) needs
-`isSquareAttacked` (or a new function built on the same scan in
-`moves/king.ts`) to return the attacking piece(s)' coordinates instead of
-just `true`, since more than one piece can deliver check at once
-(discovered double check). Since `positionHistoryAtom` is currently a
-flat `string[]` (see "Position history" in `specs/architecture.md`),
-recording this means growing each entry into a small record (e.g.
-`{position: string, checkedBy: BoardCoordinates[] | null}`) instead of a
-bare string — `isThreefoldRepetition`'s comparison would need updating to
-compare the `position` field specifically rather than the whole entry.
-Depends on "Extend position history to support reviewing a game" above
-existing first if the goal is showing this in a review UI, though the
-detection/recording half could land independently.
