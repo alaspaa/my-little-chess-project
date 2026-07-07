@@ -4,6 +4,11 @@ on:
     push:
         branches:
             - main
+        paths-ignore:
+            - "**.md"
+            - ".husky/**"
+            - ".gitignore"
+            - ".claude/**"
 
 env:
     NODE_VERSION: 22.0.0

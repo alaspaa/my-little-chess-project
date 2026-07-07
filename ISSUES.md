@@ -17,32 +17,6 @@ source of truth for now rather than maintaining two backlogs.
 
 ---
 
-## Investigate hosting on GitHub Pages
-
-**Complexity:** Small — a spike, not a build task: figure out whether it
-works and what it needs, rather than a fully-scoped feature.
-
-**Area:** `vite.config.ts`, a new GitHub Actions workflow (e.g.
-`.github/workflows/deploy.yml`)
-
-No deployment exists today — the app only runs via `npm run dev`/`npm
-run build` locally. Since this is a pure client-side SPA with no backend,
-no server-side routing, and no persistence (per `specs/architecture.md`),
-GitHub Pages (static hosting, free on a public repo) is plausible, but
-needs verifying rather than assuming: `vite.config.ts` has no `base` set
-today, which defaults to `/` — if this repo is served from
-`https://alaspaa.github.io/my-little-chess-project/` rather than a root
-domain, `base` needs to be `/my-little-chess-project/` or every built
-asset URL will 404. Needs a way to build and publish `dist/` to a
-`gh-pages` branch (either the `gh-pages` npm package run manually, or a
-GitHub Actions workflow that builds on push to `main` and deploys via
-`actions/deploy-pages` or `peaceiris/actions-gh-pages`) and confirming in
-the actual hosted URL — not just a local `vite preview`, since `base`
-issues and any other path-relative assumptions only show up once it's
-served from a subpath.
-
----
-
 ## Add board coordinate labels (ranks/files)
 
 **Complexity:** Small — a wrapper around the existing board rendering, no

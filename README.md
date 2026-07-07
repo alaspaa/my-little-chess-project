@@ -1,5 +1,7 @@
 # chess-game
 
+Play it live at [alaspaa.github.io/my-little-chess-project](https://alaspaa.github.io/my-little-chess-project/).
+
 A browser-based chess game built with React, TypeScript, and Vite. It
 currently runs entirely client-side (no backend), with the aspiration of
 adding more robust backend handling (persistence, multiplayer, etc.) as
