@@ -1,3 +1,8 @@
+:root {
+  --board-size: min(800px, calc(100vw - 2rem));
+  --square-size: calc(var(--board-size) / 8);
+}
+
 #root {
   width: 100%;
 }
@@ -5,7 +10,7 @@
 .app-content {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 3rem 2rem 2rem;
+  padding: 3rem clamp(0.5rem, 4vw, 2rem) 2rem;
   text-align: center;
 }
 
@@ -101,7 +106,7 @@
 
 .gameboard {
     box-sizing: border-box;
-    width: 800px;
+    width: var(--board-size);
     margin: 0 auto;
     border: black 1px solid;
 }
@@ -109,17 +114,17 @@
 .gameboardrow {
   padding: 0;
   margin: 0;
-  width: 800px;
-  height: 100px;
+  width: var(--board-size);
+  height: var(--square-size);
 }
 
 .gamesquare {
-  width: 100px;
-  height: 100px;
+  width: var(--square-size);
+  height: var(--square-size);
   display: inline-block;
   margin: 0;
   padding: 0;
-  
+
 }
 
  .square-black {
@@ -160,7 +165,7 @@
 
 .game-footer {
     box-sizing: border-box;
-    width: 800px;
+    width: var(--board-size);
     margin: 0.5rem auto 0;
     display: flex;
     flex-direction: column;
@@ -174,7 +179,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
+    gap: clamp(0.5rem, 2vw, 1.5rem);
 }
 
 .game-footer-actions {
@@ -186,7 +191,8 @@
 }
 
 .gameboard-player {
-    flex: 0 0 auto;
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -208,11 +214,16 @@
 
 .gameboard-player-name {
     font-size: 1.1rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .captured-pieces {
     display: grid;
-    grid-template-columns: repeat(8, 1.1rem);
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    width: min(8.8rem, 100%);
     grid-template-rows: repeat(2, 1.1rem);
     gap: 0.15rem;
     margin: 0.35rem 0;
@@ -353,6 +364,7 @@
 
 .promotion-choices {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 0.75rem;
 }
@@ -361,16 +373,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    height: 100px;
+    width: var(--square-size);
+    height: var(--square-size);
     background-color: rgb(70, 70, 70);
 }
 
  .chesspiece {
-    height: 60px;
-    width: 60px;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    height: calc(var(--square-size) * 0.6);
+    width: calc(var(--square-size) * 0.6);
+    padding-top: calc(var(--square-size) * 0.2);
+    padding-bottom: calc(var(--square-size) * 0.2);
  }
 
  .whitepiece path {

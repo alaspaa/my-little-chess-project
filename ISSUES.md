@@ -130,32 +130,6 @@ the rook move is self-explanatory enough once it happens.
 
 ---
 
-## Make the layout responsive for phone screens
-
-**Complexity:** Medium — mostly CSS, but touches nearly every fixed
-measurement in the file.
-
-**Area:** `src/App.css`
-
-Every dimension on the board/footer is a hardcoded pixel value with no
-responsive fallback: `.gameboard`/`.gameboardrow`/`.game-footer` are all
-`width: 800px`, `.gamesquare` is a fixed `100px` square, `.chesspiece` is
-a fixed `60px` square. `App.css` has exactly one `@media` query today
-(`prefers-reduced-motion`) — none for viewport width. On a phone-width
-screen (e.g. 375-430px), the board simply overflows and gets clipped or
-forces horizontal scrolling rather than shrinking to fit. Needs either a
-`@media (max-width: ...)` breakpoint that scales the board/square/piece
-sizes down together (they need to shrink in proportion — a smaller board
-with the same 100px squares doesn't fit), or switching the board's own
-sizing to a relative unit (e.g. `width: min(800px, 100vw)` with square
-sizes derived from that via a CSS custom property) so it scales smoothly
-instead of stepping at a breakpoint. Note this is a layout-only issue —
-it doesn't make the board *playable* by touch, since dragging pieces
-still depends on mouse events; see "Support touch input for dragging
-pieces" below for that half.
-
----
-
 ## Support touch input for dragging pieces
 
 **Complexity:** Medium-large — needs a parallel (or replacement) event
@@ -178,9 +152,10 @@ since Pointer Events fire for mouse, touch, and pen uniformly with the
 same `clientX`/`clientY` shape — replacing the mouse-specific listeners
 rather than adding a second parallel set for touch. Also needs
 `touch-action: none` (or equivalent) on draggable pieces so the browser
-doesn't try to scroll the page while a drag is in progress. Depends on
-"Make the layout responsive for phone screens" above to actually be
-useful on a phone, though the two are independently implementable.
+doesn't try to scroll the page while a drag is in progress. The layout
+itself already scales to fit a phone viewport (see "Responsive layout"
+in `specs/architecture.md`) — this is the remaining piece needed to make
+the board actually playable by touch.
 
 ---
 

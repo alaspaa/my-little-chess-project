@@ -301,3 +301,23 @@ Squares also have a 1-indexed DOM id used for hit-testing drops:
 `getSquareNumber(x, y) = (x + 1) + (y * 8)`, defined in both
 `GameSquare.tsx` (rendering) and `GamePiece.tsx` (`getBoardCoordinates`,
 the inverse). If one changes, the other must change with it.
+
+## Responsive layout (`src/App.css`)
+
+The board's sizing is driven by two CSS custom properties defined on
+`:root`: `--board-size` (`min(800px, calc(100vw - 2rem))`) and
+`--square-size` (`calc(var(--board-size) / 8)`). `.gameboard`,
+`.gameboardrow`, and `.game-footer` all use `var(--board-size)` directly;
+`.gamesquare` and `.promotion-choice-button` use `var(--square-size)`;
+and `.chesspiece` derives its size and padding as fractions of
+`--square-size` (`0.6`/`0.2`/`0.2`, matching the original fixed
+60px/20px/20px on a 100px square) so pieces scale in proportion to the
+squares instead of independently. This keeps every size relationship
+defined once, rather than needing a second set of hardcoded pixel values
+at a breakpoint. `elementsFromPoint`-based drop hit-testing in
+`GamePiece.tsx` and `getLegalMoves` highlighting are unaffected by any of
+this, since they work in screen coordinates, not fixed pixel assumptions
+about square size — only the drag-follow offset in `GameBoard.tsx`
+(`clientX - 30`, `clientY - 40`) is a hardcoded pixel value tuned for the
+default piece size, and will look slightly off (not broken, just
+visually offset from the cursor) at a scaled-down size.
