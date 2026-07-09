@@ -1,5 +1,5 @@
 import { useAtomValue } from "jotai"
-import GamePage from "./GamePage/GamePage"
+import GamePage from "./Chess/GamePage/GamePage"
 import StartPage from "./StartPage/StartPage"
 import Header from "./Header/Header"
 import { currentPageAtom } from "./state"

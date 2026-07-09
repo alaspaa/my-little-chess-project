@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { getQueenMoves } from "./queen"
-import { buildBoard, piece } from "../../testUtils"
+import { buildBoard, piece } from "../../../testUtils"
 
 describe("queen moves", () => {
     it("combines rook and bishop movement", () => {

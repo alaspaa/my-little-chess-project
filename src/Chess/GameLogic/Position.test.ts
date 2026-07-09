@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { serializePosition } from "./Position"
-import { buildBoard, piece } from "../testUtils"
+import { buildBoard, piece } from "../../testUtils"
 
 describe("serializePosition", () => {
     it("is the same for the same arrangement and side to move", () => {

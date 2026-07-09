@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai'
 import GamePiece from './GamePiece'
 import { type Square } from '../types/ChessObjects'
-import { highlightMovesEnabledAtom, validMovesAtom } from '../state'
+import { highlightMovesEnabledAtom, validMovesAtom } from '../../state'
 
 interface opts {
     gameSquare: Square,

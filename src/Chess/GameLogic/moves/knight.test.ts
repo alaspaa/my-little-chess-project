@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { getKnightMoves } from "./knight"
-import { buildBoard, expectMoves, piece } from "../../testUtils"
+import { buildBoard, expectMoves, piece } from "../../../testUtils"
 
 describe("knight moves", () => {
     it("moves in an L shape to all 8 squares from an open center", () => {

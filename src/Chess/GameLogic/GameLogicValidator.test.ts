@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck, isThreefoldRepetition } from "./GameLogicValidator"
 import getValidMoves from "./MoveResolver"
-import { buildBoard, expectMoves, piece } from "../testUtils"
+import { buildBoard, expectMoves, piece } from "../../testUtils"
 
 describe("isKingInCheck", () => {
     it("is false when no enemy piece attacks the king", () => {

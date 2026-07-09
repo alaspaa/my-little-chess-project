@@ -1,7 +1,7 @@
 import { useEffect, useRef} from 'react'
 import GameBoardRow from './GameBoardRow'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { boardCoordinatesAtom, gameBoardAtom, pieceClickedAtom } from '../state'
+import { boardCoordinatesAtom, gameBoardAtom, pieceClickedAtom } from '../../state'
 
 function GameBoard() {
     const gameBoard = useAtomValue(gameBoardAtom)

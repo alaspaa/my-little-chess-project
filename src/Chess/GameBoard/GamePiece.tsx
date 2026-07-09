@@ -1,9 +1,9 @@
 import { type BoardCoordinates, type ChessPiece, type Square } from "../types/ChessObjects"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, threefoldRepetitionEnabledAtom, validMovesAtom } from "../state"
+import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, threefoldRepetitionEnabledAtom, validMovesAtom } from "../../state"
 import { useAtom } from "jotai"
-import { boardCoordinatesAtom } from "../state"
+import { boardCoordinatesAtom } from "../../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck, isThreefoldRepetition } from "../GameLogic/GameLogicValidator"
 import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../GameLogic/MoveResolver"
 import { serializePosition } from "../GameLogic/Position"

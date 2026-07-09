@@ -6,6 +6,18 @@ React 19 + TypeScript + Vite, Jotai for state, FontAwesome for piece icons.
 No backend, no router, no persistence — everything lives in memory for the
 duration of one browser tab.
 
+## Folder layout
+
+Chess-only code is grouped under `src/Chess/` (`GameLogic/`, `GameBoard/`,
+`types/`, `GamePage/`, and the chess-specific modals `Modal/PromotionPrompt.tsx`/
+`Modal/RematchPrompt.tsx`), kept separate from the reusable app shell
+(`src/StartPage/`, `src/Header/`, `src/Modal/`'s generic `ConfirmModal.tsx`/
+`ModalFrame.tsx`/`SettingsMenu.tsx`) that hosts it. `src/state.ts` stays at
+the top level rather than moving under `src/Chess/` even though most of
+its atoms are chess state — it's the one cross-cutting file every layer
+(shell and chess alike) already imports directly, so splitting it wasn't
+worth the churn.
+
 ## Page switching
 
 There's no routing library. `currentPageAtom` (`"setup" | "game"`) in
@@ -80,7 +92,7 @@ All cross-component state is a Jotai atom in this one file:
   tallying results across rematches; see "Score tracking" below. Keyed by
   player slot, not color, and deliberately not reset by `resetGameAtom`.
 
-## Validation pipeline (`src/GameLogic/`)
+## Validation pipeline (`src/Chess/GameLogic/`)
 
 Move legality is split into two layers, each in its own file:
 
@@ -93,7 +105,7 @@ Move legality is split into two layers, each in its own file:
    `GameLogicValidator.ts` below is where actual yes/no validation
    happens. `MoveResolver.ts` itself is just a thin dispatcher: each
    piece type's actual move rules live in their own file under
-   `src/GameLogic/moves/` (`pawn.ts`, `rook.ts`, `knight.ts`, `bishop.ts`,
+   `src/Chess/GameLogic/moves/` (`pawn.ts`, `rook.ts`, `knight.ts`, `bishop.ts`,
    `queen.ts`, `king.ts`), with shared geometry helpers (`isOnBoard`,
    `squareIsEmpty`, `isOpponentPiece`, `getSlidingMoves`,
    `ROOK_DIRECTIONS`/`BISHOP_DIRECTIONS`) factored into `moves/shared.ts`.
@@ -113,7 +125,7 @@ Move legality is split into two layers, each in its own file:
    into the other from inside a function body, never at module-load time.
    `MoveResolver.ts` re-exports everything `moves/*.ts` needs to expose
    externally (`isPawnPromotion`, `isSquareAttacked`, `isCastlingMove`,
-   `getCastlingRookMove`), so nothing outside `src/GameLogic/` needs to
+   `getCastlingRookMove`), so nothing outside `src/Chess/GameLogic/` needs to
    know about the `moves/` folder at all.
 2. **`GameLogicValidator.ts`** — the game-rules layer built on top of
    `MoveResolver`:
@@ -159,7 +171,7 @@ atom/field rather than inferring it from the board alone.
    `gameStatusAtom` immediately — not both. See "Pawn promotion" below for
    how the deferred case gets finished.
 
-## Pawn promotion (`src/Modal/PromotionPrompt.tsx`)
+## Pawn promotion (`src/Chess/Modal/PromotionPrompt.tsx`)
 
 When `GamePiece.tsx` detects a promotion, it does **not** flip the turn or
 recompute check/checkmate status right away — it sets `pendingPromotionAtom`
@@ -186,7 +198,7 @@ deliberate, since the two files don't have a natural common parent to
 own that logic, and the snippet is small enough that the duplication is
 cheaper than the plumbing to share it.
 
-## Castling (`src/GameLogic/moves/king.ts`, `GamePiece.tsx`)
+## Castling (`src/Chess/GameLogic/moves/king.ts`, `GamePiece.tsx`)
 
 `getKingMoves` appends castling destinations (`{x: 6}` kingside, `{x: 2}`
 queenside, same `y`) via `getCastlingMoves`, which requires: the king and
@@ -214,7 +226,7 @@ rook alongside the king) and by `GameLogicValidator.ts`'s `simulateMove`
 (so the check-safety simulation used by `getLegalMoves` reflects the
 rook's real post-castling position, not its pre-move one).
 
-## Position history (`src/GameLogic/Position.ts`)
+## Position history (`src/Chess/GameLogic/Position.ts`)
 
 `serializePosition(gameBoard, turn)` turns a board + side-to-move into a
 plain string key — `Square[][]` objects are always structurally distinct
@@ -250,7 +262,7 @@ appended to regardless of the toggle — only the draw-triggering check is
 gated, since tracking is cheap and there's no reason to stop counting
 just because the auto-draw is disabled.
 
-## Rematch (`src/Modal/RematchPrompt.tsx`)
+## Rematch (`src/Chess/Modal/RematchPrompt.tsx`)
 
 `RematchPrompt` watches `gameStatusAtom` via `isGameOver` and renders a
 non-dismissible `ModalFrame` (same choice as `PromotionPrompt` — the

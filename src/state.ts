@@ -1,6 +1,6 @@
 import { atom } from "jotai";
-import { type BoardCoordinates, type CHESS_PIECE_COLOR, type ChessPiece, type PendingPromotion, type Player, type Score } from "./types/ChessObjects";
-import { createEmptyBoard, populateBoardWithPieces } from "./types/GameBoard";
+import { type BoardCoordinates, type CHESS_PIECE_COLOR, type ChessPiece, type PendingPromotion, type Player, type Score } from "./Chess/types/ChessObjects";
+import { createEmptyBoard, populateBoardWithPieces } from "./Chess/types/GameBoard";
 import i18n from "./i18n";
 
 export type Page = "setup" | "game"

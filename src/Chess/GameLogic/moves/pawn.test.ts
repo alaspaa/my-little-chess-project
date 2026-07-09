@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { getPawnMoves, isPawnPromotion } from "./pawn"
-import { buildBoard, expectMoves, piece } from "../../testUtils"
+import { buildBoard, expectMoves, piece } from "../../../testUtils"
 
 describe("pawn moves", () => {
     it("can move one or two squares forward from its starting rank", () => {

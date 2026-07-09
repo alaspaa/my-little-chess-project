@@ -1,6 +1,6 @@
 import { describe, it } from "vitest"
 import { getBishopMoves } from "./bishop"
-import { buildBoard, expectMoves, piece } from "../../testUtils"
+import { buildBoard, expectMoves, piece } from "../../../testUtils"
 
 describe("bishop moves", () => {
     it("slides diagonally and stops at the board edge", () => {

@@ -1,6 +1,6 @@
 import { expect } from "vitest"
-import { createEmptyBoard } from "./types/GameBoard"
-import type { BoardCoordinates, CHESS_PIECE_COLOR, CHESS_PIECE_TYPE, ChessPiece, Square } from "./types/ChessObjects"
+import { createEmptyBoard } from "./Chess/types/GameBoard"
+import type { BoardCoordinates, CHESS_PIECE_COLOR, CHESS_PIECE_TYPE, ChessPiece, Square } from "./Chess/types/ChessObjects"
 
 let nextPieceId = 0
 

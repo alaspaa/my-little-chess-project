@@ -71,11 +71,11 @@ undocumented.
   piece type inline.
 - Business/domain logic is kept in plain `.ts` files, separate from the
   React components that call it: move generation and check detection in
-  `src/GameLogic/`, board setup and other shared types in `src/types/`.
+  `src/Chess/GameLogic/`, board setup and other shared types in `src/Chess/types/`.
   Components stay focused on rendering and wiring DOM events to that
   logic. This split is deliberate and required going forward: don't
   inline game-rule logic inside a `.tsx` component body — write it as a
-  plain function in `src/GameLogic/` (or `src/types/` for non-rule
+  plain function in `src/Chess/GameLogic/` (or `src/Chess/types/` for non-rule
   domain code), then call it from the component. This is also what makes
   the logic testable (see Testability below) without needing to render
   anything.
@@ -84,14 +84,14 @@ undocumented.
 
 Tests run on [Vitest](https://vitest.dev) (`npm test`). Test files sit
 next to the code they cover as `*.test.ts` (e.g.
-`src/GameLogic/MoveResolver.test.ts`), not in a separate `__tests__`
+`src/Chess/GameLogic/MoveResolver.test.ts`), not in a separate `__tests__`
 tree. Import `describe`/`it`/`expect` explicitly from `"vitest"` rather
 than relying on injected globals, so files type-check without extra
 config. Shared test-only helpers (e.g. `buildBoard`/`piece` for
 constructing a board with specific pieces on it) live in
 `src/testUtils.ts`.
 
-Only the logic layer (`src/GameLogic/*.ts`, `src/types/GameBoard.ts`) is
+Only the logic layer (`src/Chess/GameLogic/*.ts`, `src/Chess/types/GameBoard.ts`) is
 covered so far — components (`GamePiece`, `GameBoard`, `StartPage`)
 aren't tested yet, since they drive everything through raw DOM mouse
 events and imperative style mutation rather than props/return values;
@@ -101,7 +101,7 @@ something callable without a real drag.
 What makes the logic layer testable, and should be preserved as more of
 it is written:
 
-- Keep game-rule logic (`src/GameLogic/*.ts`, `src/GameLogic/moves/*.ts`)
+- Keep game-rule logic (`src/Chess/GameLogic/*.ts`, `src/Chess/GameLogic/moves/*.ts`)
   as plain functions of `(gameBoard, coordinates, piece, ...)` that
   return a value — no DOM access, no atoms, no React — so they can be
   called directly in a test with a hand-built board, no rendering or
@@ -109,7 +109,7 @@ it is written:
   and the per-piece files under `moves/` already follow this.
 - Avoid hidden dependencies on global/module state inside logic functions;
   pass in everything a function needs as a parameter instead of reaching
-  out to an atom or `document` from inside `src/GameLogic/`.
+  out to an atom or `document` from inside `src/Chess/GameLogic/`.
 - Where a function's correctness matters most (move legality, check/
   checkmate detection), favor a form that's easy to assert against —
   return data (`BoardCoordinates[]`, `boolean`) rather than performing a

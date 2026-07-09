@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { getCastlingRookMove, getKingMoves, isCastlingMove, isSquareAttacked } from "./king"
-import { buildBoard, expectMoves, piece } from "../../testUtils"
+import { buildBoard, expectMoves, piece } from "../../../testUtils"
 
 describe("king moves", () => {
     it("moves exactly one square in any direction", () => {

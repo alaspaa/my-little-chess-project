@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useSetAtom } from "jotai"
 import { currentPageAtom, player1Atom, player2Atom } from "../state"
-import type { Player } from "../types/ChessObjects"
+import type { Player } from "../Chess/types/ChessObjects"
 
 function StartPage() {
     const { t } = useTranslation()

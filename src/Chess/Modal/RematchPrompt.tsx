@@ -1,7 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai"
 import { useTranslation } from "react-i18next"
-import ModalFrame from "./ModalFrame"
-import { gameStatusAtom, isGameOver, player1ColorAtom, resetGameAtom } from "../state"
+import ModalFrame from "../../Modal/ModalFrame"
+import { gameStatusAtom, isGameOver, player1ColorAtom, resetGameAtom } from "../../state"
 
 function RematchPrompt() {
     const { t } = useTranslation()

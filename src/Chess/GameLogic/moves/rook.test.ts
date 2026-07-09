@@ -1,6 +1,6 @@
 import { describe, it } from "vitest"
 import { getRookMoves } from "./rook"
-import { buildBoard, expectMoves, piece } from "../../testUtils"
+import { buildBoard, expectMoves, piece } from "../../../testUtils"
 
 describe("rook moves", () => {
     it("slides in straight lines until the edge of the board", () => {

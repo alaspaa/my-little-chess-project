@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import getValidMoves from "./MoveResolver"
-import { buildBoard, piece } from "../testUtils"
+import { buildBoard, piece } from "../../testUtils"
 import type { CHESS_PIECE_TYPE } from "../types/ChessObjects"
 
 describe("getValidMoves", () => {

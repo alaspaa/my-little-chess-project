@@ -4,7 +4,7 @@ import GameBoard from '../GameBoard/GameBoard'
 import GameFooter from '../GameBoard/GameFooter'
 import PromotionPrompt from '../Modal/PromotionPrompt'
 import RematchPrompt from '../Modal/RematchPrompt'
-import { capturedPiecesAtom, currentTurnAtom, gameStatusAtom, isGameOver, player1ColorAtom, scoreAtom, whitePlayerAtom, blackPlayerAtom } from '../state'
+import { capturedPiecesAtom, currentTurnAtom, gameStatusAtom, isGameOver, player1ColorAtom, scoreAtom, whitePlayerAtom, blackPlayerAtom } from '../../state'
 
 function GamePage() {
     const whitePlayer = useAtomValue(whitePlayerAtom)
