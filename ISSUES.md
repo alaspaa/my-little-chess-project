@@ -287,6 +287,31 @@ nothing to apply without the move existing first.
 
 ---
 
+## Move chess-specific code into its own subfolder
+
+**Complexity:** Large — no logic changes, but touches import paths across
+most of the codebase, so it's easy to start and hard to finish cleanly.
+
+**Area:** `src/GameBoard/`, `src/GameLogic/`, `src/types/`, `src/state.ts`
+
+Chess rules/board code (`src/GameLogic/`, `src/GameBoard/`,
+`src/types/ChessObjects.ts`, `src/types/GameBoard.ts`) currently sits at
+the same level as generic app shell (`src/StartPage/`, `src/Header/`,
+`src/Modal/`, `src/ConfirmModal/`, `src/GamePage/`) with nothing marking
+which is which. Grouping the chess-only pieces under one folder (e.g.
+`src/Chess/` or `src/GameLogic/` promoted to hold `GameBoard` and the
+chess types too) would make that boundary explicit and make it easier to
+later reuse or test the rules engine independent of the UI shell.
+`src/state.ts` mixes chess atoms (`gameBoardAtom`, `currentTurnAtom`,
+`validMovesAtom`, etc.) with app-shell atoms (`currentPageAtom`,
+`languageAtom`) — worth deciding whether to split it along the same line
+or leave it as the one cross-cutting state file. Since this is a pure
+move/import-path change, the risk is entirely in missed references, not
+in logic — a full-repo build plus the existing test suite passing is
+enough to confirm nothing broke.
+
+---
+
 ## En passant capture wiring
 
 **Complexity:** Medium — one method, `updateGameBoardWithMovedPiece` in
