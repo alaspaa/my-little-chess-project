@@ -2,18 +2,19 @@ import type { BoardCoordinates, ChessPiece, Square } from "../types/ChessObjects
 import { getBishopMoves } from "./moves/bishop";
 import { getKingMoves, getCastlingRookMove, isCastlingMove, isSquareAttacked } from "./moves/king";
 import { getKnightMoves } from "./moves/knight";
-import { getPawnMoves, isPawnPromotion } from "./moves/pawn";
+import { getPawnMoves, isPawnPromotion, isEnPassantMove, getEnPassantCapturedPawnCoordinates, getPawnDoubleStepTarget } from "./moves/pawn";
 import { getQueenMoves } from "./moves/queen";
 import { getRookMoves } from "./moves/rook";
 
 function getValidMoves(
     gameBoard: Square[][],
     currentCoordinates: BoardCoordinates,
-    piece: ChessPiece
+    piece: ChessPiece,
+    enPassantTarget: BoardCoordinates | null = null
 ): BoardCoordinates[] {
     switch(piece.type) {
         case "PAWN":
-            return getPawnMoves(gameBoard, currentCoordinates, piece)
+            return getPawnMoves(gameBoard, currentCoordinates, piece, enPassantTarget)
         case "ROOK":
             return getRookMoves(gameBoard, currentCoordinates, piece)
         case "KNIGHT":
@@ -30,4 +31,12 @@ function getValidMoves(
 }
 
 export default getValidMoves
-export { isPawnPromotion, isSquareAttacked, isCastlingMove, getCastlingRookMove }
+export {
+    isPawnPromotion,
+    isSquareAttacked,
+    isCastlingMove,
+    getCastlingRookMove,
+    isEnPassantMove,
+    getEnPassantCapturedPawnCoordinates,
+    getPawnDoubleStepTarget,
+}

@@ -66,6 +66,9 @@ All cross-component state is a Jotai atom in this one file:
   the black pieces white has taken), rendered in `GameFooter`.
 - `pendingPromotionAtom` — `{ color, coordinates } | null`, set when a
   pawn move lands on the back rank; see "Pawn promotion" below.
+- `enPassantTargetAtom` — `BoardCoordinates | null`, the square a pawn
+  could capture "en passant" on, non-null for exactly one move after an
+  enemy pawn double-steps; see "En passant" below.
 - `languageAtom` — mirrors `i18n.language`, initialized from it directly
   (`src/i18n.ts`'s `i18n` instance is imported into `state.ts` for this).
   `SettingsMenu.tsx`'s language dropdown (`src/Modal/languages.ts` holds
@@ -82,8 +85,8 @@ All cross-component state is a Jotai atom in this one file:
 - `resetGameAtom` — write-only action atom (no read value) that puts
   every per-game atom (`gameBoardAtom`, `currentTurnAtom`,
   `gameStatusAtom`, `capturedPiecesAtom`, `positionHistoryAtom`,
-  `pendingPromotionAtom`, and the transient drag atoms) back to its
-  starting value; see "Rematch" below. Deliberately leaves
+  `pendingPromotionAtom`, `enPassantTargetAtom`, and the transient drag
+  atoms) back to its starting value; see "Rematch" below. Deliberately leaves
   `player1Atom`/`player2Atom`/`player1ColorAtom` and settings atoms
   (`highlightMovesEnabledAtom`, `languageAtom`) untouched — a rematch is
   the same two players (and colors, until switching sides is supported)
@@ -140,9 +143,11 @@ Move legality is split into two layers, each in its own file:
   ever shows truly legal squares) and `validateMove` to decide whether to
   commit a drop.
 
-En passant is not implemented. It would need move history state (which
-pawn just double-stepped) that doesn't exist yet — add it as a new
-atom/field rather than inferring it from the board alone.
+En passant capture (see "En passant" below) is threaded through this
+whole pipeline as an extra `enPassantTarget: BoardCoordinates | null`
+parameter — `getValidMoves`, `getLegalMoves`, `validateMove`, and
+`simulateMove` all accept it (defaulting to `null`, so existing call
+sites that don't care about it don't need updating).
 
 ## Turn flow (`GamePiece.tsx`)
 
@@ -225,6 +230,40 @@ used both by `GamePiece.tsx`'s move-commit step (to actually relocate the
 rook alongside the king) and by `GameLogicValidator.ts`'s `simulateMove`
 (so the check-safety simulation used by `getLegalMoves` reflects the
 rook's real post-castling position, not its pre-move one).
+
+## En passant (`src/Chess/GameLogic/moves/pawn.ts`, `GamePiece.tsx`)
+
+`enPassantTargetAtom` (`src/state.ts`) holds the square a pawn could
+capture on "en passant" — non-null for exactly one move, the one right
+after an enemy pawn double-steps past it. `GamePiece.tsx`'s move-commit
+step overwrites it after every committed move (both the immediate-turn-flip
+path and the pawn-promotion path share this, since it happens before
+`isPawnPromotion` branches) to `getPawnDoubleStepTarget(piece, from, to)`
+— the square halfway between where the pawn started and landed, or `null`
+for any move that isn't a two-square pawn advance. This means the window
+always closes after exactly one move, without needing to track *when*
+it was set.
+
+`getPawnMoves` adds the target square to a pawn's candidate moves via
+`isEnPassantMove(piece, destination, enPassantTarget)` when a pawn's
+diagonal lands on it, but only after also confirming (via `isOpponentPiece`)
+that an enemy pawn is actually sitting where en passant would capture it
+— defensive, since nothing else about the target square's geometry
+guarantees that.
+
+Like castling, en passant's capture doesn't land on the piece it captures
+— the captured pawn sits one square behind the destination
+(`getEnPassantCapturedPawnCoordinates(from, to)`: same file as the
+destination, same rank the capturing pawn started on). Both
+`GamePiece.tsx`'s move-commit step (to actually clear that square, and to
+credit `capturedPiecesAtom` with the right piece since it isn't on the
+destination square either) and `GameLogicValidator.ts`'s `simulateMove`
+(so check-safety simulation reflects the capture) need to special-case
+this the same way they already special-case castling's rook relocation —
+the classic "en passant pin" (king and rook share the capturing pawn's
+rank; capturing removes the one piece blocking that rank) only comes out
+correctly because `simulateMove` removes the captured pawn, not just
+relocates the capturing one.
 
 ## Position history (`src/Chess/GameLogic/Position.ts`)
 

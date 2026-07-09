@@ -89,6 +89,38 @@ describe("getLegalMoves", () => {
         // to the raw pseudo-legal move set - nothing should get filtered out.
         expectMoves(moves, getValidMoves(board, {x: 4, y: 4}, rook))
     })
+
+    it("excludes an en passant capture that would remove the only pawn blocking a check", () => {
+        const king = piece("white", "KING")
+        const whitePawn = piece("white", "PAWN", true)
+        const blackPawn = piece("black", "PAWN", true)
+        const attacker = piece("black", "ROOK")
+        const board = buildBoard([
+            {x: 0, y: 4, piece: king},
+            {x: 2, y: 4, piece: whitePawn},
+            {x: 3, y: 4, piece: blackPawn},
+            {x: 7, y: 4, piece: attacker},
+        ])
+
+        const moves = getLegalMoves(board, {x: 2, y: 4}, whitePawn, {x: 3, y: 5})
+
+        expectMoves(moves, [{x: 2, y: 5}])
+    })
+
+    it("allows an en passant capture that doesn't expose the king", () => {
+        const king = piece("white", "KING")
+        const whitePawn = piece("white", "PAWN", true)
+        const blackPawn = piece("black", "PAWN", true)
+        const board = buildBoard([
+            {x: 0, y: 0, piece: king},
+            {x: 2, y: 4, piece: whitePawn},
+            {x: 3, y: 4, piece: blackPawn},
+        ])
+
+        const moves = getLegalMoves(board, {x: 2, y: 4}, whitePawn, {x: 3, y: 5})
+
+        expectMoves(moves, [{x: 2, y: 5}, {x: 3, y: 5}])
+    })
 })
 
 describe("validateMove", () => {

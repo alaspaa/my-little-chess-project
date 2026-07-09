@@ -22,7 +22,7 @@ source of truth for now rather than maintaining two backlogs.
 **Complexity:** Small — a CSS class + keyframe animation, keyed off state
 that's already read where it'd apply.
 
-**Area:** `src/GameBoard/GamePiece.tsx`, `src/App.css`
+**Area:** `src/Chess/GameBoard/GamePiece.tsx`, `src/App.css`
 
 Now that the turn-arrow indicator is gone from `GameFooter.tsx` (the
 active player is already clear enough from the highlighted name/color
@@ -44,7 +44,7 @@ than gimmicky before committing to per-piece vs. some other grouping.
 **Complexity:** Small — a wrapper around the existing board rendering, no
 new state.
 
-**Area:** UI (`src/GameBoard/GameBoard.tsx`, `src/App.css`)
+**Area:** UI (`src/Chess/GameBoard/GameBoard.tsx`, `src/App.css`)
 
 There's no way to see file/rank labels (a-h, 1-8) around the board today
 — `GameBoard.tsx` just renders 8 `GameBoardRow`s of 8 `GameSquare`s, with
@@ -64,7 +64,7 @@ position, not derived from player color or recomputed per game.
 **Complexity:** Small — mostly a design question; the code hook needed to
 answer it already exists.
 
-**Area:** UI (`src/GameBoard/GameSquare.tsx`, `src/App.css`)
+**Area:** UI (`src/Chess/GameBoard/GameSquare.tsx`, `src/App.css`)
 
 `GameSquare.tsx` already highlights a picked-up piece's legal destinations
 with two states — `.validmove` and `.validcapture` (see `isValidMove`/
@@ -73,7 +73,7 @@ promotion looks identical to any other move or capture square today, even
 though dropping on it doesn't just move the piece, it also pops open
 `PromotionPrompt`. Worth thinking about whether that's worth a third
 visual state (e.g. a `.validpromotion` class) before building it:
-`isPawnPromotion(piece, destination)` in `src/GameLogic/moves/pawn.ts`
+`isPawnPromotion(piece, destination)` in `src/Chess/GameLogic/moves/pawn.ts`
 already exists and could be called per candidate square in
 `GameSquare.tsx` the same way `isValidCapture` is computed now, so the
 implementation is small — the open question is purely whether a distinct
@@ -87,14 +87,14 @@ there) or just visual noise.
 **Complexity:** Small — mostly a design question; the code hook needed to
 answer it already exists.
 
-**Area:** UI (`src/GameBoard/GameSquare.tsx`, `src/App.css`)
+**Area:** UI (`src/Chess/GameBoard/GameSquare.tsx`, `src/App.css`)
 
 Same open question as "Consider a distinct highlight for
 promotion-triggering moves" above, for castling instead: a castling
 destination is just another square in the king's `.validmove` set today,
 indistinguishable from an ordinary one-step king move, even though
 dropping on it also relocates a rook two squares away.
-`isCastlingMove(piece, from, to)` in `src/GameLogic/moves/king.ts` already
+`isCastlingMove(piece, from, to)` in `src/Chess/GameLogic/moves/king.ts` already
 exists and could be called per candidate square the same way
 `isValidCapture` is computed now, so — as with promotion — the
 implementation is small; the open question is whether a distinct
@@ -107,7 +107,7 @@ the rook move is self-explanatory enough once it happens.
 
 **Complexity:** Small — read-only rendering of an existing atom.
 
-**Area:** UI (`src/GameBoard/GameFooter.tsx` or `src/Header/Header.tsx`)
+**Area:** UI (`src/Chess/GameBoard/GameFooter.tsx` or `src/Header/Header.tsx`)
 
 `scoreAtom` (`{player1, player2, draws}`, see "Score tracking" in
 `specs/architecture.md`) exists and is already incremented correctly
@@ -127,7 +127,7 @@ assertions themselves (did the right elements render) are simple.
 **Area:** test config (`vite.config.ts`), new dev dependencies,
 `src/**/*.test.tsx` next to each component
 
-Only the logic layer (`src/GameLogic/*.ts`, `src/types/GameBoard.ts`) has
+Only the logic layer (`src/Chess/GameLogic/*.ts`, `src/Chess/types/GameBoard.ts`) has
 tests today — components
 (`GamePiece`, `GameBoard`, `StartPage`, etc.) aren't covered at all (see
 "Testability" in `specs/code-style.md`), so there's no safety net against
@@ -151,7 +151,7 @@ is a separate, harder problem than this issue's scope.
 **Complexity:** Medium — just a counter (moves since the last pawn move
 or capture), reset on the right conditions and checked each turn.
 
-**Area:** game state (`src/state.ts`, `src/GameLogic/GameLogicValidator.ts`)
+**Area:** game state (`src/state.ts`, `src/Chess/GameLogic/GameLogicValidator.ts`)
 
 A game should be drawn if 50 full moves pass with no pawn move and no
 capture. Needs: a new counter in state (e.g. `halfmoveClockAtom`),
@@ -189,7 +189,7 @@ counting just because the auto-draw is disabled.
 **Complexity:** Medium — the pieces needed don't exist yet, but nothing
 here is architecturally hard on its own.
 
-**Area:** `src/GameLogic/Position.ts`, state (`src/state.ts`)
+**Area:** `src/Chess/GameLogic/Position.ts`, state (`src/state.ts`)
 
 `positionHistoryAtom` (see "Position history" in `specs/architecture.md`)
 already has every position of the current game in order, which is most
@@ -216,7 +216,7 @@ would likely also want alongside the raw positions.
 piece is checking, not just whether the king is in check, plus a shape
 change to how history is stored.
 
-**Area:** `src/GameLogic/GameLogicValidator.ts`, `src/GameLogic/moves/king.ts`,
+**Area:** `src/Chess/GameLogic/GameLogicValidator.ts`, `src/Chess/GameLogic/moves/king.ts`,
 state (`src/state.ts`)
 
 `isKingInCheck`/`isSquareAttacked` currently only return a boolean —
@@ -244,8 +244,8 @@ detection/recording half could land independently.
 to interact with the existing pause state during a pawn promotion, and a
 new game-over reason.
 
-**Area:** state (`src/state.ts`), `src/GameBoard/GamePiece.tsx`, UI
-(`src/GameBoard/GameFooter.tsx`)
+**Area:** state (`src/state.ts`), `src/Chess/GameBoard/GamePiece.tsx`, UI
+(`src/Chess/GameBoard/GameFooter.tsx`)
 
 No time control exists — games can go on indefinitely. Needs deciding
 between two designs before implementation: a **per-game clock** (each
@@ -263,44 +263,3 @@ the game is already effectively paused then (see "Pawn promotion" in
 `specs/architecture.md`) — the same pause condition `GamePiece.tsx`'s
 `onPointerDown` already checks before starting a drag.
 
----
-
-## En passant move-generation logic
-
-**Complexity:** Large — needs move-history state that doesn't exist yet,
-plus a rule that depends on the timing of the previous move, not just
-current board state.
-
-**Area:** move rules (`src/GameLogic/moves/pawn.ts`), state (`src/state.ts`)
-
-A pawn that double-steps past an enemy pawn should be capturable "as if"
-it only moved one square, but only on the very next move. This needs move
-history that doesn't exist yet — specifically, which pawn (if any) just
-made a two-square advance. Add that as new state (e.g. a
-`lastMoveAtom`/field tracked in `GamePiece.tsx`'s move-commit step), then
-extend `getPawnMoves` to use it and produce the extra diagonal capture
-square. This issue is move-generation only — actually applying the
-capture (removing a pawn that isn't on the destination square) is
-"En passant capture wiring" below, since neither half is useful alone:
-generating the move with nothing to apply it is dead code, and there's
-nothing to apply without the move existing first.
-
----
-
-## En passant capture wiring
-
-**Complexity:** Medium — one method, `updateGameBoardWithMovedPiece` in
-`GamePiece.tsx`, currently assumes a capture always happens on the
-destination square.
-
-**Area:** `src/GameBoard/GamePiece.tsx`
-
-Once "En passant move-generation logic" above produces a legal en passant
-destination, committing it needs to remove the *captured* pawn, which
-sits one square behind the destination (same file, the row the capturing
-pawn started from) — not on the destination square itself, where
-`updateGameBoardWithMovedPiece` looks today. Depends on the move-history
-state from the logic issue existing first, since the commit step needs
-to know it's an en passant capture (as opposed to a normal diagonal
-move onto an empty square, which is otherwise illegal for a pawn) to
-know which extra square to clear.

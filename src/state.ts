@@ -55,6 +55,8 @@ export const capturedPiecesAtom = atom<Record<CHESS_PIECE_COLOR, ChessPiece[]>>(
 
 export const pendingPromotionAtom = atom<PendingPromotion | null>(null)
 
+export const enPassantTargetAtom = atom<BoardCoordinates | null>(null)
+
 // Serialized (board + side-to-move) snapshot appended after every completed
 // move, for threefold repetition detection.
 export const positionHistoryAtom = atom<string[]>([])
@@ -75,6 +77,7 @@ export const resetGameAtom = atom(null, (_get, set) => {
     set(capturedPiecesAtom, {white: [], black: []})
     set(positionHistoryAtom, [])
     set(pendingPromotionAtom, null)
+    set(enPassantTargetAtom, null)
     set(validMovesAtom, [])
     set(pieceClickedAtom, null)
     set(boardCoordinatesAtom, null)

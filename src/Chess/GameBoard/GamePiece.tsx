@@ -1,11 +1,11 @@
 import { type BoardCoordinates, type ChessPiece, type Square } from "../types/ChessObjects"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { capturedPiecesAtom, currentTurnAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, threefoldRepetitionEnabledAtom, validMovesAtom } from "../../state"
+import { capturedPiecesAtom, currentTurnAtom, enPassantTargetAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, threefoldRepetitionEnabledAtom, validMovesAtom } from "../../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck, isThreefoldRepetition } from "../GameLogic/GameLogicValidator"
-import { getCastlingRookMove, isCastlingMove, isPawnPromotion } from "../GameLogic/MoveResolver"
+import { getCastlingRookMove, getEnPassantCapturedPawnCoordinates, getPawnDoubleStepTarget, isCastlingMove, isEnPassantMove, isPawnPromotion } from "../GameLogic/MoveResolver"
 import { serializePosition } from "../GameLogic/Position"
 import getPieceIcon from "./pieceIcons"
 
@@ -27,6 +27,7 @@ function GamePiece(props: opts) {
     const [pendingPromotion, setPendingPromotion] = useAtom(pendingPromotionAtom)
     const [positionHistory, setPositionHistory] = useAtom(positionHistoryAtom)
     const [threefoldRepetitionEnabled] = useAtom(threefoldRepetitionEnabledAtom)
+    const [enPassantTarget, setEnPassantTarget] = useAtom(enPassantTargetAtom)
 
     // Read via refs inside the event listeners below instead of depending on
     // these atoms in the effect, so the listeners are attached once and
@@ -39,6 +40,7 @@ function GamePiece(props: opts) {
     const pendingPromotionRef = useRef(pendingPromotion)
     const positionHistoryRef = useRef(positionHistory)
     const threefoldRepetitionEnabledRef = useRef(threefoldRepetitionEnabled)
+    const enPassantTargetRef = useRef(enPassantTarget)
     useEffect(() => {
         pieceClickedRef.current = pieceClicked
         boardCoordinatesRef.current = boardCoordinates
@@ -48,6 +50,7 @@ function GamePiece(props: opts) {
         pendingPromotionRef.current = pendingPromotion
         positionHistoryRef.current = positionHistory
         threefoldRepetitionEnabledRef.current = threefoldRepetitionEnabled
+        enPassantTargetRef.current = enPassantTarget
     })
 
     useEffect(() => {
@@ -69,7 +72,7 @@ function GamePiece(props: opts) {
             if(clickedPiece.color !== currentTurnRef.current) return
 
             setPieceClicked(id)
-            setValidMoves(getLegalMoves(currentGameBoard, currentCoordinates, clickedPiece))
+            setValidMoves(getLegalMoves(currentGameBoard, currentCoordinates, clickedPiece, enPassantTargetRef.current))
         }
 
         const onPointerUp = () => {
@@ -84,13 +87,21 @@ function GamePiece(props: opts) {
                 })
 
                 const currentGameBoard = gameBoardRef.current
+                const currentEnPassantTarget = enPassantTargetRef.current
 
                 const gameBoardCoordinates = getGameBoardCoordinatesFromGameSquare(gameSquare)
-                if(gameBoardCoordinates) {
-                    //console.log(`${gameBoardCoordinates?.x}, ${gameBoardCoordinates?.y}, ${pieceClicked}`)
+                if(gameBoardCoordinates && pieceClicked) {
 
-                    const capturedPiece = currentGameBoard[gameBoardCoordinates.y][gameBoardCoordinates.x].piece
-                    const newBoard = updateGameBoardWithMovedPiece(currentGameBoard, pieceClicked!, gameBoardCoordinates!)
+                    const originalCoordinates = findPieceCoordinates(currentGameBoard, pieceClicked)
+                    const movingPiece = originalCoordinates && currentGameBoard[originalCoordinates.y][originalCoordinates.x].piece
+
+                    let capturedPieceCoordinates = gameBoardCoordinates
+                    if(movingPiece && originalCoordinates && isEnPassantMove(movingPiece, gameBoardCoordinates, currentEnPassantTarget)) {
+                        capturedPieceCoordinates = getEnPassantCapturedPawnCoordinates(originalCoordinates, gameBoardCoordinates)
+                    }
+                    const capturedPiece = currentGameBoard[capturedPieceCoordinates.y][capturedPieceCoordinates.x].piece
+
+                    const newBoard = updateGameBoardWithMovedPiece(currentGameBoard, pieceClicked, gameBoardCoordinates, currentEnPassantTarget)
                     if(newBoard !== currentGameBoard) {
                         setGameBoard(newBoard)
 
@@ -101,6 +112,11 @@ function GamePiece(props: opts) {
                                 [capturingColor]: [...previous[capturingColor], capturedPiece],
                             }))
                         }
+
+                        const nextEnPassantTarget = movingPiece && originalCoordinates
+                            ? getPawnDoubleStepTarget(movingPiece, originalCoordinates, gameBoardCoordinates)
+                            : null
+                        setEnPassantTarget(nextEnPassantTarget)
 
                         const movedPiece = newBoard[gameBoardCoordinates.y][gameBoardCoordinates.x].piece
                         if(movedPiece && isPawnPromotion(movedPiece, gameBoardCoordinates)) {
@@ -116,7 +132,7 @@ function GamePiece(props: opts) {
                             const newPositionHistory = [...positionHistoryRef.current, position]
                             setPositionHistory(newPositionHistory)
 
-                            if(isCheckmate(newBoard, nextTurn)) {
+                            if(isCheckmate(newBoard, nextTurn, nextEnPassantTarget)) {
                                 setGameStatus({state: "checkmate", color: nextTurn})
                             } else if(threefoldRepetitionEnabledRef.current && isThreefoldRepetition(newPositionHistory, position)) {
                                 setGameStatus({state: "draw", color: null})
@@ -154,7 +170,7 @@ function GamePiece(props: opts) {
         }
 
         return cleanup
-    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces, setPendingPromotion, setPositionHistory])
+    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces, setPendingPromotion, setPositionHistory, setEnPassantTarget])
 
     return(
         <div className="gamepiece" id={piece.id} ref={pieceRef}>
@@ -189,7 +205,12 @@ function findPieceCoordinates(gameBoard: Square[][], pieceId: string): BoardCoor
     return null
 }
 
-function updateGameBoardWithMovedPiece(gameBoard: Square[][], pieceId: string, newCoordinates: BoardCoordinates): Square[][] {
+function updateGameBoardWithMovedPiece(
+    gameBoard: Square[][],
+    pieceId: string,
+    newCoordinates: BoardCoordinates,
+    enPassantTarget: BoardCoordinates | null
+): Square[][] {
     const originalCoordinates = findPieceCoordinates(gameBoard, pieceId)
     const piece = originalCoordinates && gameBoard[originalCoordinates.y][originalCoordinates.x].piece
 
@@ -199,17 +220,18 @@ function updateGameBoardWithMovedPiece(gameBoard: Square[][], pieceId: string, n
         square.piece?.id === pieceId ? {...square, piece: null} : square
     ))
 
-    return validateAndUpdateGameBoardWithMovedPiece(gameBoard, newBoard, originalCoordinates, newCoordinates, piece)
+    return validateAndUpdateGameBoardWithMovedPiece(gameBoard, newBoard, originalCoordinates, newCoordinates, piece, enPassantTarget)
 }
 
 function validateAndUpdateGameBoardWithMovedPiece(
-    currentGameBoard: Square[][], 
-    newGameBoard: Square[][], 
-    originalCoordinates: BoardCoordinates, 
+    currentGameBoard: Square[][],
+    newGameBoard: Square[][],
+    originalCoordinates: BoardCoordinates,
     newCoordinates: BoardCoordinates,
     chessPiece: ChessPiece,
+    enPassantTarget: BoardCoordinates | null,
 ): Square[][] {
- if(!validateMove(currentGameBoard, originalCoordinates, newCoordinates, chessPiece)) return currentGameBoard
+ if(!validateMove(currentGameBoard, originalCoordinates, newCoordinates, chessPiece, enPassantTarget)) return currentGameBoard
 
 
     newGameBoard[newCoordinates.y][newCoordinates.x] = {
@@ -227,6 +249,14 @@ function validateAndUpdateGameBoardWithMovedPiece(
         newGameBoard[originalCoordinates.y][rookMove.to] = {
             ...newGameBoard[originalCoordinates.y][rookMove.to],
             piece: rook && {...rook, hasMoved: true}
+        }
+    }
+
+    if(isEnPassantMove(chessPiece, newCoordinates, enPassantTarget)) {
+        const capturedPawnCoordinates = getEnPassantCapturedPawnCoordinates(originalCoordinates, newCoordinates)
+        newGameBoard[capturedPawnCoordinates.y][capturedPawnCoordinates.x] = {
+            ...newGameBoard[capturedPawnCoordinates.y][capturedPawnCoordinates.x],
+            piece: null
         }
     }
 

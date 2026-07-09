@@ -1,27 +1,45 @@
 import type { BoardCoordinates, CHESS_PIECE_COLOR, ChessPiece, Square } from "../types/ChessObjects";
-import getValidMoves, { getCastlingRookMove, isCastlingMove, isSquareAttacked } from "./MoveResolver";
+import getValidMoves, { getCastlingRookMove, isCastlingMove, isEnPassantMove, getEnPassantCapturedPawnCoordinates, isSquareAttacked } from "./MoveResolver";
 
 function validateMove(
     gameBoard: Square[][],
     currentCoordinates: BoardCoordinates,
     newCoordinates: BoardCoordinates,
-    piece: ChessPiece
+    piece: ChessPiece,
+    enPassantTarget: BoardCoordinates | null = null
 ): boolean {
-    const legalMoves = getLegalMoves(gameBoard, currentCoordinates, piece)
+    const legalMoves = getLegalMoves(gameBoard, currentCoordinates, piece, enPassantTarget)
     return legalMoves.some(move => move.x === newCoordinates.x && move.y === newCoordinates.y)
 }
 
-function getLegalMoves(gameBoard: Square[][], currentCoordinates: BoardCoordinates, piece: ChessPiece): BoardCoordinates[] {
-    const candidateMoves = getValidMoves(gameBoard, currentCoordinates, piece)
-    return candidateMoves.filter(move => !moveLeavesKingInCheck(gameBoard, currentCoordinates, move, piece))
+function getLegalMoves(
+    gameBoard: Square[][],
+    currentCoordinates: BoardCoordinates,
+    piece: ChessPiece,
+    enPassantTarget: BoardCoordinates | null = null
+): BoardCoordinates[] {
+    const candidateMoves = getValidMoves(gameBoard, currentCoordinates, piece, enPassantTarget)
+    return candidateMoves.filter(move => !moveLeavesKingInCheck(gameBoard, currentCoordinates, move, piece, enPassantTarget))
 }
 
-function moveLeavesKingInCheck(gameBoard: Square[][], from: BoardCoordinates, to: BoardCoordinates, piece: ChessPiece): boolean {
-    const simulatedBoard = simulateMove(gameBoard, from, to, piece)
+function moveLeavesKingInCheck(
+    gameBoard: Square[][],
+    from: BoardCoordinates,
+    to: BoardCoordinates,
+    piece: ChessPiece,
+    enPassantTarget: BoardCoordinates | null
+): boolean {
+    const simulatedBoard = simulateMove(gameBoard, from, to, piece, enPassantTarget)
     return isKingInCheck(simulatedBoard, piece.color)
 }
 
-function simulateMove(gameBoard: Square[][], from: BoardCoordinates, to: BoardCoordinates, piece: ChessPiece): Square[][] {
+function simulateMove(
+    gameBoard: Square[][],
+    from: BoardCoordinates,
+    to: BoardCoordinates,
+    piece: ChessPiece,
+    enPassantTarget: BoardCoordinates | null = null
+): Square[][] {
     const newBoard = gameBoard.map(row => row.map(square => ({...square})))
     newBoard[from.y][from.x] = {piece: null}
     newBoard[to.y][to.x] = {piece}
@@ -31,6 +49,11 @@ function simulateMove(gameBoard: Square[][], from: BoardCoordinates, to: BoardCo
         const rook = newBoard[from.y][rookMove.from].piece
         newBoard[from.y][rookMove.from] = {piece: null}
         newBoard[from.y][rookMove.to] = {piece: rook}
+    }
+
+    if(isEnPassantMove(piece, to, enPassantTarget)) {
+        const capturedPawnCoordinates = getEnPassantCapturedPawnCoordinates(from, to)
+        newBoard[capturedPawnCoordinates.y][capturedPawnCoordinates.x] = {piece: null}
     }
 
     return newBoard
@@ -56,14 +79,14 @@ function findKingCoordinates(gameBoard: Square[][], color: CHESS_PIECE_COLOR): B
     return null
 }
 
-function isCheckmate(gameBoard: Square[][], color: CHESS_PIECE_COLOR): boolean {
+function isCheckmate(gameBoard: Square[][], color: CHESS_PIECE_COLOR, enPassantTarget: BoardCoordinates | null = null): boolean {
     if(!isKingInCheck(gameBoard, color)) return false
 
     return !gameBoard.some((row, y) =>
         row.some((square, x) => {
             const piece = square.piece
             if(!piece || piece.color !== color) return false
-            return getLegalMoves(gameBoard, {x, y}, piece).length > 0
+            return getLegalMoves(gameBoard, {x, y}, piece, enPassantTarget).length > 0
         })
     )
 }

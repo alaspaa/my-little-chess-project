@@ -1,7 +1,12 @@
 import type { BoardCoordinates, ChessPiece, Square } from "../../types/ChessObjects";
 import { isOnBoard, isOpponentPiece, squareIsEmpty } from "./shared";
 
-function getPawnMoves(gameBoard: Square[][], currentCoordinates: BoardCoordinates, piece: ChessPiece): BoardCoordinates[] {
+function getPawnMoves(
+    gameBoard: Square[][],
+    currentCoordinates: BoardCoordinates,
+    piece: ChessPiece,
+    enPassantTarget: BoardCoordinates | null = null
+): BoardCoordinates[] {
     const validMoves: BoardCoordinates[] = []
     const direction = piece.color === "white" ? 1 : -1
 
@@ -19,8 +24,15 @@ function getPawnMoves(gameBoard: Square[][], currentCoordinates: BoardCoordinate
     const captureLeft = {x: currentCoordinates.x - 1, y: currentCoordinates.y + direction}
     const captureRight = {x: currentCoordinates.x + 1, y: currentCoordinates.y + direction}
     for(const capture of [captureLeft, captureRight]) {
-        if(isOnBoard(capture) && isOpponentPiece(gameBoard, capture, piece.color)) {
+        if(!isOnBoard(capture)) continue
+
+        if(isOpponentPiece(gameBoard, capture, piece.color)) {
             validMoves.push(capture)
+        } else if(isEnPassantMove(piece, capture, enPassantTarget)) {
+            const capturedPawnSquare = {x: capture.x, y: currentCoordinates.y}
+            if(isOpponentPiece(gameBoard, capturedPawnSquare, piece.color)) {
+                validMoves.push(capture)
+            }
         }
     }
 
@@ -32,4 +44,18 @@ function isPawnPromotion(piece: ChessPiece, destination: BoardCoordinates): bool
     return piece.color === "white" ? destination.y === 7 : destination.y === 0
 }
 
-export { getPawnMoves, isPawnPromotion }
+function isEnPassantMove(piece: ChessPiece, destination: BoardCoordinates, enPassantTarget: BoardCoordinates | null): boolean {
+    if(piece.type !== "PAWN" || !enPassantTarget) return false
+    return destination.x === enPassantTarget.x && destination.y === enPassantTarget.y
+}
+
+function getEnPassantCapturedPawnCoordinates(from: BoardCoordinates, to: BoardCoordinates): BoardCoordinates {
+    return {x: to.x, y: from.y}
+}
+
+function getPawnDoubleStepTarget(piece: ChessPiece, from: BoardCoordinates, to: BoardCoordinates): BoardCoordinates | null {
+    if(piece.type !== "PAWN" || Math.abs(to.y - from.y) !== 2) return null
+    return {x: from.x, y: (from.y + to.y) / 2}
+}
+
+export { getPawnMoves, isPawnPromotion, isEnPassantMove, getEnPassantCapturedPawnCoordinates, getPawnDoubleStepTarget }
