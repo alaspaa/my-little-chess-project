@@ -59,50 +59,6 @@ position, not derived from player color or recomputed per game.
 
 ---
 
-## Consider a distinct highlight for promotion-triggering moves
-
-**Complexity:** Small — mostly a design question; the code hook needed to
-answer it already exists.
-
-**Area:** UI (`src/Chess/GameBoard/GameSquare.tsx`, `src/App.css`)
-
-`GameSquare.tsx` already highlights a picked-up piece's legal destinations
-with two states — `.validmove` and `.validcapture` (see `isValidMove`/
-`isValidCapture` there) — but a destination that would trigger a pawn
-promotion looks identical to any other move or capture square today, even
-though dropping on it doesn't just move the piece, it also pops open
-`PromotionPrompt`. Worth thinking about whether that's worth a third
-visual state (e.g. a `.validpromotion` class) before building it:
-`isPawnPromotion(piece, destination)` in `src/Chess/GameLogic/moves/pawn.ts`
-already exists and could be called per candidate square in
-`GameSquare.tsx` the same way `isValidCapture` is computed now, so the
-implementation is small — the open question is purely whether a distinct
-highlight is actually useful (arguably self-evident once you drop a pawn
-there) or just visual noise.
-
----
-
-## Consider a distinct highlight for castling moves
-
-**Complexity:** Small — mostly a design question; the code hook needed to
-answer it already exists.
-
-**Area:** UI (`src/Chess/GameBoard/GameSquare.tsx`, `src/App.css`)
-
-Same open question as "Consider a distinct highlight for
-promotion-triggering moves" above, for castling instead: a castling
-destination is just another square in the king's `.validmove` set today,
-indistinguishable from an ordinary one-step king move, even though
-dropping on it also relocates a rook two squares away.
-`isCastlingMove(piece, from, to)` in `src/Chess/GameLogic/moves/king.ts` already
-exists and could be called per candidate square the same way
-`isValidCapture` is computed now, so — as with promotion — the
-implementation is small; the open question is whether a distinct
-highlight (e.g. a `.validcastle` class) is worth it, or whether seeing
-the rook move is self-explanatory enough once it happens.
-
----
-
 ## Display wins/losses/draws
 
 **Complexity:** Small — read-only rendering of an existing atom.

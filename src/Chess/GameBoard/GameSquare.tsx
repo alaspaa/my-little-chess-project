@@ -1,7 +1,8 @@
 import { useAtomValue } from 'jotai'
 import GamePiece from './GamePiece'
 import { type Square } from '../types/ChessObjects'
-import { highlightMovesEnabledAtom, validMovesAtom } from '../../state'
+import { highlightMovesEnabledAtom, pickedUpPieceAtom, validMovesAtom } from '../../state'
+import { isCastlingMove, isPawnPromotion } from '../GameLogic/MoveResolver'
 
 interface opts {
     gameSquare: Square,
@@ -13,19 +14,29 @@ function GameSquare(props: opts) {
     const {gameSquare, rowIndex, columnIndex } = props
     const validMoves = useAtomValue(validMovesAtom)
     const highlightMovesEnabled = useAtomValue(highlightMovesEnabledAtom)
+    const pickedUpPiece = useAtomValue(pickedUpPieceAtom)
 
+    const destination = {x: columnIndex, y: rowIndex}
     const isValidMove = highlightMovesEnabled && validMoves.some(move => move.x === columnIndex && move.y === rowIndex)
     const isValidCapture = isValidMove && !!gameSquare.piece
+    const isValidPromotion = isValidMove && !!pickedUpPiece && isPawnPromotion(pickedUpPiece.piece, destination)
+    const isValidCastle = isValidMove && !!pickedUpPiece && isCastlingMove(pickedUpPiece.piece, pickedUpPiece.coordinates, destination)
+
+    const highlightClassName = isValidPromotion ? ' validpromotion'
+        : isValidCastle ? ' validcastle'
+        : isValidCapture ? ' validcapture'
+        : isValidMove ? ' validmove'
+        : ''
 
     return (
         <div
             key={getSquareNumber(columnIndex, rowIndex).toString()}
             id={getSquareNumber(columnIndex, rowIndex).toString()}
-            className={'gamesquare ' + getColorClassName(columnIndex, rowIndex) + (isValidCapture ? ' validcapture' : isValidMove ? ' validmove' : '')}
+            className={'gamesquare ' + getColorClassName(columnIndex, rowIndex) + highlightClassName}
         >
             {gameSquare.piece &&
-                <GamePiece 
-                    piece={gameSquare.piece} 
+                <GamePiece
+                    piece={gameSquare.piece}
                 />
             }
         </div>

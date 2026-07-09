@@ -15,6 +15,7 @@ export function isGameOver(state: GameStatus["state"]): boolean {
 }
 
 export const pieceClickedAtom = atom<string | null>(null)
+export const pickedUpPieceAtom = atom<{piece: ChessPiece, coordinates: BoardCoordinates} | null>(null)
 export const boardCoordinatesAtom = atom<BoardCoordinates | null>(null)
 export const pieceClickedIdAtom = atom<string | null>(null)
 export const validMovesAtom = atom<BoardCoordinates[]>([])
@@ -80,5 +81,6 @@ export const resetGameAtom = atom(null, (_get, set) => {
     set(enPassantTargetAtom, null)
     set(validMovesAtom, [])
     set(pieceClickedAtom, null)
+    set(pickedUpPieceAtom, null)
     set(boardCoordinatesAtom, null)
 })

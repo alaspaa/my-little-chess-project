@@ -1,7 +1,7 @@
 import { type BoardCoordinates, type ChessPiece, type Square } from "../types/ChessObjects"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useRef } from "react"
-import { capturedPiecesAtom, currentTurnAtom, enPassantTargetAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pieceClickedAtom, positionHistoryAtom, threefoldRepetitionEnabledAtom, validMovesAtom } from "../../state"
+import { capturedPiecesAtom, currentTurnAtom, enPassantTargetAtom, gameBoardAtom, gameStatusAtom, isGameOver, pendingPromotionAtom, pickedUpPieceAtom, pieceClickedAtom, positionHistoryAtom, threefoldRepetitionEnabledAtom, validMovesAtom } from "../../state"
 import { useAtom } from "jotai"
 import { boardCoordinatesAtom } from "../../state"
 import validateMove, { getLegalMoves, isCheckmate, isKingInCheck, isThreefoldRepetition } from "../GameLogic/GameLogicValidator"
@@ -18,6 +18,7 @@ function GamePiece(props: opts) {
 
     const pieceRef = useRef<HTMLDivElement>(null)
     const [pieceClicked, setPieceClicked] = useAtom(pieceClickedAtom)
+    const [, setPickedUpPiece] = useAtom(pickedUpPieceAtom)
     const [boardCoordinates, setBoardCoordinates] = useAtom(boardCoordinatesAtom)
     const [gameBoard, setGameBoard] = useAtom(gameBoardAtom)
     const [, setValidMoves] = useAtom(validMovesAtom)
@@ -72,6 +73,7 @@ function GamePiece(props: opts) {
             if(clickedPiece.color !== currentTurnRef.current) return
 
             setPieceClicked(id)
+            setPickedUpPiece({piece: clickedPiece, coordinates: currentCoordinates})
             setValidMoves(getLegalMoves(currentGameBoard, currentCoordinates, clickedPiece, enPassantTargetRef.current))
         }
 
@@ -157,6 +159,7 @@ function GamePiece(props: opts) {
 
             setBoardCoordinates(null)
             setPieceClicked(null)
+            setPickedUpPiece(null)
             setValidMoves([])
         }
 
@@ -170,7 +173,7 @@ function GamePiece(props: opts) {
         }
 
         return cleanup
-    }, [setPieceClicked, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces, setPendingPromotion, setPositionHistory, setEnPassantTarget])
+    }, [setPieceClicked, setPickedUpPiece, setValidMoves, setGameBoard, setCurrentTurn, setGameStatus, setBoardCoordinates, setCapturedPieces, setPendingPromotion, setPositionHistory, setEnPassantTarget])
 
     return(
         <div className="gamepiece" id={piece.id} ref={pieceRef}>
