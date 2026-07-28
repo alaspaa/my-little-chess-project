@@ -194,6 +194,103 @@ detection/recording half could land independently.
 
 ---
 
+## Add a signup screen (username + password)
+
+**Complexity:** Medium — new page, form, and state additions following an
+existing pattern (`StartPage.tsx`), plus the first outgoing network-request
+plumbing in an app that doesn't have any today.
+
+**Area:** new page component (e.g. `src/SignupPage/SignupPage.tsx`),
+`src/state.ts` (`Page` type), `src/App.tsx`
+
+**User story:** As a new player, I want to sign up with a username and
+password, so that I have an account for future features like a lobby and
+chat (see "Plan and design a chat window" below).
+
+No signup flow exists today — `StartPage.tsx` just collects two local
+player names for a single in-browser hotseat game, there are no accounts
+(see "Stack" in `specs/architecture.md`: no backend, no persistence).
+Needs a new page with username + password inputs, following `StartPage`'s
+conventions (`useTranslation` for labels/errors, a new value added to the
+`Page` union and a matching branch in `App.tsx`). On submit, the outgoing
+signup message should be shaped like `{ username, password, configs: null }`
+— `configs` is a placeholder for a not-yet-decided settings/config payload
+and should stay `null` until that shape exists elsewhere. Since there's no
+backend or network layer anywhere in this codebase yet, this issue also
+has to introduce the first request-sending plumbing — whether that's a
+real endpoint, a mocked/stubbed call, or just a `console.log` of the
+payload for now is an open decision to make at implementation time.
+
+---
+
+## Add a login screen (username + password)
+
+**Complexity:** Small-medium — mirrors the signup screen's form and reuses
+whatever networking plumbing it introduces.
+
+**Area:** new page component (e.g. `src/LoginPage/LoginPage.tsx`),
+`src/state.ts` (`Page` type), `src/App.tsx`
+
+**User story:** As a returning player, I want to log in with my username
+and password, so that I can access my existing account instead of
+re-entering my details every time.
+
+Depends on "Add a signup screen" above landing first, since it establishes
+both the credentials-form pattern and the first outgoing request this app
+makes — login should reuse those rather than re-inventing them. Needs
+username + password inputs only (no `configs` object — login doesn't
+create configuration, it authenticates against existing config), a new
+`Page` value, and a branch in `App.tsx` alongside the signup one. Where a
+successful login actually leads — into `StartPage`'s existing two-player
+local setup, straight into a game, somewhere new — is an open design
+question, since today's `currentPageAtom` flow (`"setup" | "game"`) has no
+concept of "logged in" at all.
+
+---
+
+## Plan and design a chat window
+
+**Complexity:** Large — this issue is scoped as planning/design, not
+implementation; the open questions are bigger than the code would be.
+
+**Area:** design/planning first; likely `src/state.ts`, a new
+`src/Chat/` (or `src/Lobby/`) folder, and `GamePage.tsx` layout once
+scoped
+
+**User stories:**
+- As an online player, I want to see other online players in a lobby/chat
+  window and challenge one of them to a game, so that I can find an
+  opponent without arranging a match outside the app.
+- As a player in an active game, I want a separate messaging window with
+  my opponent, so that we can talk during the game without it being mixed
+  into the general lobby chat.
+
+No chat feature exists today. The intended direction (confirmed with the
+user) is two distinct pieces, not one chat window: a **lobby** where
+online players see each other and issue/accept challenges, and a
+**per-game** messaging window scoped to just the two opponents once a
+game starts. Depends on the signup/login issues above landing first —
+none of this makes sense without accounts, and it implies this app moves
+from today's local-hotseat-only model (see "Stack" in
+`specs/architecture.md`) toward being primarily remote-only, which is a
+much bigger shift than chat alone (a real backend, real-time transport,
+matchmaking/challenge flow, session handling — none of which exist yet).
+
+Before writing any code, this needs a design pass answering at least:
+whether the lobby and per-game chat are one component with two modes or
+two separate ones; how a challenge is issued/accepted and what happens to
+the lobby view once a game starts; whether per-game messages persist
+across a rematch the way `resetGameAtom` resets other per-game state (see
+"State" in `specs/architecture.md`); and whether the remote-play shift
+this implies (accounts, live opponent presence, network transport) should
+be tracked as its own separate issue rather than folded into this one.
+Deliverable for this issue is a design writeup (a new `specs/` doc, or
+enough detail added here) resolving those questions and breaking the
+result into concrete, independently-pickup-able sub-issues — not a chat
+window itself.
+
+---
+
 ## Add a chess clock
 
 **Complexity:** Large — new atoms, a per-turn ticking mechanism that has
